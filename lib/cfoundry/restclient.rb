@@ -6,7 +6,7 @@ require "cfoundry/errors"
 
 module CFoundry
   class RESTClient
-    attr_accessor :target, :token, :proxy
+    attr_accessor :target, :token, :proxy, :trace
 
     def initialize(
         target = "http://api.cloudfoundry.com",
@@ -144,9 +144,8 @@ module CFoundry
 
       json = req.delete :json
 
-      trace = false
       RestClient::Request.execute(req) do |response, request|
-        if trace
+        if @trace
           puts '>>>'
           puts "PROXY: #{RestClient.proxy}" if RestClient.proxy
           puts "REQUEST: #{req[:method]} #{req[:url]}"

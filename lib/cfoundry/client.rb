@@ -24,6 +24,14 @@ module CFoundry
       @rest.proxy = x
     end
 
+    def trace
+      @rest.trace
+    end
+
+    def trace=(x)
+      @rest.trace = x
+    end
+
 
     # Cloud metadata
     def info
