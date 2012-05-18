@@ -130,6 +130,17 @@ module CFoundry
       end
     end
 
+    def uri
+      uris[0]
+    end
+
+    def uri=(x)
+      self.uris = [x]
+    end
+
+    alias :url :uri
+    alias :url= :uri=
+
     def framework
       manifest["staging"]["framework"] ||
         manifest["staging"]["model"]
