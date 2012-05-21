@@ -33,11 +33,16 @@ module CFoundry
     end
 
     def pack(dir, zipfile)
+      files = files_to_pack(dir)
+      return false if files.empty?
+
       ::Zip::ZipFile.open(zipfile, true) do |zf|
-        files_to_pack(dir).each do |f|
+        files.each do |f|
           zf.add(f.sub("#{dir}/",''), f)
         end
       end
+
+      true
     end
   end
 end

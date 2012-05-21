@@ -238,9 +238,9 @@ module CFoundry
 
       resources = determine_resources(tmpdir) if check_resources
 
-      CFoundry::Zip.pack(tmpdir, zipfile)
+      packed = CFoundry::Zip.pack(tmpdir, zipfile)
 
-      @client.rest.upload_app(@name, zipfile, resources || [])
+      @client.rest.upload_app(@name, packed && zipfile, resources || [])
     ensure
       FileUtils.rm_f(zipfile) if zipfile
       FileUtils.rm_rf(tmpdir) if tmpdir

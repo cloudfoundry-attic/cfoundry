@@ -97,13 +97,15 @@ module CFoundry
       payload = {
         :_method => "put",
         :resources => resources.to_json,
+        :multipart => true,
         :application =>
           if zipfile.is_a? File
             zipfile
-          else
+          elsif zipfile.is_a? String
             File.new(zipfile, "rb")
           end
       }
+
       post(payload, "apps", name, "application")
     rescue RestClient::ServerBrokeConnection
       retry
