@@ -249,7 +249,7 @@ module CFoundry
     private
 
     def prepare_package(path, to)
-      if path =~ /\.(war|zip)$/
+      if path =~ /\.(jar|war|zip)$/
         CFoundry::Zip.unpack(path, to)
       elsif war_file = Dir.glob("#{path}/*.war").first
         CFoundry::Zip.unpack(war_file, to)
