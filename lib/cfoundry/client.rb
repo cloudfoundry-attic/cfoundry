@@ -39,12 +39,26 @@ module CFoundry
     end
 
     def system_services
-      @rest.system_services
+      services = {}
+
+      @rest.system_services.each do |type, vendors|
+        vendors.each do |vendor, versions|
+          services[vendor] =
+            { :type => type,
+              :versions => versions.keys,
+              :description => versions.values[0]["description"],
+              :vendor => vendor
+            }
+        end
+      end
+
+      services
     end
 
     def system_runtimes
       @rest.system_runtimes
     end
+
 
     # Users
     def users
