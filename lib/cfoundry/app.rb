@@ -374,15 +374,17 @@ module CFoundry
 
       def debugger
         return unless @manifest["debug_ip"] and @manifest["debug_port"]
-        { "ip" => @manifest["debug_ip"],
-          "port" => @manifest["debug_port"]
+
+        { :ip => @manifest["debug_ip"],
+          :port => @manifest["debug_port"]
         }
       end
 
       def console
         return unless @manifest["console_ip"] and @manifest["console_port"]
-        { "ip" => @manifest["console_ip"],
-          "port" => @manifest["console_port"]
+
+        { :ip => @manifest["console_ip"],
+          :port => @manifest["console_port"]
         }
       end
 
