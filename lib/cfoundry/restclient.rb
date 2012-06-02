@@ -5,7 +5,7 @@ require "cfoundry/errors"
 
 
 module CFoundry
-  class RESTClient
+  class RESTClient # :nodoc:
     attr_accessor :target, :token, :proxy, :trace
 
     def initialize(

@@ -6,23 +6,67 @@ require "tmpdir"
 require "cfoundry/zip"
 
 module CFoundry
+  # Class for representing a user's application on a given target (via
+  # Client).
+  #
+  # Goes not guarantee that the app exists; used for both app creation and
+  # retrieval, as the attributes are all lazily retrieved. Setting attributes
+  # does not perform any requests; use #update! to commit your changes.
   class App
+    # Application name.
     attr_reader :name
 
+    # Application instance count.
+    attr_accessor :total_instances
+
+    # Services bound to the application.
+    attr_accessor :services
+
+    # Application environment variables.
+    attr_accessor :env
+
+    # Application memory limit.
+    attr_accessor :memory
+
+    # Application framework.
+    attr_accessor :framework
+
+    # Application runtime.
+    attr_accessor :runtime
+
+    # Application startup command.
+    #
+    # Used for standalone apps.
+    attr_accessor :command
+
+    # Application debug mode.
+    attr_accessor :debug_mode
+
+    # Application state.
+    attr_accessor :state
+    alias_method :status, :state
+
+    # URIs mapped to the application.
+    attr_accessor :uris
+    alias_method :urls, :uris
+
+
+    # Create an App object.
+    #
+    # You'll usually call Client#app instead
     def initialize(name, client, manifest = nil)
       @name = name
       @client = client
       @manifest = manifest
     end
 
-    def inspect
+    def inspect # :nodoc:
       "#<App '#@name'>"
     end
 
-    def manifest
-      @manifest ||= @client.rest.app(@name)
-    end
-
+    # Delete the application from the target.
+    #
+    # Keeps the metadata, but clears target-specific state from it.
     def delete!
       @client.rest.delete_app(@name)
 
@@ -33,11 +77,15 @@ module CFoundry
       end
     end
 
+    # Create the application on the target.
+    #
+    # Call this after setting the various attributes.
     def create!
       @client.rest.create_app(@manifest.merge("name" => @name))
       @manifest = nil
     end
 
+    # Check if the application exists on the target.
     def exists?
       @client.rest.app(@name)
       true
@@ -45,16 +93,19 @@ module CFoundry
       false
     end
 
+    # Retrieve all of the instances of the app, as Instance objects.
     def instances
       @client.rest.instances(@name).collect do |m|
         Instance.new(@name, m["index"], @client, m)
       end
     end
 
+    # Retrieve application statistics, e.g. CPU load and memory usage.
     def stats
       @client.rest.stats(@name)
     end
 
+    # Update application attributes. Does not restart the application.
     def update!(what = {})
       # TODO: hacky; can we not just set in meta field?
       # we write to manifest["debug"] but read from manifest["meta"]["debug"]
@@ -64,19 +115,28 @@ module CFoundry
       @manifest = nil
     end
 
+    # Stop the application.
     def stop!
       update! "state" => "STOPPED"
     end
 
+    # Start the application.
     def start!
       update! "state" => "STARTED"
     end
 
+    # Restart the application.
     def restart!
       stop!
       start!
     end
 
+    # Determine application health.
+    #
+    # If all instances are running, returns "RUNNING". If only some are
+    # started, returns the precentage of them that are healthy.
+    #
+    # Otherwise, returns application's status.
     def health
       s = state
       if s == "STARTED"
@@ -97,6 +157,7 @@ module CFoundry
       end
     end
 
+    # Check that all application instances are running.
     def healthy?
       # invalidate cache so the check is fresh
       @manifest = nil
@@ -104,10 +165,15 @@ module CFoundry
     end
     alias_method :running?, :healthy?
 
+    # Is the application stopped?
     def stopped?
       state == "STOPPED"
     end
 
+    # Is the application started?
+    #
+    # Note that this does not imply that all instances are running. See
+    # #healthy?
     def started?
       state == "STARTED"
     end
@@ -130,10 +196,12 @@ module CFoundry
       end
     end
 
+    # Shortcut for uris[0]
     def uri
       uris[0]
     end
 
+    # Shortcut for uris = [x]
     def uri=(x)
       self.uris = [x]
     end
@@ -141,12 +209,12 @@ module CFoundry
     alias :url :uri
     alias :url= :uri=
 
-    def framework
+    def framework # :nodoc:
       manifest["staging"]["framework"] ||
         manifest["staging"]["model"]
     end
 
-    def framework=(v)
+    def framework=(v) # :nodoc:
       @manifest ||= {}
       @manifest["staging"] ||= {}
 
@@ -157,12 +225,12 @@ module CFoundry
       end
     end
 
-    def runtime
+    def runtime # :nodoc:
       manifest["staging"]["runtime"] ||
         manifest["staging"]["stack"]
     end
 
-    def runtime=(v)
+    def runtime=(v) # :nodoc:
       @manifest ||= {}
       @manifest["staging"] ||= {}
 
@@ -173,39 +241,47 @@ module CFoundry
       end
     end
 
-    def command
+
+    def command # :nodoc:
       manifest["staging"]["command"]
     end
 
-    def command=(v)
+    def command=(v) # :nodoc:
       @manifest ||= {}
       @manifest["staging"] ||= {}
       @manifest["staging"]["command"] = v
     end
 
-    def memory
+
+    def memory # :nodoc:
       manifest["resources"]["memory"]
     end
 
-    def memory=(v)
+    def memory=(v) # :nodoc:
       @manifest ||= {}
       @manifest["resources"] ||= {}
       @manifest["resources"]["memory"] = v
     end
 
-    def debug_mode
-      manifest.fetch("debug") { manifest["meta"] && manifest["meta"]["debug"] }
+
+    def debug_mode # :nodoc:
+      manifest.fetch("debug") do
+        manifest["meta"] && manifest["meta"]["debug"]
+      end
     end
 
-    def debug_mode=(v)
+    def debug_mode=(v) # :nodoc:
       @manifest ||= {}
       @manifest["debug"] = v
     end
 
+
+    # Bind services to application.
     def bind(*service_names)
       update!("services" => services + service_names)
     end
 
+    # Unbind services from application.
     def unbind(*service_names)
       update!("services" =>
                 services.reject { |s|
@@ -213,16 +289,46 @@ module CFoundry
                 })
     end
 
+    # Retrieve file listing under path for the first instance of the application.
+    #
+    # [path]
+    #   A sequence of strings representing path segments.
+    #
+    #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
     def files(*path)
       Instance.new(@name, 0, @client).files(*path)
     end
 
+    # Retrieve file contents for the first instance of the application.
+    #
+    # [path]
+    #   A sequence of strings representing path segments.
+    #
+    #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
     def file(*path)
       Instance.new(@name, 0, @client).file(*path)
     end
 
+    # Default paths to exclude from upload payload.
+    #
+    # Value: .git, _darcs, .svn
     UPLOAD_EXCLUDE = %w{.git _darcs .svn}
 
+    # Upload application's code to target. Do this after #create! and before
+    # #start!
+    #
+    # [path]
+    #   A path pointing to either a directory, or a .jar, .war, or .zip
+    #   file.
+    #
+    #   If a .vmcignore file is detected under the given path, it will be used
+    #   to exclude paths from the payload, similar to a .gitignore.
+    #
+    # [check_resources]
+    #   If set to `false`, the entire payload will be uploaded
+    #   without checking the resource cache.
+    #
+    #   Only do this if you know what you're doing.
     def upload(path, check_resources = true)
       unless File.exist? path
         raise "invalid application path '#{path}'"
@@ -247,6 +353,10 @@ module CFoundry
     end
 
     private
+
+    def manifest
+      @manifest ||= @client.rest.app(@name)
+    end
 
     def prepare_package(path, to)
       if path =~ /\.(jar|war|zip)$/
@@ -291,6 +401,9 @@ module CFoundry
       end
     end
 
+    # Minimum size for an application payload to bother checking resources.
+    #
+    # Value: 64kb
     RESOURCE_CHECK_LIMIT = 64 * 1024
 
     def determine_resources(path)
@@ -349,9 +462,17 @@ module CFoundry
       files && files.select { |f| File.socket? f }
     end
 
+    # Class represnting a running instance of an application.
     class Instance
-      attr_reader :app, :index, :manifest
+      # The application this instance belongs to.
+      attr_reader :app
 
+      # Application instance number.
+      attr_reader :index
+
+      # Create an Instance object.
+      #
+      # You'll usually call App#instances instead
       def initialize(appname, index, client, manifest = {})
         @app = appname
         @index = index
@@ -359,19 +480,23 @@ module CFoundry
         @manifest = manifest
       end
 
-      def inspect
+      def inspect # :nodoc:
         "#<App::Instance '#@app' \##@index>"
       end
 
+      # Instance state.
       def state
         @manifest["state"]
       end
       alias_method :status, :state
 
+      # Instance start time.
       def since
         Time.at(@manifest["since"])
       end
 
+      # Instance debugger data. If instance is in debug mode, returns a hash
+      # containing :ip and :port keys.
       def debugger
         return unless @manifest["debug_ip"] and @manifest["debug_port"]
 
@@ -380,6 +505,8 @@ module CFoundry
         }
       end
 
+      # Instance console data. If instance has a console, returns a hash
+      # containing :ip and :port keys.
       def console
         return unless @manifest["console_ip"] and @manifest["console_port"]
 
@@ -388,6 +515,8 @@ module CFoundry
         }
       end
 
+      # True if instance is starting or running, false if it's down or
+      # flapping.
       def healthy?
         case state
         when "STARTING", "RUNNING"
@@ -397,12 +526,24 @@ module CFoundry
         end
       end
 
+      # Retrieve file listing under path for this instance.
+      #
+      # [path]
+      #   A sequence of strings representing path segments.
+      #
+      #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
       def files(*path)
         @client.rest.files(@app, @index, *path).split("\n").collect do |entry|
           path + [entry.split(/\s+/, 2)[0]]
         end
       end
 
+      # Retrieve file contents for this instance.
+      #
+      # [path]
+      #   A sequence of strings representing path segments.
+      #
+      #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
       def file(*path)
         @client.rest.files(@app, @index, *path)
       end
