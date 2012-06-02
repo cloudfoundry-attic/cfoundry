@@ -102,6 +102,7 @@ module CFoundry
       @manifest = nil
       health == "RUNNING"
     end
+    alias_method :running?, :healthy?
 
     def stopped?
       state == "STOPPED"
@@ -110,7 +111,6 @@ module CFoundry
     def started?
       state == "STARTED"
     end
-    alias_method :running?, :started?
 
     { :total_instances => "instances",
       :state => "state",
