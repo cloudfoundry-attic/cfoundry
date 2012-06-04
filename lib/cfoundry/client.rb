@@ -15,7 +15,7 @@ module CFoundry
     #
     # A token may also be provided to skip the login step.
     def initialize(target = "http://api.cloudfoundry.com", token = nil)
-      @rest = RESTClient.new(*args)
+      @rest = RESTClient.new(target, token)
     end
 
     # The current target URL of the client.
