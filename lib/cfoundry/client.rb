@@ -9,7 +9,8 @@ module CFoundry
   # values. Initialize with the target and, optionally, an auth token. These
   # are the only two internal states.
   class Client
-    attr_reader :rest #:nodoc:
+    # Internal RESTClient instance. Normally won't be touching this.
+    attr_reader :rest
 
     # Create a new Client for interfacing with the given target.
     #

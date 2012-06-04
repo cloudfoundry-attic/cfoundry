@@ -18,7 +18,8 @@ module CFoundry
       @manifest = manifest
     end
 
-    def inspect # :nodoc:
+    # Show string representing the user.
+    def inspect
       "#<User '#@email'>"
     end
 

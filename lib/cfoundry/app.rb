@@ -60,7 +60,8 @@ module CFoundry
       @manifest = manifest
     end
 
-    def inspect # :nodoc:
+    # Show string representing the application.
+    def inspect
       "#<App '#@name'>"
     end
 
@@ -209,7 +210,8 @@ module CFoundry
     alias :url :uri
     alias :url= :uri=
 
-    def framework # :nodoc:
+    # Application framework.
+    def framework
       manifest["staging"]["framework"] ||
         manifest["staging"]["model"]
     end
@@ -225,7 +227,8 @@ module CFoundry
       end
     end
 
-    def runtime # :nodoc:
+    # Application runtime.
+    def runtime
       manifest["staging"]["runtime"] ||
         manifest["staging"]["stack"]
     end
@@ -242,7 +245,10 @@ module CFoundry
     end
 
 
-    def command # :nodoc:
+    # Application startup command.
+    #
+    # Used for standalone apps.
+    def command
       manifest["staging"]["command"]
     end
 
@@ -253,7 +259,8 @@ module CFoundry
     end
 
 
-    def memory # :nodoc:
+    # Application memory.
+    def memory
       manifest["resources"]["memory"]
     end
 
@@ -264,7 +271,8 @@ module CFoundry
     end
 
 
-    def debug_mode # :nodoc:
+    # Application debug mode.
+    def debug_mode
       manifest.fetch("debug") do
         manifest["meta"] && manifest["meta"]["debug"]
       end
@@ -310,8 +318,6 @@ module CFoundry
     end
 
     # Default paths to exclude from upload payload.
-    #
-    # Value: .git, _darcs, .svn
     UPLOAD_EXCLUDE = %w{.git _darcs .svn}
 
     # Upload application's code to target. Do this after #create! and before
@@ -402,8 +408,6 @@ module CFoundry
     end
 
     # Minimum size for an application payload to bother checking resources.
-    #
-    # Value: 64kb
     RESOURCE_CHECK_LIMIT = 64 * 1024
 
     def determine_resources(path)
@@ -480,7 +484,8 @@ module CFoundry
         @manifest = manifest
       end
 
-      def inspect # :nodoc:
+      # Show string representing the application instance.
+      def inspect
         "#<App::Instance '#@app' \##@index>"
       end
 

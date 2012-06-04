@@ -1,10 +1,16 @@
 module CFoundry
   # Exception representing errors returned by the API.
   class APIError < RuntimeError
-    class << self # :nodoc:
-      attr_reader :error_code, :description # :nodoc:
+    class << self
+      # Generic error code for the exception.
+      attr_reader :error_code
 
-      def setup(code, description = nil) # :nodoc:
+      # Generic description for the exception.
+      attr_reader :description
+
+      private
+
+      def setup(code, description = nil)
         @error_code = code
         @description = description
       end
@@ -26,7 +32,8 @@ module CFoundry
       @description || self.class.description
     end
 
-    def to_s # :nodoc:
+    # Exception message.
+    def to_s
       if error_code
         "#{error_code}: #{description}"
       else
@@ -53,7 +60,8 @@ module CFoundry
       @message = message
     end
 
-    def to_s # :nodoc:
+    # Exception message.
+    def to_s
       "#{description} (#{@message})"
     end
   end
@@ -66,7 +74,11 @@ module CFoundry
   # Exception raised when access is denied to something, either because the
   # user is not logged in or is not an administrator.
   class Denied < APIError
-    attr_reader :error_code, :description # :nodoc:
+    # Specific error code.
+    attr_reader :error_code
+
+    # Specific description.
+    attr_reader :description
 
     # Initialize, with a default error code and message.
     def initialize(
@@ -86,7 +98,8 @@ module CFoundry
       @body = body
     end
 
-    def to_s # :nodoc:
+    # Exception message.
+    def to_s
       "target failed to handle our request due to an internal error (#{@code})"
     end
   end

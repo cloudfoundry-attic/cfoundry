@@ -36,7 +36,8 @@ module CFoundry
       @manifest = manifest
     end
 
-    def inspect # :nodoc:
+    # Show string representing the service.
+    def inspect
       "#<Service '#@name'>"
     end
 
