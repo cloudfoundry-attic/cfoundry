@@ -1,7 +1,7 @@
 module CFoundry
   # Class for representing a user on a given target (via Client).
   #
-  # Goes not guarantee that the user exists; used for both user creation and
+  # Does not guarantee that the user exists; used for both user creation and
   # retrieval, as the attributes are all lazily retrieved. Setting attributes
   # does not perform any requests; use #update! to commit your changes.
   class User

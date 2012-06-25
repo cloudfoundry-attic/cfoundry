@@ -9,7 +9,7 @@ module CFoundry
   # Class for representing a user's application on a given target (via
   # Client).
   #
-  # Goes not guarantee that the app exists; used for both app creation and
+  # Does not guarantee that the app exists; used for both app creation and
   # retrieval, as the attributes are all lazily retrieved. Setting attributes
   # does not perform any requests; use #update! to commit your changes.
   class App

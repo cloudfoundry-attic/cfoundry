@@ -1,7 +1,7 @@
 module CFoundry
   # Class for representing a user's service on a given target (via Client).
   #
-  # Goes not guarantee that the service exists; used for both service creation
+  # Does not guarantee that the service exists; used for both service creation
   # and retrieval, as the attributes are all lazily retrieved. Setting
   # attributes does not perform any requests; use #update! to commit your
   # changes.
