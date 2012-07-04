@@ -101,6 +101,11 @@ module CFoundry
             info[:code],
             info[:description])
 
+        # UAA uses this
+        when 401
+          info = JSON.parse response
+          raise Denied.new(401, info[:error])
+
         when 404
           raise NotFound
 

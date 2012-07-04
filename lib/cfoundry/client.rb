@@ -102,10 +102,33 @@ module CFoundry
       user(email)
     end
 
+    # Login prompts
+    def login_prompts
+      if @rest.uaa
+        @rest.uaa.prompts
+      else
+        { :username => ["text", "Email"],
+          :password => ["password", "Password"]
+        }
+      end
+    end
+
     # Authenticate with the target. Sets the client token.
-    def login(email, password)
+    #
+    # Credentials is a hash, typically containing :username and :password
+    # keys.
+    #
+    # The values in the hash should mirror the prompts given by
+    # `login_prompts`.
+    def login(credentials)
       @rest.token =
-        @rest.create_token({ :password => password }, email)[:token]
+        if @rest.uaa
+          @rest.uaa.authorize(credentials)
+        else
+          @rest.create_token(
+            { :password => credentials[:password] },
+            credentials[:username])[:token]
+        end
     end
 
     # Clear client token. No requests are made for this.
