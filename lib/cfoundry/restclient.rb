@@ -1,11 +1,10 @@
-require "restclient"
 require "json"
 
-require "cfoundry/errors"
+require "cfoundry/baseclient"
 
 
 module CFoundry
-  class RESTClient # :nodoc:
+  class RESTClient < BaseClient
     attr_accessor :target, :token, :proxy, :trace
 
     def initialize(
@@ -17,58 +16,58 @@ module CFoundry
 
     # Cloud metadata
     def info
-      json_get("info")
+      get("info", nil => :json)
     end
 
     def system_services
-      json_get("info", "services")
+      get("info", "services", nil => :json)
     end
 
     def system_runtimes
-      json_get("info", "runtimes")
+      get("info", "runtimes", nil => :json)
     end
 
     # Users
     def users
-      json_get("users")
+      get("users", nil => :json)
     end
 
     def create_user(payload)
-      post(payload.to_json, "users")
+      post(payload, "users")
     end
 
     def user(email)
-      json_get("users", email)
+      get("users", email, nil => :json)
     end
 
     def delete_user(email)
-      delete("users", email)
+      delete("users", email, nil => :json)
       true
     end
 
     def update_user(email, payload)
-      put(payload.to_json, "users", email)
+      put(payload, "users", email, :json => nil)
     end
 
     def create_token(payload, email)
-      json_post(payload.to_json, "users", email, "tokens")
+      post(payload, "users", email, "tokens", :json => :json)
     end
 
     # Applications
     def apps
-      json_get("apps")
+      get("apps", nil => :json)
     end
 
     def create_app(payload)
-      json_post(payload.to_json, "apps")
+      post(payload, "apps", :json => :json)
     end
 
     def app(name)
-      json_get("apps", name)
+      get("apps", name, nil => :json)
     end
 
     def instances(name)
-      json_get("apps", name, "instances")["instances"]
+      get("apps", name, "instances", nil => :json)["instances"]
     end
 
     def files(name, instance, *path)
@@ -77,20 +76,21 @@ module CFoundry
     alias :file :files
 
     def update_app(name, payload)
-      put(payload.to_json, "apps", name)
+      put(payload, "apps", name, :json => nil)
     end
 
     def delete_app(name)
+      # TODO: no JSON response?
       delete("apps", name)
       true
     end
 
     def stats(name)
-      json_get("apps", name, "stats")
+      get("apps", name, "stats", nil => :json)
     end
 
     def check_resources(fingerprints)
-      json_post(fingerprints.to_json, "resources")
+      post(fingerprints, "resources", :json => :json)
     end
 
     def upload_app(name, zipfile, resources = [])
@@ -113,148 +113,20 @@ module CFoundry
 
     # Services
     def services
-      json_get("services")
+      get("services", nil => :json)
     end
 
     def create_service(manifest)
-      json_post(manifest.to_json, "services")
+      post(manifest, "services", :json => :json)
     end
 
     def service(name)
-      json_get("services", name)
+      get("services", name, nil => :json)
     end
 
     def delete_service(name)
-      delete("services", name)
+      delete("services", name, nil => :json)
       true
-    end
-
-  private
-    def request(type, segments, options = {})
-      headers = {}
-      headers["AUTHORIZATION"] = @token if @token
-      headers["PROXY-USER"] = @proxy if @proxy
-      headers["Content-Type"] = "application/json" # TODO: probably not always
-                                                   #       and set Accept
-      headers["Content-Length"] =
-        options[:payload] ? options[:payload].size : 0
-
-      req = options.dup
-      req[:method] = type
-      req[:url] = url(segments)
-      req[:headers] = headers.merge(req[:headers] || {})
-
-      json = req.delete :json
-
-      RestClient::Request.execute(req) do |response, request|
-        if @trace
-          puts '>>>'
-          puts "PROXY: #{RestClient.proxy}" if RestClient.proxy
-          puts "REQUEST: #{req[:method]} #{req[:url]}"
-          puts "RESPONSE_HEADERS:"
-          response.headers.each do |key, value|
-            puts "    #{key} : #{value}"
-          end
-          puts "REQUEST_HEADERS:"
-          request.headers.each do |key, value|
-            puts "    #{key} : #{value}"
-          end
-          puts "REQUEST_BODY: #{req[:payload]}" if req[:payload]
-          puts "RESPONSE: [#{response.code}]"
-          begin
-            puts JSON.pretty_generate(JSON.parse(response.body))
-          rescue
-            puts "#{response.body}"
-          end
-          puts '<<<'
-        end
-
-        case response.code
-        when 200, 204, 302
-          if json
-            if response.code == 204
-              raise "Expected JSON response, got 204 No Content"
-            end
-
-            JSON.parse response
-          else
-            response
-          end
-
-        # TODO: figure out how/when the CC distinguishes these
-        when 400, 403
-          info = JSON.parse response
-          raise Denied.new(
-            info["code"],
-            info["description"])
-
-        when 404
-          raise NotFound
-
-        when 411, 500, 504
-          begin
-            raise_error(JSON.parse(response))
-          rescue JSON::ParserError
-            raise BadResponse.new(response.code, response)
-          end
-
-        else
-          raise BadResponse.new(response.code, response)
-        end
-      end
-    rescue SocketError, Errno::ECONNREFUSED => e
-      raise TargetRefused, e.message
-    end
-
-    def raise_error(info)
-      case info["code"]
-      when 402
-        raise UploadFailed.new(info["description"])
-      else
-        raise APIError.new(info["code"], info["description"])
-      end
-    end
-
-    def get(*path)
-      request(:get, path)
-    end
-
-    def delete(*path)
-      request(:delete, path)
-    end
-
-    def post(payload, *path)
-      request(:post, path, :payload => payload)
-    end
-
-    def put(payload, *path)
-      request(:put, path, :payload => payload)
-    end
-
-    def json_get(*path)
-      request(:get, path, :json => true)
-    end
-
-    def json_delete(*path)
-      request(:delete, path, :json => true)
-    end
-
-    def json_post(payload, *path)
-      request(:post, path, :payload => payload, :json => true)
-    end
-
-    def json_put(payload, *path)
-      request(:put, path, :payload => payload, :json => true)
-    end
-
-    def url(segments)
-      "#@target/#{safe_path(segments)}"
-    end
-
-    def safe_path(*segments)
-      segments.flatten.collect { |x|
-        URI.encode x.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")
-      }.join("/")
     end
   end
 end
