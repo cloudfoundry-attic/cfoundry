@@ -8,7 +8,7 @@ module CFoundry
     attr_accessor :target, :token, :proxy, :trace
 
     def initialize(
-        target = "http://api.cloudfoundry.com",
+        target = "https://api.cloudfoundry.com",
         token = nil)
       @target = target
       @token = token
