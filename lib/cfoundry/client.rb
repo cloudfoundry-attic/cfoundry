@@ -61,7 +61,7 @@ module CFoundry
           services[vendor] =
             { :type => type,
               :versions => versions.keys,
-              :description => versions.values[0]["description"],
+              :description => versions.values[0][:description],
               :vendor => vendor
             }
         end
@@ -80,10 +80,10 @@ module CFoundry
     def users
       @rest.users.collect do |json|
         CFoundry::User.new(
-          json["email"],
+          json[:email],
           self,
-          { "email" => json["email"],
-            "admin" => json["admin"] })
+          { :email => json[:email],
+            :admin => json[:admin] })
       end
     end
 
@@ -105,7 +105,7 @@ module CFoundry
     # Authenticate with the target. Sets the client token.
     def login(email, password)
       @rest.token =
-        @rest.create_token({ :password => password }, email)["token"]
+        @rest.create_token({ :password => password }, email)[:token]
     end
 
     # Clear client token. No requests are made for this.
@@ -122,7 +122,7 @@ module CFoundry
     # Retreive all of the current user's applications.
     def apps
       @rest.apps.collect do |json|
-        CFoundry::App.new(json["name"], self, json)
+        CFoundry::App.new(json[:name], self, json)
       end
     end
 
@@ -139,7 +139,7 @@ module CFoundry
     # Retrieve all of the current user's services.
     def services
       @rest.services.collect do |json|
-        CFoundry::Service.new(json["name"], self, json)
+        CFoundry::Service.new(json[:name], self, json)
       end
     end
 

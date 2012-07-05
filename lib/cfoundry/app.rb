@@ -72,9 +72,9 @@ module CFoundry
       @client.rest.delete_app(@name)
 
       if @manifest
-        @manifest.delete "meta"
-        @manifest.delete "version"
-        @manifest.delete "state"
+        @manifest.delete :meta
+        @manifest.delete :version
+        @manifest.delete :state
       end
     end
 
@@ -82,7 +82,7 @@ module CFoundry
     #
     # Call this after setting the various attributes.
     def create!
-      @client.rest.create_app(@manifest.merge("name" => @name))
+      @client.rest.create_app(@manifest.merge(:name => @name))
       @manifest = nil
     end
 
@@ -97,7 +97,7 @@ module CFoundry
     # Retrieve all of the instances of the app, as Instance objects.
     def instances
       @client.rest.instances(@name).collect do |m|
-        Instance.new(@name, m["index"], @client, m)
+        Instance.new(@name, m[:index], @client, m)
       end
     end
 
@@ -109,7 +109,7 @@ module CFoundry
     # Update application attributes. Does not restart the application.
     def update!(what = {})
       # TODO: hacky; can we not just set in meta field?
-      # we write to manifest["debug"] but read from manifest["meta"]["debug"]
+      # we write to manifest[:debug] but read from manifest[:meta][:debug]
       what[:debug] = debug_mode
 
       @client.rest.update_app(@name, manifest.merge(what))
@@ -118,12 +118,12 @@ module CFoundry
 
     # Stop the application.
     def stop!
-      update! "state" => "STOPPED"
+      update! :state => "STOPPED"
     end
 
     # Start the application.
     def start!
-      update! "state" => "STARTED"
+      update! :state => "STARTED"
     end
 
     # Restart the application.
@@ -141,8 +141,8 @@ module CFoundry
     def health
       s = state
       if s == "STARTED"
-        healthy_count = manifest["runningInstances"]
-        expected = manifest["instances"]
+        healthy_count = manifest[:runningInstances]
+        expected = manifest[:instances]
         if healthy_count && expected > 0
           ratio = healthy_count / expected.to_f
           if ratio == 1.0
@@ -179,13 +179,13 @@ module CFoundry
       state == "STARTED"
     end
 
-    { :total_instances => "instances",
-      :state => "state",
-      :status => "state",
-      :services => "services",
-      :uris => "uris",
-      :urls => "uris",
-      :env => "env"
+    { :total_instances => :instances,
+      :state => :state,
+      :status => :state,
+      :services => :services,
+      :uris => :uris,
+      :urls => :uris,
+      :env => :env
     }.each do |meth, attr|
       define_method(meth) do
         manifest[attr]
@@ -212,35 +212,35 @@ module CFoundry
 
     # Application framework.
     def framework
-      manifest["staging"]["framework"] ||
-        manifest["staging"]["model"]
+      manifest[:staging][:framework] ||
+        manifest[:staging][:model]
     end
 
     def framework=(v) # :nodoc:
       @manifest ||= {}
-      @manifest["staging"] ||= {}
+      @manifest[:staging] ||= {}
 
-      if @manifest["staging"].key? "model"
-        @manifest["staging"]["model"] = v
+      if @manifest[:staging].key? :model
+        @manifest[:staging][:model] = v
       else
-        @manifest["staging"]["framework"] = v
+        @manifest[:staging][:framework] = v
       end
     end
 
     # Application runtime.
     def runtime
-      manifest["staging"]["runtime"] ||
-        manifest["staging"]["stack"]
+      manifest[:staging][:runtime] ||
+        manifest[:staging][:stack]
     end
 
     def runtime=(v) # :nodoc:
       @manifest ||= {}
-      @manifest["staging"] ||= {}
+      @manifest[:staging] ||= {}
 
-      if @manifest["staging"].key? "stack"
-        @manifest["staging"]["stack"] = v
+      if @manifest[:staging].key? :stack
+        @manifest[:staging][:stack] = v
       else
-        @manifest["staging"]["runtime"] = v
+        @manifest[:staging][:runtime] = v
       end
     end
 
@@ -249,49 +249,49 @@ module CFoundry
     #
     # Used for standalone apps.
     def command
-      manifest["staging"]["command"]
+      manifest[:staging][:command]
     end
 
     def command=(v) # :nodoc:
       @manifest ||= {}
-      @manifest["staging"] ||= {}
-      @manifest["staging"]["command"] = v
+      @manifest[:staging] ||= {}
+      @manifest[:staging][:command] = v
     end
 
 
     # Application memory.
     def memory
-      manifest["resources"]["memory"]
+      manifest[:resources][:memory]
     end
 
     def memory=(v) # :nodoc:
       @manifest ||= {}
-      @manifest["resources"] ||= {}
-      @manifest["resources"]["memory"] = v
+      @manifest[:resources] ||= {}
+      @manifest[:resources][:memory] = v
     end
 
 
     # Application debug mode.
     def debug_mode
-      manifest.fetch("debug") do
-        manifest["meta"] && manifest["meta"]["debug"]
+      manifest.fetch(:debug) do
+        manifest[:meta] && manifest[:meta][:debug]
       end
     end
 
     def debug_mode=(v) # :nodoc:
       @manifest ||= {}
-      @manifest["debug"] = v
+      @manifest[:debug] = v
     end
 
 
     # Bind services to application.
     def bind(*service_names)
-      update!("services" => services + service_names)
+      update!(:services => services + service_names)
     end
 
     # Unbind services from application.
     def unbind(*service_names)
-      update!("services" =>
+      update!(:services =>
                 services.reject { |s|
                   service_names.include?(s)
                 })
@@ -433,8 +433,8 @@ module CFoundry
       resources = @client.rest.check_resources(fingerprints)
 
       resources.each do |resource|
-        FileUtils.rm_f resource["fn"]
-        resource["fn"].sub!("#{path}/", '')
+        FileUtils.rm_f resource[:fn]
+        resource[:fn].sub!("#{path}/", "")
       end
 
       resources
@@ -491,32 +491,32 @@ module CFoundry
 
       # Instance state.
       def state
-        @manifest["state"]
+        @manifest[:state]
       end
       alias_method :status, :state
 
       # Instance start time.
       def since
-        Time.at(@manifest["since"])
+        Time.at(@manifest[:since])
       end
 
       # Instance debugger data. If instance is in debug mode, returns a hash
       # containing :ip and :port keys.
       def debugger
-        return unless @manifest["debug_ip"] and @manifest["debug_port"]
+        return unless @manifest[:debug_ip] and @manifest[:debug_port]
 
-        { :ip => @manifest["debug_ip"],
-          :port => @manifest["debug_port"]
+        { :ip => @manifest[:debug_ip],
+          :port => @manifest[:debug_port]
         }
       end
 
       # Instance console data. If instance has a console, returns a hash
       # containing :ip and :port keys.
       def console
-        return unless @manifest["console_ip"] and @manifest["console_port"]
+        return unless @manifest[:console_ip] and @manifest[:console_port]
 
-        { :ip => @manifest["console_ip"],
-          :port => @manifest["console_port"]
+        { :ip => @manifest[:console_ip],
+          :port => @manifest[:console_port]
         }
       end
 

@@ -32,7 +32,7 @@ module CFoundry
     #
     # Call this after setting the various attributes.
     def create!
-      @client.rest.create_user(@manifest.merge("email" => @email))
+      @client.rest.create_user(@manifest.merge(:email => @email))
     end
 
     # Update user attributes.
@@ -51,14 +51,14 @@ module CFoundry
 
     # Check if the user is an administrator.
     def admin?
-      manifest["admin"]
+      manifest[:admin]
     end
 
     # Set the user's password.
     #
     # Call #update! after using this.
     def password=(str)
-      manifest["password"] = str
+      manifest[:password] = str
     end
 
     private

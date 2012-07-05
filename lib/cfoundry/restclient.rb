@@ -67,7 +67,7 @@ module CFoundry
     end
 
     def instances(name)
-      get("apps", name, "instances", nil => :json)["instances"]
+      get("apps", name, "instances", nil => :json)[:instances]
     end
 
     def files(name, instance, *path)

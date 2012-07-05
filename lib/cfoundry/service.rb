@@ -50,7 +50,7 @@ module CFoundry
     #
     # Call this after setting the various attributes.
     def create!
-      @client.rest.create_service(@manifest.merge("name" => @name))
+      @client.rest.create_service(@manifest.merge(:name => @name))
     end
 
     # Check if the service exists on the target.
@@ -63,20 +63,20 @@ module CFoundry
 
     # Timestamp of when the service was created.
     def created
-      Time.at(meta["created"])
+      Time.at(meta[:created])
     end
 
     # Timestamp of when the service was last updated.
     def updated
-      Time.at(meta["updated"])
+      Time.at(meta[:updated])
     end
 
-    { :type => "type",
-      :vendor => "vendor",
-      :version => "version",
-      :properties => "properties",
-      :tier => "tier",
-      :meta => "meta"
+    { :type => :type,
+      :vendor => :vendor,
+      :version => :version,
+      :properties => :properties,
+      :tier => :tier,
+      :meta => :meta
     }.each do |meth, attr|
       define_method(meth) do
         manifest[attr]

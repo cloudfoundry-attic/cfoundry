@@ -9,6 +9,10 @@ module CFoundry
   class BaseClient # :nodoc:
     private
 
+    def parse_json(x)
+      JSON.parse(x, :symbolize_names => true)
+    end
+
     def request(method, segments, options = {})
       accept = options.delete(:accept)
       type = options.delete(:type)
@@ -85,24 +89,24 @@ module CFoundry
               raise "Expected JSON response, got 204 No Content"
             end
 
-            JSON.parse response
+            parse_json(response)
           else
             response
           end
 
         # TODO: figure out how/when the CC distinguishes these
         when 400, 403
-          info = JSON.parse response
+          info = parse_json(response)
           raise Denied.new(
-            info["code"],
-            info["description"])
+            info[:code],
+            info[:description])
 
         when 404
           raise NotFound
 
         when 411, 500, 504
           begin
-            raise_error(JSON.parse(response))
+            raise_error(parse_json(response))
           rescue JSON::ParserError
             raise BadResponse.new(response.code, response)
           end
@@ -116,11 +120,11 @@ module CFoundry
     end
 
     def raise_error(info)
-      case info["code"]
+      case info[:code]
       when 402
-        raise UploadFailed.new(info["description"])
+        raise UploadFailed.new(info[:description])
       else
-        raise APIError.new(info["code"], info["description"])
+        raise APIError.new(info[:code], info[:description])
       end
     end
 
