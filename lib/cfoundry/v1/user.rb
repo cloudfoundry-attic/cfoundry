@@ -1,4 +1,4 @@
-module CFoundry
+module CFoundry::V1
   # Class for representing a user on a given target (via Client).
   #
   # Does not guarantee that the user exists; used for both user creation and

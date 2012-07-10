@@ -1,4 +1,4 @@
-module CFoundry
+module CFoundry::V1
   # Class for representing a user's service on a given target (via Client).
   #
   # Does not guarantee that the service exists; used for both service creation

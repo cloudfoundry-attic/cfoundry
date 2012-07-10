@@ -5,7 +5,7 @@ require "tmpdir"
 
 require "cfoundry/zip"
 
-module CFoundry
+module CFoundry::V1
   # Class for representing a user's application on a given target (via
   # Client).
   #

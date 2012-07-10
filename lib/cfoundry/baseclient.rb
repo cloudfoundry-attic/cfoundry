@@ -1,19 +1,34 @@
-
 require "restclient"
 require "json"
 
-require "cfoundry/errors"
-
-
 module CFoundry
   class BaseClient # :nodoc:
+    def request_path(method, path, types = {}, options = {})
+      path = url(path) if path.is_a?(Array)
+
+      unless types.empty?
+        if params = types.delete(:params)
+          options[:params] = params
+        end
+
+        if types.size > 1
+          raise "request types must contain only one Content-Type => Accept"
+        end
+
+        options[:type] = types.keys.first
+        options[:accept] = types.values.first
+      end
+
+      request(method, path, options)
+    end
+
     private
 
     def parse_json(x)
       JSON.parse(x, :symbolize_names => true)
     end
 
-    def request(method, segments, options = {})
+    def request(method, path, options = {})
       accept = options.delete(:accept)
       type = options.delete(:type)
       payload = options.delete(:payload)
@@ -44,12 +59,13 @@ module CFoundry
 
       headers.merge!(options[:headers]) if options[:headers]
 
-      url = url(segments)
-      url << "?" + encode_params(params) if params
+      if params
+        path += "?" + encode_params(params)
+      end
 
       req = options.dup
       req[:method] = method
-      req[:url] = url
+      req[:url] = @target + path
       req[:headers] = headers
       req[:payload] = payload
 
@@ -78,59 +94,10 @@ module CFoundry
           puts '<<<'
         end
 
-        case response.code
-        when 200, 204, 302
-          if accept == :headers
-            return response.headers
-          end
-
-          if json
-            if response.code == 204
-              raise "Expected JSON response, got 204 No Content"
-            end
-
-            parse_json(response)
-          else
-            response
-          end
-
-        # TODO: figure out how/when the CC distinguishes these
-        when 400, 403
-          info = parse_json(response)
-          raise Denied.new(
-            info[:code],
-            info[:description])
-
-        # UAA uses this
-        when 401
-          info = JSON.parse response
-          raise Denied.new(401, info[:error])
-
-        when 404
-          raise NotFound
-
-        when 411, 500, 504
-          begin
-            raise_error(parse_json(response))
-          rescue JSON::ParserError
-            raise BadResponse.new(response.code, response)
-          end
-
-        else
-          raise BadResponse.new(response.code, response)
-        end
+        handle_response(response, accept)
       end
     rescue SocketError, Errno::ECONNREFUSED => e
       raise TargetRefused, e.message
-    end
-
-    def raise_error(info)
-      case info[:code]
-      when 402
-        raise UploadFailed.new(info[:description])
-      else
-        raise APIError.new(info[:code], info[:description])
-      end
     end
 
     def mimetype(type)
@@ -172,20 +139,9 @@ module CFoundry
     def request_with_types(method, path, options = {})
       if path.last.is_a?(Hash)
         types = path.pop
-
-        if query = types.delete(:params)
-          options[:params] = query
-        end
-
-        if types.size > 1
-          raise "request types must contain only one Content-Type => Accept"
-        end
-
-        options[:type] = types.keys.first
-        options[:accept] = types.values.first
       end
 
-      request(method, path, options)
+      request_path(method, url(path), types, options)
     end
 
     def get(*path)
@@ -205,7 +161,7 @@ module CFoundry
     end
 
     def url(segments)
-      "#@target/#{safe_path(segments)}"
+      "/#{safe_path(segments)}"
     end
 
     def safe_path(*segments)

@@ -3,9 +3,8 @@ require "json"
 require "cfoundry/baseclient"
 require "cfoundry/uaaclient"
 
-
-module CFoundry
-  class RESTClient < BaseClient
+module CFoundry::V1
+  class Base < BaseClient
     attr_accessor :target, :token, :proxy, :trace
 
     def initialize(
@@ -16,10 +15,6 @@ module CFoundry
     end
 
     # Cloud metadata
-    def info
-      get("info", nil => :json)
-    end
-
     def system_services
       get("info", "services", nil => :json)
     end
@@ -34,10 +29,10 @@ module CFoundry
     def uaa
       return @uaa unless @uaa.nil?
 
-      endpoint = info[:authorization_endpoint]
+      endpoint = ENV["CFOUNDRY_UAA"] || info[:authorization_endpoint]
       return @uaa = false unless endpoint
 
-      @uaa = UAAClient.new(endpoint)
+      @uaa = CFoundry::UAAClient.new(endpoint)
       @uaa.trace = @trace
       @uaa
     end
@@ -142,6 +137,55 @@ module CFoundry
     def delete_service(name)
       delete("services", name, nil => :json)
       true
+    end
+
+    private
+
+    def handle_response(response, accept)
+      json = accept == :json
+
+      case response.code
+      when 200, 204, 302
+        if accept == :headers
+          return response.headers
+        end
+
+        if json
+          if response.code == 204
+            raise "Expected JSON response, got 204 No Content"
+          end
+
+          parse_json(response)
+        else
+          response
+        end
+
+      when 400, 403
+        info = parse_json(response)
+        raise CFoundry::Denied.new(403, info[:description])
+
+      when 404
+        raise CFoundry::NotFound
+
+      when 411, 500, 504
+        begin
+          raise_error(parse_json(response))
+        rescue JSON::ParserError
+          raise CFoundry::BadResponse.new(response.code, response)
+        end
+
+      else
+        raise CFoundry::BadResponse.new(response.code, response)
+      end
+    end
+
+    def raise_error(info)
+      case info[:code]
+      when 402
+        raise CFoundry::UploadFailed.new(info[:description])
+      else
+        raise CFoundry::APIError.new(info[:code], info[:description])
+      end
     end
   end
 end
