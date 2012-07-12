@@ -1,6 +1,7 @@
 require "cfoundry/v1/base"
 require "cfoundry/v1/app"
 require "cfoundry/v1/service"
+require "cfoundry/v1/service_instance"
 require "cfoundry/v1/user"
 
 
@@ -45,24 +46,28 @@ module CFoundry::V1
       @base.trace = bool
     end
 
+    # The currently authenticated user.
+    def current_user
+      if user = info[:user]
+        user(user)
+      end
+    end
+
 
     # Retrieve target metadata.
     def info
       @base.info
     end
 
-    # Retrieve available services. Returned as a Hash from vendor => metadata.
-    def system_services
-      services = {}
+    # Retrieve available services.
+    def services
+      services = []
 
       @base.system_services.each do |type, vendors|
         vendors.each do |vendor, versions|
-          services[vendor] =
-            { :type => type,
-              :versions => versions.keys,
-              :description => versions.values[0][:description],
-              :vendor => vendor
-            }
+          versions.each do |num, meta|
+            services << Service.new(vendor, meta[:description], num)
+          end
         end
       end
 
@@ -70,15 +75,33 @@ module CFoundry::V1
     end
 
     # Retrieve available runtimes.
-    def system_runtimes
-      @base.system_runtimes
+    def runtimes
+      runtimes = []
+
+      @base.system_runtimes.each do |name, meta|
+        runtimes << Runtime.new(name.to_s, meta[:version])
+      end
+
+      runtimes
+    end
+
+    # Retrieve available frameworks.
+    def frameworks
+      fs = info[:frameworks]
+      return unless fs
+
+      frameworks = []
+      fs.each do |name, meta|
+        frameworks << Framework.new(name.to_s)
+      end
+      frameworks
     end
 
 
     # Retrieve user list. Admin-only.
     def users
       @base.users.collect do |json|
-        CFoundry::User.new(
+        User.new(
           json[:email],
           self,
           { :email => json[:email],
@@ -92,7 +115,7 @@ module CFoundry::V1
     # This should be used for both user creation (after calling User#create!)
     # and retrieval.
     def user(email)
-      CFoundry::User.new(email, self)
+      User.new(email, self)
     end
 
     # Create a user on the target and return a User object representing them.
@@ -144,7 +167,7 @@ module CFoundry::V1
     # Retreive all of the current user's applications.
     def apps
       @base.apps.collect do |json|
-        CFoundry::App.new(json[:name], self, json)
+        App.new(json[:name], self, json)
       end
     end
 
@@ -154,14 +177,14 @@ module CFoundry::V1
     # This should be used for both app creation (after calling App#create!)
     # and retrieval.
     def app(name)
-      CFoundry::App.new(name, self)
+      App.new(name, self)
     end
 
 
     # Retrieve all of the current user's services.
-    def services
+    def service_instances
       @base.services.collect do |json|
-        CFoundry::Service.new(json[:name], self, json)
+        Service.new(json[:name], self, json)
       end
     end
 
@@ -170,8 +193,8 @@ module CFoundry::V1
     #
     # This should be used for both service creation (after calling
     # Service#create!) and retrieval.
-    def service(name)
-      CFoundry::Service.new(name, self)
+    def service_instance(name)
+      ServiceInstance.new(name, self)
     end
   end
 end

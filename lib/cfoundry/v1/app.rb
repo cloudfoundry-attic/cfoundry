@@ -5,6 +5,9 @@ require "tmpdir"
 
 require "cfoundry/zip"
 
+require "cfoundry/v1/framework"
+require "cfoundry/v1/runtime"
+
 module CFoundry::V1
   # Class for representing a user's application on a given target (via
   # Client).
@@ -213,11 +216,14 @@ module CFoundry::V1
 
     # Application framework.
     def framework
-      manifest[:staging][:framework] ||
-        manifest[:staging][:model]
+      Framework.new(
+        manifest[:staging][:framework] ||
+          manifest[:staging][:model])
     end
 
     def framework=(v) # :nodoc:
+      v = v.name if v.is_a?(Framework)
+
       @manifest ||= {}
       @manifest[:staging] ||= {}
 
@@ -230,11 +236,14 @@ module CFoundry::V1
 
     # Application runtime.
     def runtime
-      manifest[:staging][:runtime] ||
-        manifest[:staging][:stack]
+      Framework.new(
+        manifest[:staging][:runtime] ||
+          manifest[:staging][:stack])
     end
 
     def runtime=(v) # :nodoc:
+      v = v.name if v.is_a?(Runtime)
+
       @manifest ||= {}
       @manifest[:staging] ||= {}
 
