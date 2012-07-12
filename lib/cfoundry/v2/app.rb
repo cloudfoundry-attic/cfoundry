@@ -25,7 +25,7 @@ module CFoundry::V2
     attribute :file_descriptors,    :default => 256
     attribute :disk_quota,          :default => 256
     attribute :state,               :default => "STOPPED"
-    to_many   :service_bindings,    :as => :service
+    to_many   :service_bindings
 
     alias :total_instances :instances
     alias :total_instances= :instances=
