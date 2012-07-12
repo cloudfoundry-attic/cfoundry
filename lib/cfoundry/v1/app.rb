@@ -108,9 +108,10 @@ module CFoundry::V1
 
     # Update application attributes. Does not restart the application.
     def update!(what = {})
-      # TODO: hacky; can we not just set in meta field?
-      # we write to manifest[:debug] but read from manifest[:meta][:debug]
+      # bleh. have to set these here (normally in :meta) or they'll get lost.
       what[:debug] = debug_mode
+      what[:staging] ||= {}
+      what[:staging][:command] = command
 
       @client.rest.update_app(@name, manifest.merge(what))
       @manifest = nil
@@ -249,7 +250,8 @@ module CFoundry::V1
     #
     # Used for standalone apps.
     def command
-      manifest[:staging][:command]
+      manifest[:staging][:command] ||
+        manifest[:meta][:command]
     end
 
     def command=(v) # :nodoc:
