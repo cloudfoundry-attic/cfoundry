@@ -18,20 +18,8 @@ module CFoundry::V2
     end
 
 
-    # grab the metadata from a token that looks like:
-    #
-    # bearer (base64 ...)
-    def token_data
-      return @token_data if @token_data
-
-      tok = Base64.decode64(@token.sub(/^bearer\s+/, ""))
-      tok.sub!(/\{.+?\}/, "") # clear algo
-      @token_data = JSON.parse(tok[/\{.+?\}/], :symbolize_names => true)
-    end
-
     # invalidate token data when changing token
     def token=(t)
-      @token_data = nil
       @token = t
     end
 
@@ -42,13 +30,19 @@ module CFoundry::V2
     def uaa
       return @uaa unless @uaa.nil?
 
-      endpoint = ENV["CFOUNDRY_UAA"] || info[:authorization_endpoint]
+      endpoint = info[:authorization_endpoint]
       return @uaa = false unless endpoint
 
       @uaa = CFoundry::UAAClient.new(endpoint)
       @uaa.trace = @trace
       @uaa.token = @token
       @uaa
+    end
+
+
+    # Cloud metadata
+    def info
+      get("info", nil => :json)
     end
 
 

@@ -60,9 +60,15 @@ module CFoundry::V2
 
     # The currently authenticated user.
     def current_user
-      user(@base.token_data[:user_id])
+      if user = info[:user]
+        user(user)
+      end
     end
 
+    # Cloud metadata
+    def info
+      @base.info
+    end
 
     # Login prompts
     def login_prompts
@@ -83,7 +89,6 @@ module CFoundry::V2
     # The values in the hash should mirror the prompts given by
     # `login_prompts`.
     def login(credentials)
-      @token_data = nil
       @current_organization = nil
       @current_space = nil
 
