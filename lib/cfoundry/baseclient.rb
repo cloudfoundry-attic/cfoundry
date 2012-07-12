@@ -3,6 +3,11 @@ require "json"
 
 module CFoundry
   class BaseClient # :nodoc:
+    def initialize(target, token = nil)
+      @target = target
+      @token = token
+    end
+
     def request_path(method, path, types = {}, options = {})
       path = url(path) if path.is_a?(Array)
 
@@ -118,21 +123,20 @@ module CFoundry
       end
     end
 
-    def encode_params(hash, escape = true, parent = nil)
+    def encode_params(hash, escape = true)
       hash.keys.map do |k|
         v = hash[k]
-        key = parent ? "#{parent}[#{k}]" : k
 
         value =
           if v.is_a?(Hash)
             v.to_json
           elsif escape
-            URI.escape(v.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+            URI.escape(v.to_s, /[^#{URI::PATTERN::UNRESERVED}]/)
           else
             v
           end
 
-        "#{key}=#{value}"
+        "#{k}=#{value}"
       end.join("&")
     end
 
@@ -168,6 +172,35 @@ module CFoundry
       segments.flatten.collect { |x|
         URI.encode x.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")
       }.join("/")
+    end
+
+    private
+
+    def handle_response(response, accept)
+      json = accept == :json
+
+      case response.code
+      when 200, 201, 204, 302
+        if accept == :headers
+          return response.headers
+        end
+
+        if json
+          if response.code == 204
+            raise "Expected JSON response, got 204 No Content"
+          end
+
+          parse_json(response)
+        else
+          response
+        end
+
+      when 404
+        raise CFoundry::NotFound
+
+      else
+        raise CFoundry::BadResponse.new(response.code, response)
+      end
     end
   end
 end
