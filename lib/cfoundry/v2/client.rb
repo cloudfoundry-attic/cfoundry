@@ -176,9 +176,5 @@ module CFoundry::V2
 
     alias :spaces :app_spaces
     alias :space :app_space
-
-    alias :system_frameworks :frameworks
-    alias :system_runtimes :runtimes
-    alias :system_services :services
   end
 end

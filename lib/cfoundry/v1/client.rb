@@ -66,7 +66,8 @@ module CFoundry::V1
       @base.system_services.each do |type, vendors|
         vendors.each do |vendor, versions|
           versions.each do |num, meta|
-            services << Service.new(vendor, meta[:description], num)
+            services <<
+              Service.new(vendor.to_s, num, meta[:description], type)
           end
         end
       end
@@ -79,7 +80,8 @@ module CFoundry::V1
       runtimes = []
 
       @base.system_runtimes.each do |name, meta|
-        runtimes << Runtime.new(name.to_s, meta[:version])
+        runtimes <<
+          Runtime.new(name.to_s, meta[:version], meta[:debug_modes])
       end
 
       runtimes
@@ -189,7 +191,7 @@ module CFoundry::V1
     # Retrieve all of the current user's services.
     def service_instances
       @base.services.collect do |json|
-        Service.new(json[:name], self, json)
+        ServiceInstance.new(json[:name], self, json)
       end
     end
 

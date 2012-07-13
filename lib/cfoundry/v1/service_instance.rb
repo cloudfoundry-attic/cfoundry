@@ -7,7 +7,7 @@ module CFoundry::V1
   # changes.
   class ServiceInstance
     # Service name.
-    attr_reader :name
+    attr_accessor :name
 
     # Service type (e.g. key-value).
     attr_accessor :type
