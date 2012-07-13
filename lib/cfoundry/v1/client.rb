@@ -92,7 +92,12 @@ module CFoundry::V1
 
       frameworks = []
       fs.each do |name, meta|
-        frameworks << Framework.new(name.to_s)
+        runtimes = meta[:runtimes].collect do |r|
+          Runtime.new(r[:name], r[:description])
+        end
+
+        frameworks <<
+          Framework.new(name.to_s, nil, runtimes, meta[:detection])
       end
       frameworks
     end

@@ -1,10 +1,12 @@
 module CFoundry::V1
   class Framework
-    attr_accessor :name, :description
+    attr_accessor :name, :description, :runtimes, :detection
 
-    def initialize(name, description = nil)
+    def initialize(name, description = nil, runtimes = [], detection = nil)
       @name = name
       @description = description
+      @runtimes = runtimes
+      @detection = detection
     end
 
     def apps
