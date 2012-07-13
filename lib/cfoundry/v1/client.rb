@@ -176,7 +176,7 @@ module CFoundry::V1
     #
     # This should be used for both app creation (after calling App#create!)
     # and retrieval.
-    def app(name)
+    def app(name = nil)
       App.new(name, self)
     end
 
@@ -193,7 +193,7 @@ module CFoundry::V1
     #
     # This should be used for both service creation (after calling
     # Service#create!) and retrieval.
-    def service_instance(name)
+    def service_instance(name = nil)
       ServiceInstance.new(name, self)
     end
   end
