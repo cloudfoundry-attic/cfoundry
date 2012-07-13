@@ -117,7 +117,7 @@ module CFoundry::V2
         info = parse_json(response)
         raise CFoundry::APIError.new(info[:code], info[:description])
 
-      when 401
+      when 401, 403
         info = parse_json(response)
         raise CFoundry::Denied.new(info[:code], info[:description])
 
