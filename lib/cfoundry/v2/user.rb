@@ -14,9 +14,37 @@ module CFoundry::V2
 
     attribute :guid # guid is explicitly set for users
 
+    alias :admin? :admin
+
     alias :spaces :app_spaces
     alias :managed_spaces :managed_app_spaces
     alias :audited_spaces :audited_app_spaces
     alias :default_space :default_app_space
+
+    # optional metadata from UAA
+    attr_accessor :emails, :name
+
+    def email
+      return unless @emails && @emails.first
+      @emails.first[:value]
+    end
+
+    def given_name
+      return unless @name && @name[:givenName] != email
+      @name[:givenName]
+    end
+
+    def family_name
+      return unless @name && @name[:familyName] != email
+      @name[:familyName]
+    end
+
+    def full_name
+      if @name && @name[:fullName]
+        @name[:fullName]
+      elsif given_name && family_name
+        "#{given_name} #{family_name}"
+      end
+    end
   end
 end
