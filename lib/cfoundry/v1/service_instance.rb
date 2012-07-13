@@ -43,19 +43,19 @@ module CFoundry::V1
 
     # Delete the service from the target.
     def delete!
-      @client.rest.delete_service(@name)
+      @client.base.delete_service(@name)
     end
 
     # Create the service on the target.
     #
     # Call this after setting the various attributes.
     def create!
-      @client.rest.create_service(@manifest.merge(:name => @name))
+      @client.base.create_service(@manifest.merge(:name => @name))
     end
 
     # Check if the service exists on the target.
     def exists?
-      @client.rest.service(@name)
+      @client.base.service(@name)
       true
     rescue CFoundry::NotFound
       false
@@ -91,7 +91,7 @@ module CFoundry::V1
     private
 
     def manifest
-      @manifest ||= @client.rest.service(@name)
+      @manifest ||= @client.base.service(@name)
     end
   end
 end

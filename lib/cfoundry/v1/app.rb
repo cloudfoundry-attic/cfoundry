@@ -72,7 +72,7 @@ module CFoundry::V1
     #
     # Keeps the metadata, but clears target-specific state from it.
     def delete!
-      @client.rest.delete_app(@name)
+      @client.base.delete_app(@name)
 
       if @manifest
         @manifest.delete :meta
@@ -85,13 +85,13 @@ module CFoundry::V1
     #
     # Call this after setting the various attributes.
     def create!
-      @client.rest.create_app(@manifest.merge(:name => @name))
+      @client.base.create_app(@manifest.merge(:name => @name))
       @manifest = nil
     end
 
     # Check if the application exists on the target.
     def exists?
-      @client.rest.app(@name)
+      @client.base.app(@name)
       true
     rescue CFoundry::NotFound
       false
@@ -99,14 +99,14 @@ module CFoundry::V1
 
     # Retrieve all of the instances of the app, as Instance objects.
     def instances
-      @client.rest.instances(@name).collect do |m|
+      @client.base.instances(@name).collect do |m|
         Instance.new(@name, m[:index], @client, m)
       end
     end
 
     # Retrieve application statistics, e.g. CPU load and memory usage.
     def stats
-      @client.rest.stats(@name)
+      @client.base.stats(@name)
     end
 
     # Update application attributes. Does not restart the application.
@@ -116,7 +116,7 @@ module CFoundry::V1
       what[:staging] ||= {}
       what[:staging][:command] = command
 
-      @client.rest.update_app(@name, manifest.merge(what))
+      @client.base.update_app(@name, manifest.merge(what))
       @manifest = nil
     end
 
@@ -363,7 +363,7 @@ module CFoundry::V1
 
       packed = CFoundry::Zip.pack(tmpdir, zipfile)
 
-      @client.rest.upload_app(@name, packed && zipfile, resources || [])
+      @client.base.upload_app(@name, packed && zipfile, resources || [])
     ensure
       FileUtils.rm_f(zipfile) if zipfile
       FileUtils.rm_rf(tmpdir) if tmpdir
@@ -372,7 +372,7 @@ module CFoundry::V1
     private
 
     def manifest
-      @manifest ||= @client.rest.app(@name)
+      @manifest ||= @client.base.app(@name)
     end
 
     def prepare_package(path, to)
@@ -441,7 +441,7 @@ module CFoundry::V1
 
       return if total_size <= RESOURCE_CHECK_LIMIT
 
-      resources = @client.rest.check_resources(fingerprints)
+      resources = @client.base.check_resources(fingerprints)
 
       resources.each do |resource|
         FileUtils.rm_f resource[:fn]
@@ -549,7 +549,7 @@ module CFoundry::V1
       #
       #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
       def files(*path)
-        @client.rest.files(@app, @index, *path).split("\n").collect do |entry|
+        @client.base.files(@app, @index, *path).split("\n").collect do |entry|
           path + [entry.split(/\s+/, 2)[0]]
         end
       end
@@ -561,7 +561,7 @@ module CFoundry::V1
       #
       #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
       def file(*path)
-        @client.rest.files(@app, @index, *path)
+        @client.base.files(@app, @index, *path)
       end
     end
   end

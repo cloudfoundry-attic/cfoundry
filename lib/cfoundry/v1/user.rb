@@ -25,25 +25,25 @@ module CFoundry::V1
 
     # Delete the user from the target.
     def delete!
-      @client.rest.delete_user(@email)
+      @client.base.delete_user(@email)
     end
 
     # Create the user on the target.
     #
     # Call this after setting the various attributes.
     def create!
-      @client.rest.create_user(@manifest.merge(:email => @email))
+      @client.base.create_user(@manifest.merge(:email => @email))
     end
 
     # Update user attributes.
     def update!(what = {})
-      @client.rest.update_user(@email, manifest.merge(what))
+      @client.base.update_user(@email, manifest.merge(what))
       @manifest = nil
     end
 
     # Check if the user exists on the target.
     def exists?
-      @client.rest.user(@email)
+      @client.base.user(@email)
       true
     rescue CFoundry::Denied
       false
@@ -64,7 +64,7 @@ module CFoundry::V1
     private
 
     def manifest
-      @manifest ||= @client.rest.user(@email)
+      @manifest ||= @client.base.user(@email)
     end
   end
 end
