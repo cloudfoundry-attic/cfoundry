@@ -145,7 +145,7 @@ module CFoundry
         types = path.pop
       end
 
-      request_path(method, url(path), types, options)
+      request_path(method, url(path), types || {}, options)
     end
 
     def get(*path)
