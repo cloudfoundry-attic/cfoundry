@@ -17,7 +17,7 @@ module CFoundry::V1
   # does not perform any requests; use #update! to commit your changes.
   class App
     # Application name.
-    attr_reader :name
+    attr_accessor :name
 
     # Application instance count.
     attr_accessor :total_instances
