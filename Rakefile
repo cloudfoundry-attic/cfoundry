@@ -23,7 +23,7 @@ end
 task :reinstall => [:uninstall, :install]
 
 task :release => :build do
-  sh "gem push cfoundry-#{CFoundry::VERSION}"
+  sh "gem push cfoundry-#{CFoundry::VERSION}.gem"
 end
 
 namespace "bundler" do
