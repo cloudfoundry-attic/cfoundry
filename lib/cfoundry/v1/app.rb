@@ -113,8 +113,8 @@ module CFoundry::V1
     def update!(what = {})
       # bleh. have to set these here (normally in :meta) or they'll get lost.
       what[:debug] = debug_mode
-      what[:staging] ||= {}
-      what[:staging][:command] = command
+      what[:staging] = (what[:staging] || {}).merge(manifest[:staging])
+      what[:staging][:command] = command if command
 
       @client.base.update_app(@name, manifest.merge(what))
       @manifest = nil
