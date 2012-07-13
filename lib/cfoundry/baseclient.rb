@@ -56,7 +56,7 @@ module CFoundry
         when :json
           payload = payload.to_json
         when :form
-          payload = encode_params(payload, false)
+          payload = encode_params(payload)
         end
       end
 
@@ -126,17 +126,9 @@ module CFoundry
     def encode_params(hash, escape = true)
       hash.keys.map do |k|
         v = hash[k]
-
-        value =
-          if v.is_a?(Hash)
-            v.to_json
-          elsif escape
-            URI.escape(v.to_s, /[^#{URI::PATTERN::UNRESERVED}]/)
-          else
-            v
-          end
-
-        "#{k}=#{value}"
+        v = v.to_json if v.is_a?(Hash)
+        v = URI.escape(v.to_s, /[^#{URI::PATTERN::UNRESERVED}]/) if escape
+        "#{k}=#{v}"
       end.join("&")
     end
 
