@@ -17,6 +17,7 @@ module CFoundry::V2
           @manifest ||= {}
           @manifest[:entity] ||= {}
           @manifest[:entity][name] = val
+          @diff[name] = val
         }
       end
 
@@ -38,7 +39,8 @@ module CFoundry::V2
         define_method(:"#{name}=") { |x|
           @manifest ||= {}
           @manifest[:entity] ||= {}
-          @manifest[:entity][:"#{name}_guid"] = x.id
+          @manifest[:entity][:"#{name}_guid"] =
+            @diff[:"#{name}_guid"] = x.id
         }
       end
 
@@ -78,7 +80,8 @@ module CFoundry::V2
         define_method(:"#{plural}=") { |xs|
           @manifest ||= {}
           @manifest[:entity] ||= {}
-          @manifest[:entity][:"#{singular}_guids"] = xs.collect(&:id)
+          @manifest[:entity][:"#{singular}_guids"] =
+            @diff[:"#{singular}_guids"] = xs.collect(&:id)
         }
       end
     end
@@ -89,6 +92,7 @@ module CFoundry::V2
       @id = id
       @client = client
       @manifest = manifest
+      @diff = {}
     end
 
     def manifest
@@ -118,11 +122,8 @@ module CFoundry::V2
       true
     end
 
-    def update!(diff = nil)
-      @client.base.send(
-        :"update_#{object_name}",
-        @id,
-        diff || manifest[:entity])
+    def update!(diff = @diff)
+      @client.base.send(:"update_#{object_name}", @id, diff)
 
       @manifest = nil
     end
