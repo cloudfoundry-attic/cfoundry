@@ -132,6 +132,9 @@ module CFoundry::V2
 
       plural = :"#{singular}s"
 
+      has_app_space =
+        CFoundry::V2.const_get(klass).method_defined? :app_space
+
       define_method(singular) do |*args|
         id, _ = args
         CFoundry::V2.const_get(klass).new(id, self)
@@ -140,6 +143,11 @@ module CFoundry::V2
       define_method(plural) do |*args|
         depth, query = args
         depth ||= 1
+
+        if has_app_space
+          query ||= {}
+          query[:app_space_guid] ||= current_space.id
+        end
 
         @base.send(plural, depth, query)[:resources].collect do |json|
           send(:"make_#{singular}", json)
