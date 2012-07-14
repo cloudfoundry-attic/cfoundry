@@ -9,5 +9,6 @@ module CFoundry::V2
     to_many   :auditors, :as => :user
     to_many   :apps
     to_many   :domains
+    to_many   :service_instances
   end
 end
