@@ -8,5 +8,8 @@ module CFoundry::V2
     to_many   :service_bindings
     attribute :credentials
     attribute :vendor_data, :default => ""
+
+    alias :space :app_space
+    alias :space= :app_space=
   end
 end
