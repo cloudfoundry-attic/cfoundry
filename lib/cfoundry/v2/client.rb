@@ -5,7 +5,9 @@ require "cfoundry/v2/framework"
 require "cfoundry/v2/organization"
 require "cfoundry/v2/runtime"
 require "cfoundry/v2/service"
+require "cfoundry/v2/service_binding"
 require "cfoundry/v2/service_instance"
+require "cfoundry/v2/service_plan"
 require "cfoundry/v2/space"
 require "cfoundry/v2/user"
 
@@ -113,8 +115,9 @@ module CFoundry::V2
     end
 
 
-    [:app, :organization, :app_space, :service, :service_binding,
-      :service_instance, :user, :runtime, :framework].each do |singular|
+    [ :app, :organization, :app_space, :user, :runtime, :framework,
+      :service, :service_plan, :service_binding, :service_instance
+    ].each do |singular|
       klass = singular.to_s.capitalize.gsub(/(.)_(.)/) do
         $1 + $2.upcase
       end

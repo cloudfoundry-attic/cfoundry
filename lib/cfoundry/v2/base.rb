@@ -46,8 +46,9 @@ module CFoundry::V2
     end
 
 
-    [:app, :organization, :app_space, :service, :service_instance,
-      :user, :runtime, :framework].each do |obj|
+    [ :app, :organization, :app_space, :user, :runtime, :framework,
+      :service, :service_plan, :service_binding, :service_instance
+    ].each do |obj|
       plural = "#{obj}s"
 
       define_method(obj) do |guid, *args|
