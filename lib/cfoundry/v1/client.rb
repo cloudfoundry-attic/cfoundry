@@ -187,6 +187,9 @@ module CFoundry::V1
       App.new(name, self)
     end
 
+    # TODO: remove once v2 allows filtering by name
+    # see V2::Client#app_by_name
+    alias :app_by_name :app
 
     # Retrieve all of the current user's services.
     def service_instances

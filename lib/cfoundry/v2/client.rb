@@ -115,6 +115,14 @@ module CFoundry::V2
     end
 
 
+    # TODO: allow direct filtering
+    def app_by_name(name)
+      current_space.apps.find do |a|
+        a.name == name
+      end
+    end
+
+
     [ :app, :organization, :app_space, :user, :runtime, :framework,
       :service, :service_plan, :service_binding, :service_instance
     ].each do |singular|
