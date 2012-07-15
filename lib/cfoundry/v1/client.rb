@@ -189,7 +189,12 @@ module CFoundry::V1
 
     # TODO: remove once v2 allows filtering by name
     # see V2::Client#app_by_name
-    alias :app_by_name :app
+    def app_by_name(name)
+      app = app(name)
+      if app.exists?
+        app
+      end
+    end
 
     # Retrieve all of the current user's services.
     def service_instances
