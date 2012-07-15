@@ -22,7 +22,7 @@ module CFoundry::V2
     to_one    :app_space
     to_one    :runtime
     to_one    :framework
-    attribute :environment_json,    :default => "{}"
+    attribute :environment_json,    :default => {}
     attribute :memory,              :default => 256
     attribute :instances,           :default => 1
     attribute :file_descriptors,    :default => 256
@@ -38,6 +38,8 @@ module CFoundry::V2
 
     alias :space :app_space
     alias :space= :app_space=
+
+    private :environment_json, :environment_json=
 
     def env
       @env ||= CFoundry::ChattyHash.new(
