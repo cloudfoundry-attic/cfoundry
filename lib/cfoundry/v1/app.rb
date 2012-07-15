@@ -4,6 +4,7 @@ require "pathname"
 require "tmpdir"
 
 require "cfoundry/zip"
+require "cfoundry/chatty_hash"
 
 require "cfoundry/v1/framework"
 require "cfoundry/v1/runtime"
@@ -183,13 +184,29 @@ module CFoundry::V1
       state == "STARTED"
     end
 
+    def env
+      e = manifest[:env] || []
+
+      env = {}
+      e.each do |pair|
+        name, val = pair.split("=", 2)
+        env[name] = val
+      end
+
+      CFoundry::ChattyHash.new(method(:env=), env)
+    end
+
+    def env=(hash)
+      @manifest ||= {}
+      @manifest[:env] = hash.collect { |k, v| "#{k}=#{v}" }
+    end
+
     { :total_instances => :instances,
       :state => :state,
       :status => :state,
       :services => :services,
       :uris => :uris,
-      :urls => :uris,
-      :env => :env
+      :urls => :uris
     }.each do |meth, attr|
       define_method(meth) do
         manifest[attr]
