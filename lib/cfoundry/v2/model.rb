@@ -28,7 +28,10 @@ module CFoundry::V2
           if manifest[:entity].key? name
             @client.send(:"make_#{obj}", manifest[:entity][name])
           else
-            @client.send(:"#{name}_from", send("#{obj}_url"))
+            @client.send(
+              :"#{obj}_from",
+              send("#{name}_url"),
+              opts[:depth] || 1)
           end
         }
 
@@ -46,7 +49,9 @@ module CFoundry::V2
 
       def to_many(plural, opts = {})
         singular = plural.to_s.sub(/s$/, "").to_sym
+
         object = opts[:as] || singular
+        plural_object = object.to_s.sub(/s$/, "").to_sym
 
         define_method(plural) {
           if manifest[:entity].key? plural
@@ -54,7 +59,10 @@ module CFoundry::V2
               @client.send(:"make_#{object}", json)
             end
           else
-            @client.send(:"#{plural}_from", send("#{plural}_url"))
+            @client.send(
+              :"#{plural_object}_from",
+              send("#{plural}_url"),
+              opts[:depth] || 1)
           end
         }
 

@@ -154,13 +154,16 @@ module CFoundry::V2
         end
       end
 
-      define_method(:"#{singular}_from") do |path|
+      define_method(:"#{singular}_from") do |path, *args|
+        depth, _ = args
+        depth ||= 1
+
         uri = URI.parse(path)
 
         if uri.query
-          uri.query += "&inline-relations-depth=1"
+          uri.query += "&inline-relations-depth=#{depth}"
         else
-          uri.query = "inline-relations-depth=1"
+          uri.query = "inline-relations-depth=#{depth}"
         end
 
         send(
@@ -171,13 +174,16 @@ module CFoundry::V2
             nil => :json))
       end
 
-      define_method(:"#{plural}_from") do |path|
+      define_method(:"#{plural}_from") do |path, *args|
+        depth, _ = args
+        depth ||= 1
+
         uri = URI.parse(path)
 
         if uri.query
-          uri.query += "&inline-relations-depth=1"
+          uri.query += "&inline-relations-depth=#{depth}"
         else
-          uri.query = "inline-relations-depth=1"
+          uri.query = "inline-relations-depth=#{depth}"
         end
 
         @base.request_path(
