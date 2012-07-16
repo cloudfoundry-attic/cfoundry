@@ -115,7 +115,7 @@ module CFoundry::V2
       @manifest =
         @client.base.send(
           :"create_#{object_name}",
-          @manifest[:entity].merge(self.class.defaults))
+          self.class.defaults.merge(@manifest[:entity]))
 
       @id = @manifest[:metadata][:guid]
 
