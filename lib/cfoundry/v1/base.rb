@@ -58,7 +58,7 @@ module CFoundry::V1
     end
 
     def create_user(payload)
-      post(payload, "users")
+      post(payload, "users", :json => nil)
     end
 
     def user(email)
