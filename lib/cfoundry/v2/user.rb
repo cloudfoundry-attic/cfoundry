@@ -14,8 +14,16 @@ module CFoundry::V2
 
     attribute :guid # guid is explicitly set for users
 
-    alias :admin? :admin
+    def guid
+      @guid
+    end
 
+    def guid=(x)
+      @guid = x
+      super
+    end
+
+    alias :admin? :admin
 
     # optional metadata from UAA
     attr_accessor :emails, :name

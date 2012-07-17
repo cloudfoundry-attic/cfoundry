@@ -43,7 +43,7 @@ module CFoundry::V2
           @manifest ||= {}
           @manifest[:entity] ||= {}
           @manifest[:entity][:"#{name}_guid"] =
-            @diff[:"#{name}_guid"] = x.id
+            @diff[:"#{name}_guid"] = x.guid
         }
       end
 
@@ -74,14 +74,14 @@ module CFoundry::V2
         define_method(:"add_#{singular}") { |x|
           @client.base.request_path(
             :put,
-            ["v2", "#{object_name}s", @id, plural, x.id],
+            ["v2", "#{object_name}s", @guid, plural, x.guid],
             nil => :json)
         }
 
         define_method(:"remove_#{singular}") {
           @client.base.request_path(
             :delete,
-            ["v2", "#{object_name}s", @id, plural, x.id],
+            ["v2", "#{object_name}s", @guid, plural, x.guid],
             nil => :json)
         }
 
@@ -89,15 +89,15 @@ module CFoundry::V2
           @manifest ||= {}
           @manifest[:entity] ||= {}
           @manifest[:entity][:"#{singular}_guids"] =
-            @diff[:"#{singular}_guids"] = xs.collect(&:id)
+            @diff[:"#{singular}_guids"] = xs.collect(&:guid)
         }
       end
     end
 
-    attr_reader :id
+    attr_reader :guid
 
-    def initialize(id, client, manifest = nil)
-      @id = id
+    def initialize(guid, client, manifest = nil)
+      @guid = guid
       @client = client
       @manifest = manifest
       @diff = {}
@@ -105,11 +105,11 @@ module CFoundry::V2
 
     def manifest
       # inline depth of 2 for fewer requests
-      @manifest ||= @client.base.send(object_name, @id, 2)
+      @manifest ||= @client.base.send(object_name, @guid, 2)
     end
 
     def inspect
-      "\#<#{self.class.name} '#@id'>"
+      "\#<#{self.class.name} '#@guid'>"
     end
 
     def object_name
@@ -125,19 +125,19 @@ module CFoundry::V2
           :"create_#{object_name}",
           self.class.defaults.merge(@manifest[:entity]))
 
-      @id = @manifest[:metadata][:guid]
+      @guid = @manifest[:metadata][:guid]
 
       true
     end
 
     def update!(diff = @diff)
-      @client.base.send(:"update_#{object_name}", @id, diff)
+      @client.base.send(:"update_#{object_name}", @guid, diff)
 
       @manifest = nil
     end
 
     def delete!
-      @client.base.send(:"delete_#{object_name}", @id)
+      @client.base.send(:"delete_#{object_name}", @guid)
 
       if @manifest
         @manifest.delete :metadata
@@ -145,14 +145,14 @@ module CFoundry::V2
     end
 
     def exists?
-      @client.base.send(object_name, @id)
+      @client.base.send(object_name, @guid)
       true
     rescue CFoundry::APIError # TODO: NotFound would be better
       false
     end
 
     def ==(other)
-      other.is_a?(self.class) && @id == other.id
+      other.is_a?(self.class) && @guid == other.guid
     end
   end
 end
