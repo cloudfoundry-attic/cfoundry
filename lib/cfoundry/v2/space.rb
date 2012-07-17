@@ -1,7 +1,7 @@
 require "cfoundry/v2/model"
 
 module CFoundry::V2
-  class AppSpace < Model
+  class Space < Model
     attribute :name
     to_one    :organization
     to_many   :developers, :as => :user

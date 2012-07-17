@@ -19,7 +19,7 @@ module CFoundry::V2
   class App < Model
     attribute :name
     attribute :production
-    to_one    :app_space
+    to_one    :space
     to_one    :runtime
     to_one    :framework
     attribute :environment_json,    :default => {}
@@ -35,9 +35,6 @@ module CFoundry::V2
 
     alias :services :service_bindings
     alias :services= :service_bindings=
-
-    alias :space :app_space
-    alias :space= :app_space=
 
     private :environment_json, :environment_json=
 

@@ -46,7 +46,7 @@ module CFoundry::V2
     end
 
 
-    [ :app, :organization, :app_space, :user, :runtime, :framework,
+    [ :app, :organization, :space, :user, :runtime, :framework,
       :service, :service_plan, :service_binding, :service_instance
     ].each do |obj|
       plural = "#{obj}s"
@@ -86,12 +86,6 @@ module CFoundry::V2
         get("v2", plural, nil => :json, :params => params)
       end
     end
-
-    alias :spaces :app_spaces
-    alias :space :app_space
-    alias :update_space :update_app_space
-    alias :delete_space :delete_app_space
-    alias :create_space :create_app_space
 
     private
 

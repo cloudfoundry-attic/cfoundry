@@ -123,7 +123,7 @@ module CFoundry::V2
     end
 
 
-    [ :app, :organization, :app_space, :user, :runtime, :framework,
+    [ :app, :organization, :space, :user, :runtime, :framework,
       :service, :service_plan, :service_binding, :service_instance
     ].each do |singular|
       klass = singular.to_s.capitalize.gsub(/(.)_(.)/) do
@@ -132,21 +132,21 @@ module CFoundry::V2
 
       plural = :"#{singular}s"
 
-      has_app_space =
-        CFoundry::V2.const_get(klass).method_defined? :app_space
+      has_space =
+        CFoundry::V2.const_get(klass).method_defined? :space
 
       define_method(singular) do |*args|
-        id, _ = args
-        CFoundry::V2.const_get(klass).new(id, self)
+        guid, _ = args
+        CFoundry::V2.const_get(klass).new(guid, self)
       end
 
       define_method(plural) do |*args|
         depth, query = args
         depth ||= 1
 
-        if has_app_space
+        if has_space && current_space
           query ||= {}
-          query[:app_space_guid] ||= current_space.id
+          query[:space_guid] ||= current_space.guid
         end
 
         @base.send(plural, depth, query)[:resources].collect do |json|
@@ -201,8 +201,5 @@ module CFoundry::V2
           json)
       end
     end
-
-    alias :spaces :app_spaces
-    alias :space :app_space
   end
 end
