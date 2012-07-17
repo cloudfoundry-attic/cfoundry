@@ -195,7 +195,10 @@ module CFoundry::V2
       end
 
       define_method(:"make_#{singular}") do |json|
-        CFoundry::V2.const_get(klass).new(json[:metadata][:guid], self, json)
+        CFoundry::V2.const_get(klass).new(
+          json[:metadata][:guid],
+          self,
+          json)
       end
     end
 

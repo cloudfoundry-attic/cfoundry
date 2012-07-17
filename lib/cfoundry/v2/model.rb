@@ -51,7 +51,7 @@ module CFoundry::V2
         singular = plural.to_s.sub(/s$/, "").to_sym
 
         object = opts[:as] || singular
-        plural_object = object.to_s.sub(/s$/, "").to_sym
+        plural_object = :"#{object}s"
 
         define_method(plural) {
           if manifest[:entity].key? plural
