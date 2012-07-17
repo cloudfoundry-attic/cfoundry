@@ -78,25 +78,25 @@ module CFoundry
 
       RestClient::Request.execute(req) do |response, request|
         if @trace
-          puts '>>>'
-          puts "PROXY: #{RestClient.proxy}" if RestClient.proxy
-          puts "REQUEST: #{req[:method]} #{req[:url]}"
-          puts "RESPONSE_HEADERS:"
+          $stderr.puts '>>>'
+          $stderr.puts "PROXY: #{RestClient.proxy}" if RestClient.proxy
+          $stderr.puts "REQUEST: #{req[:method]} #{req[:url]}"
+          $stderr.puts "RESPONSE_HEADERS:"
           response.headers.each do |key, value|
-            puts "    #{key} : #{value}"
+            $stderr.puts "    #{key} : #{value}"
           end
-          puts "REQUEST_HEADERS:"
+          $stderr.puts "REQUEST_HEADERS:"
           request.headers.each do |key, value|
-            puts "    #{key} : #{value}"
+            $stderr.puts "    #{key} : #{value}"
           end
-          puts "REQUEST_BODY: #{req[:payload]}" if req[:payload]
-          puts "RESPONSE: [#{response.code}]"
+          $stderr.puts "REQUEST_BODY: #{req[:payload]}" if req[:payload]
+          $stderr.puts "RESPONSE: [#{response.code}]"
           begin
-            puts JSON.pretty_generate(JSON.parse(response.body))
+            $stderr.puts JSON.pretty_generate(JSON.parse(response.body))
           rescue
-            puts "#{response.body}"
+            $stderr.puts "#{response.body}"
           end
-          puts '<<<'
+          $stderr.puts '<<<'
         end
 
         handle_response(response, accept)
