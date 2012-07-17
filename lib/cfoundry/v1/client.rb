@@ -53,6 +53,14 @@ module CFoundry::V1
       end
     end
 
+    def current_space
+      nil
+    end
+
+    def current_organization
+      nil
+    end
+
 
     # Retrieve target metadata.
     def info
