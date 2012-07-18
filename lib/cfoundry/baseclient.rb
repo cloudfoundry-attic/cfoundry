@@ -65,7 +65,8 @@ module CFoundry
       headers.merge!(options[:headers]) if options[:headers]
 
       if params
-        path += "?" + encode_params(params)
+        uri = URI.parse(path)
+        path += (uri.query ? "&" : "?") + encode_params(params)
       end
 
       req = options.dup

@@ -115,29 +115,23 @@ module CFoundry::V2
     end
 
 
-    # TODO: allow direct filtering
-    def app_by_name(name)
-      current_space.apps.find do |a|
-        a.name == name
-      end
-    end
-
-
     [ :app, :organization, :space, :user, :runtime, :framework,
       :service, :service_plan, :service_binding, :service_instance
     ].each do |singular|
-      klass = singular.to_s.capitalize.gsub(/(.)_(.)/) do
+      plural = :"#{singular}s"
+
+      classname = singular.to_s.capitalize.gsub(/(.)_(.)/) do
         $1 + $2.upcase
       end
 
-      plural = :"#{singular}s"
+      klass = CFoundry::V2.const_get(classname)
 
-      has_space =
-        CFoundry::V2.const_get(klass).method_defined? :space
+      has_space = klass.method_defined? :space
+      has_name = klass.method_defined? :name
 
       define_method(singular) do |*args|
         guid, _ = args
-        CFoundry::V2.const_get(klass).new(guid, self)
+        klass.new(guid, self)
       end
 
       define_method(plural) do |*args|
@@ -154,48 +148,38 @@ module CFoundry::V2
         end
       end
 
-      define_method(:"#{singular}_from") do |path, *args|
-        depth, _ = args
-        depth ||= 1
-
-        uri = URI.parse(path)
-
-        if uri.query
-          uri.query += "&inline-relations-depth=#{depth}"
-        else
-          uri.query = "inline-relations-depth=#{depth}"
+      if has_name
+        define_method(:"#{singular}_by_name") do |name|
+          if has_space && current_space
+            current_space.send(plural, 1, :name => name).first
+          else
+            send(plural, 1, :name => name).first
+          end
         end
+      end
 
+      define_method(:"#{singular}_from") do |path, *args|
         send(
           :"make_#{singular}",
           @base.request_path(
             :get,
-            uri.to_s,
-            nil => :json))
+            path,
+            nil => :json,
+            :params => @base.params_from(args)))
       end
 
       define_method(:"#{plural}_from") do |path, *args|
-        depth, _ = args
-        depth ||= 1
-
-        uri = URI.parse(path)
-
-        if uri.query
-          uri.query += "&inline-relations-depth=#{depth}"
-        else
-          uri.query = "inline-relations-depth=#{depth}"
-        end
-
         @base.request_path(
             :get,
-            uri.to_s,
-            nil => :json)[:resources].collect do |json|
+            path,
+            nil => :json,
+            :params => @base.params_from(args))[:resources].collect do |json|
           send(:"make_#{singular}", json)
         end
       end
 
       define_method(:"make_#{singular}") do |json|
-        CFoundry::V2.const_get(klass).new(
+        klass.new(
           json[:metadata][:guid],
           self,
           json)

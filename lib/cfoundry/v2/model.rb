@@ -53,16 +53,27 @@ module CFoundry::V2
         object = opts[:as] || singular
         plural_object = :"#{object}s"
 
-        define_method(plural) {
-          if manifest[:entity].key? plural
-            manifest[:entity][plural].collect do |json|
+        define_method(plural) { |*args|
+          depth, query = args
+
+          if manifest[:entity].key?(plural)
+            objs = manifest[:entity][plural]
+
+            if query
+              find_by = query.keys.first
+              find_val = query.values.first
+              objs = objs.select { |o| o[:entity][find_by] == find_val }
+            end
+
+            objs.collect do |json|
               @client.send(:"make_#{object}", json)
             end
           else
             @client.send(
               :"#{plural_object}_from",
               send("#{plural}_url"),
-              opts[:depth] || 1)
+              depth || opts[:depth],
+              query)
           end
         }
 

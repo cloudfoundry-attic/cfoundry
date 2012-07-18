@@ -74,17 +74,22 @@ module CFoundry::V2
       end
 
       define_method(plural) do |*args|
-        depth, query = args
-        depth ||= 1
-
-        params = { :"inline-relations-depth" => depth }
-
-        if query
-          params[:q] = "#{query.keys.first}:#{query.values.first}"
-        end
-
-        get("v2", plural, nil => :json, :params => params)
+        get("v2", plural, nil => :json, :params => params_from(args))
       end
+    end
+
+
+    def params_from(args)
+      depth, query = args
+      depth ||= 1
+
+      params = { :"inline-relations-depth" => depth }
+
+      if query
+        params[:q] = "#{query.keys.first}:#{query.values.first}"
+      end
+
+      params
     end
 
     private
