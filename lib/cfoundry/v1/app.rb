@@ -114,7 +114,7 @@ module CFoundry::V1
     def update!(what = {})
       # bleh. have to set these here (normally in :meta) or they'll get lost.
       what[:debug] = debug_mode
-      what[:staging] = (what[:staging] || {}).merge(manifest[:staging])
+      what[:staging] = (what[:staging] || {}).merge(manifest[:staging] || {})
       what[:staging][:command] = command if command
 
       @client.base.update_app(@name, manifest.merge(what))
@@ -233,6 +233,8 @@ module CFoundry::V1
 
     # Application framework.
     def framework
+      return unless manifest[:staging]
+
       Framework.new(
         manifest[:staging][:framework] ||
           manifest[:staging][:model])
@@ -253,6 +255,8 @@ module CFoundry::V1
 
     # Application runtime.
     def runtime
+      return unless manifest[:staging]
+
       Framework.new(
         manifest[:staging][:runtime] ||
           manifest[:staging][:stack])
@@ -276,6 +280,8 @@ module CFoundry::V1
     #
     # Used for standalone apps.
     def command
+      return unless manifest[:staging] || manifest[:meta]
+
       manifest[:staging][:command] ||
         manifest[:meta][:command]
     end
@@ -289,6 +295,8 @@ module CFoundry::V1
 
     # Application memory.
     def memory
+      return unless manifest[:resources]
+
       manifest[:resources][:memory]
     end
 
