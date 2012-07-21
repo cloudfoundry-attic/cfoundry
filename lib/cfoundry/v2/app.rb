@@ -33,10 +33,11 @@ module CFoundry::V2
     alias :total_instances :instances
     alias :total_instances= :instances=
 
-    alias :services :service_bindings
-    alias :services= :service_bindings=
-
     private :environment_json, :environment_json=
+
+    def services
+      service_bindings.collect(&:service_instance)
+    end
 
     def env
       @env ||= CFoundry::ChattyHash.new(
