@@ -321,16 +321,20 @@ module CFoundry::V1
 
 
     # Bind services to application.
-    def bind(*service_names)
-      update!(:services => services + service_names)
+    def bind(*instances)
+      update!(:services => services + instances.collect(&:name))
     end
 
     # Unbind services from application.
-    def unbind(*service_names)
+    def unbind(*instances)
       update!(:services =>
                 services.reject { |s|
-                  service_names.include?(s)
+                  instances.any? { |i| i.name == s }
                 })
+    end
+
+    def binds?(instance)
+      services.any? { |s| s == instance.name }
     end
 
     # Retrieve file listing under path for the first instance of the application.
