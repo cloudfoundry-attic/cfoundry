@@ -25,8 +25,8 @@ module CFoundry::V2
         obj = opts[:as] || name
 
         define_method(name) {
-          if manifest[:entity].key? name
-            @client.send(:"make_#{obj}", manifest[:entity][name])
+          if @manifest && @manifest[:entity].key?(name)
+            @client.send(:"make_#{obj}", @manifest[:entity][name])
           else
             @client.send(
               :"#{obj}_from",
@@ -56,8 +56,8 @@ module CFoundry::V2
         define_method(plural) { |*args|
           depth, query = args
 
-          if manifest[:entity].key?(plural)
-            objs = manifest[:entity][plural]
+          if @manifest && @manifest[:entity].key?(plural) && !depth
+            objs = @manifest[:entity][plural]
 
             if query
               find_by = query.keys.first
@@ -71,7 +71,7 @@ module CFoundry::V2
           else
             @client.send(
               :"#{plural_object}_from",
-              send("#{plural}_url"),
+              "/v2/#{object_name}s/#@guid/#{plural}",
               depth || opts[:depth],
               query)
           end
