@@ -162,8 +162,13 @@ module CFoundry::V2
       false
     end
 
-    def ==(other)
+    def eql?(other)
       other.is_a?(self.class) && @guid == other.guid
+    end
+    alias :== :eql?
+
+    def hash
+      @guid.hash
     end
   end
 end
