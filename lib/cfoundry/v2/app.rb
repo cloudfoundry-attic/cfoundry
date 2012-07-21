@@ -119,16 +119,33 @@ module CFoundry::V2
     end
 
     # Bind services to application.
-    def bind(*service_names)
-      update!(:services => services + service_names)
+    def bind(*instances)
+      instances.each do |i|
+        binding = @client.service_binding
+        binding.app = self
+        binding.service_instance = i
+        binding.credentials = {} # ?
+        binding.create!
+      end
+
+      self
     end
 
     # Unbind services from application.
-    def unbind(*service_names)
-      update!(:services =>
-                services.reject { |s|
-                  service_names.include?(s)
-                })
+    def unbind(*instances)
+      service_bindings.each do |b|
+        if instances.include? b.service_instance
+          b.delete!
+        end
+      end
+
+      self
+    end
+
+    def binds?(instance)
+      service_bindings.any? { |b|
+        b.service_instance == instance
+      }
     end
   end
 end
