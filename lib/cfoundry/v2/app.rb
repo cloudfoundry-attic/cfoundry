@@ -51,10 +51,17 @@ module CFoundry::V2
       hash
     end
 
+    def command # TODO v2
+      nil
+    end
+
     def debug_mode # TODO v2
       nil
     end
-    alias :console :debug_mode
+
+    def console # TODO v2
+      nil
+    end
 
     def uris # TODO v2
       []
