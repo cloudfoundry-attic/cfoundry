@@ -150,6 +150,8 @@ module CFoundry::V2
     def delete!
       @client.base.send(:"delete_#{object_name}", @guid)
 
+      @guid = nil
+
       if @manifest
         @manifest.delete :metadata
       end
