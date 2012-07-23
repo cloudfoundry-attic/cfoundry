@@ -130,11 +130,35 @@ module CFoundry::V2
           '\1_\2').downcase
     end
 
+    # this does a bit of extra processing to allow for
+    # `delete!' followed by `create!'
     def create!
-      @manifest =
-        @client.base.send(
-          :"create_#{object_name}",
-          self.class.defaults.merge(@manifest[:entity]))
+      payload = {}
+
+      self.class.defaults.merge(@manifest[:entity]).each do |k, v|
+        if v.is_a?(Hash) && v.key?(:metadata)
+          # skip; there's a _guid attribute already
+        elsif v.is_a?(Array) && v.all? { |x|
+                x.is_a?(Hash) && x.key?(:metadata)
+              }
+          singular = k.to_s.sub(/s$/, "")
+
+          payload[:"#{singular}_guids"] = v.collect do |x|
+            if x.is_a?(Hash) && x.key?(:metadata)
+              x[:metadata][:guid]
+            else
+              x
+            end
+          end
+        elsif k.to_s.end_with?("_json") && v.is_a?(String)
+          payload[k] = JSON.parse(v)
+        elsif k.to_s.end_with?("_url")
+        else
+          payload[k] = v
+        end
+      end
+
+      @manifest = @client.base.send(:"create_#{object_name}", payload)
 
       @guid = @manifest[:metadata][:guid]
 
