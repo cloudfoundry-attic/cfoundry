@@ -130,6 +130,11 @@ module CFoundry::V2
           '\1_\2').downcase
     end
 
+    def invalidate!
+      @manifest = nil
+      @diff = {}
+    end
+
     # this does a bit of extra processing to allow for
     # `delete!' followed by `create!'
     def create!
