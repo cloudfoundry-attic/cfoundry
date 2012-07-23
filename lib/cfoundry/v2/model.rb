@@ -162,11 +162,15 @@ module CFoundry::V2
 
       @guid = @manifest[:metadata][:guid]
 
+      @diff.clear
+
       true
     end
 
     def update!(diff = @diff)
       @client.base.send(:"update_#{object_name}", @guid, diff)
+
+      @diff.clear if diff == @diff
 
       @manifest = nil
     end
@@ -175,6 +179,8 @@ module CFoundry::V2
       @client.base.send(:"delete_#{object_name}", @guid)
 
       @guid = nil
+
+      @diff.clear
 
       if @manifest
         @manifest.delete :metadata
