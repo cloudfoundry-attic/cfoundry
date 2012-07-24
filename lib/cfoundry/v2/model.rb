@@ -115,8 +115,7 @@ module CFoundry::V2
     end
 
     def manifest
-      # inline depth of 2 for fewer requests
-      @manifest ||= @client.base.send(object_name, @guid, 2)
+      @manifest ||= @client.base.send(object_name, @guid)
     end
 
     def inspect
