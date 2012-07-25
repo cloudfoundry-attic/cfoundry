@@ -201,10 +201,21 @@ module CFoundry::V1
       @manifest[:env] = hash.collect { |k, v| "#{k}=#{v}" }
     end
 
+    def services
+      manifest[:services].collect do |name|
+        @client.service_instance(name)
+      end
+    end
+
+    def services=(instances)
+      @manifest ||= {}
+      @manifest[:services] = instances.collect(&:name)
+    end
+
+
     { :total_instances => :instances,
       :state => :state,
       :status => :state,
-      :services => :services,
       :uris => :uris,
       :urls => :uris
     }.each do |meth, attr|
