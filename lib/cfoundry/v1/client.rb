@@ -75,7 +75,7 @@ module CFoundry::V1
         vendors.each do |vendor, versions|
           versions.each do |num, meta|
             services <<
-              Service.new(vendor.to_s, num, meta[:description], type)
+              Service.new(vendor.to_s, num.to_s, meta[:description], type)
           end
         end
       end
