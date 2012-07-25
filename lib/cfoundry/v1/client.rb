@@ -195,13 +195,9 @@ module CFoundry::V1
       App.new(name, self)
     end
 
-    # TODO: remove once v2 allows filtering by name
-    # see V2::Client#app_by_name
     def app_by_name(name)
       app = app(name)
-      if app.exists?
-        app
-      end
+      app if app.exists?
     end
 
     # Retrieve all of the current user's services.
@@ -218,6 +214,11 @@ module CFoundry::V1
     # Service#create!) and retrieval.
     def service_instance(name = nil)
       ServiceInstance.new(name, self)
+    end
+
+    def service_instance_by_name(name)
+      service = service_instance(name)
+      service if service.exists?
     end
   end
 end
