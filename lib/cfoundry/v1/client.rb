@@ -180,7 +180,7 @@ module CFoundry::V1
 
 
     # Retreive all of the current user's applications.
-    def apps
+    def apps(depth = 1, query = {})
       @base.apps.collect do |json|
         App.new(json[:name], self, json)
       end
@@ -201,7 +201,7 @@ module CFoundry::V1
     end
 
     # Retrieve all of the current user's services.
-    def service_instances
+    def service_instances(depth = 1, query = {})
       @base.services.collect do |json|
         ServiceInstance.new(json[:name], self, json)
       end
