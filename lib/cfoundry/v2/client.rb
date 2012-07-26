@@ -1,3 +1,5 @@
+require "base64"
+
 require "cfoundry/v2/base"
 
 require "cfoundry/v2/app"
@@ -62,8 +64,10 @@ module CFoundry::V2
 
     # The currently authenticated user.
     def current_user
-      if user = info[:user]
-        user(user)
+      if guid = token_data[:user_id]
+        user = user(guid)
+        user.emails = [{ :value => token_data[:email] }]
+        user
       end
     end
 
@@ -184,6 +188,22 @@ module CFoundry::V2
           self,
           json)
       end
+    end
+
+    private
+
+    # grab the metadata from a token that looks like:
+    #
+    # bearer (base64 ...)
+    def token_data
+      tok = Base64.decode64(@base.token.sub(/^bearer\s+/, ""))
+      tok.sub!(/\{.+?\}/, "") # clear algo
+      JSON.parse(tok[/\{.+?\}/], :symbolize_names => true)
+
+    # normally i don't catch'em all, but can't expect all tokens to be the
+    # proper format, so just silently fail as this is not critical
+    rescue
+      {}
     end
   end
 end
