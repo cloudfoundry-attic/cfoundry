@@ -10,6 +10,7 @@ require "cfoundry/v2/service"
 require "cfoundry/v2/service_binding"
 require "cfoundry/v2/service_instance"
 require "cfoundry/v2/service_plan"
+require "cfoundry/v2/service_auth_token"
 require "cfoundry/v2/space"
 require "cfoundry/v2/user"
 
@@ -119,8 +120,8 @@ module CFoundry::V2
     end
 
 
-    [ :app, :organization, :space, :user, :runtime, :framework,
-      :service, :service_plan, :service_binding, :service_instance
+    [ :app, :organization, :space, :user, :runtime, :framework, :service,
+      :service_plan, :service_binding, :service_instance, :service_auth_token
     ].each do |singular|
       plural = :"#{singular}s"
 
