@@ -7,6 +7,6 @@ module CFoundry::V2
     to_one    :service_plan
     to_many   :service_bindings
     attribute :credentials
-    attribute :vendor_data, :default => ""
+    attribute :gateway_data, :default => {}
   end
 end
