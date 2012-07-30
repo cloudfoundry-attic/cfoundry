@@ -75,6 +75,11 @@ module CFoundry::V1
       @manifest = nil
     end
 
+    def eql?(other)
+      other.is_a?(self.class) && @name == other.name
+    end
+    alias :== :eql?
+
     { :type => :type,
       :vendor => :vendor,
       :version => :version,
