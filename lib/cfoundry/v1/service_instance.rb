@@ -38,7 +38,7 @@ module CFoundry::V1
 
     # Show string representing the service.
     def inspect
-      "#<Service '#@name'>"
+      "#<ServiceInstance '#@name'>"
     end
 
     # Delete the service from the target.
