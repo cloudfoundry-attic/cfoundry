@@ -71,6 +71,10 @@ module CFoundry::V1
       Time.at(meta[:updated])
     end
 
+    def invalidate!
+      @manifest = nil
+    end
+
     { :type => :type,
       :vendor => :vendor,
       :version => :version,
