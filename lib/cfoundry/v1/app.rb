@@ -62,6 +62,7 @@ module CFoundry::V1
       @name = name
       @client = client
       @manifest = manifest
+      @diff = {}
     end
 
     # Show string representing the application.
@@ -76,9 +77,8 @@ module CFoundry::V1
       @client.base.delete_app(@name)
 
       if @manifest
-        @manifest.delete :meta
-        @manifest.delete :version
-        @manifest.delete :state
+        @diff = read_manifest
+        @manifest = nil
       end
     end
 
@@ -86,8 +86,8 @@ module CFoundry::V1
     #
     # Call this after setting the various attributes.
     def create!
-      @client.base.create_app(@manifest.merge(:name => @name))
-      @manifest = nil
+      @client.base.create_app(create_manifest)
+      @diff = {}
     end
 
     # Check if the application exists on the target.
@@ -112,13 +112,16 @@ module CFoundry::V1
 
     # Update application attributes. Does not restart the application.
     def update!(what = {})
-      # bleh. have to set these here (normally in :meta) or they'll get lost.
-      what[:debug] = debug_mode
-      what[:staging] = (what[:staging] || {}).merge(manifest[:staging] || {})
-      what[:staging][:command] = command if command
+      what.each do |k, v|
+        send(:"#{k}=", v)
+      end
 
-      @client.base.update_app(@name, manifest.merge(what))
+      @client.base.update_app(@name, update_manifest)
+
       @manifest = nil
+      @diff = {}
+
+      self
     end
 
     # Stop the application.
@@ -146,8 +149,8 @@ module CFoundry::V1
     def health
       s = state
       if s == "STARTED"
-        healthy_count = manifest[:runningInstances]
-        expected = manifest[:instances]
+        healthy_count = running_instances
+        expected = total_instances
         if healthy_count && expected > 0
           ratio = healthy_count / expected.to_f
           if ratio == 1.0
@@ -184,50 +187,40 @@ module CFoundry::V1
       state == "STARTED"
     end
 
-    def env
-      e = manifest[:env] || []
-
-      env = {}
-      e.each do |pair|
-        name, val = pair.split("=", 2)
-        env[name] = val
-      end
-
-      CFoundry::ChattyHash.new(method(:env=), env)
-    end
-
-    def env=(hash)
-      @manifest ||= {}
-      @manifest[:env] = hash.collect { |k, v| "#{k}=#{v}" }
-    end
-
-    def services
-      manifest[:services].collect do |name|
-        @client.service_instance(name)
-      end
-    end
-
-    def services=(instances)
-      @manifest ||= {}
-      @manifest[:services] = instances.collect(&:name)
-    end
-
 
     { :total_instances => :instances,
+      :running_instances => :running_instances,
+      :runtime_name => :runtime,
+      :framework_name => :framework,
+      :service_names => :services,
+      :env_array => :env,
       :state => :state,
       :status => :state,
       :uris => :uris,
-      :urls => :uris
+      :urls => :uris,
+      :command => :command,
+      :console => :console,
+      :memory => :memory,
+      :disk => :disk,
+      :fds => :fds,
+      :debug_mode => :debug,
+      :version => :version,
+      :meta_version => :meta_version,
+      :created => :created
     }.each do |meth, attr|
       define_method(meth) do
-        manifest[attr]
+        if @diff.key?(attr)
+          @diff[attr]
+        else
+          read_manifest[attr]
+        end
       end
 
       define_method(:"#{meth}=") do |v|
-        @manifest ||= {}
-        @manifest[attr] = v
+        @diff[attr] = v
       end
     end
+
 
     # Shortcut for uris[0]
     def uri
@@ -244,103 +237,61 @@ module CFoundry::V1
 
     # Application framework.
     def framework
-      return unless manifest[:staging]
-
-      Framework.new(
-        manifest[:staging][:framework] ||
-          manifest[:staging][:model])
+      Framework.new(framework_name)
     end
 
     def framework=(v) # :nodoc:
       v = v.name if v.is_a?(Framework)
-
-      @manifest ||= {}
-      @manifest[:staging] ||= {}
-
-      if @manifest[:staging].key? :model
-        @manifest[:staging][:model] = v
-      else
-        @manifest[:staging][:framework] = v
-      end
+      self.framework_name = v
     end
 
     # Application runtime.
     def runtime
-      return unless manifest[:staging]
-
-      Framework.new(
-        manifest[:staging][:runtime] ||
-          manifest[:staging][:stack])
+      Runtime.new(runtime_name)
     end
 
     def runtime=(v) # :nodoc:
       v = v.name if v.is_a?(Runtime)
+      self.runtime_name = v
+    end
 
-      @manifest ||= {}
-      @manifest[:staging] ||= {}
+    def env
+      e = env_array || []
 
-      if @manifest[:staging].key? :stack
-        @manifest[:staging][:stack] = v
-      else
-        @manifest[:staging][:runtime] = v
+      env = {}
+      e.each do |pair|
+        name, val = pair.split("=", 2)
+        env[name] = val
+      end
+
+      CFoundry::ChattyHash.new(method(:env=), env)
+    end
+
+    def env=(hash)
+      self.env_array = hash.collect { |k, v| "#{k}=#{v}" }
+    end
+
+    def services
+      service_names.collect do |name|
+        @client.service_instance(name)
       end
     end
 
-
-    # Application startup command.
-    #
-    # Used for standalone apps.
-    def command
-      return unless manifest[:staging] || manifest[:meta]
-
-      manifest[:staging][:command] ||
-        manifest[:meta][:command]
-    end
-
-    def command=(v) # :nodoc:
-      @manifest ||= {}
-      @manifest[:staging] ||= {}
-      @manifest[:staging][:command] = v
-    end
-
-
-    # Application memory.
-    def memory
-      return unless manifest[:resources]
-
-      manifest[:resources][:memory]
-    end
-
-    def memory=(v) # :nodoc:
-      @manifest ||= {}
-      @manifest[:resources] ||= {}
-      @manifest[:resources][:memory] = v
-    end
-
-
-    # Application debug mode.
-    def debug_mode
-      manifest.fetch(:debug) do
-        manifest[:meta] && manifest[:meta][:debug]
-      end
-    end
-
-    def debug_mode=(v) # :nodoc:
-      @manifest ||= {}
-      @manifest[:debug] = v
+    def services=(instances)
+      self.service_names = instances.collect(&:name)
     end
 
 
     # Bind services to application.
     def bind(*instances)
-      update!(:services => services + instances.collect(&:name))
+      update!(:services => services + instances)
     end
 
     # Unbind services from application.
     def unbind(*instances)
       update!(:services =>
                 services.reject { |s|
-                  instances.any? { |i| i.name == s }
+                  instances.any? { |i| i.name == s.name }
                 })
     end
 
@@ -411,8 +362,81 @@ module CFoundry::V1
 
     private
 
+    ATTR_MAP = {
+      :instances => :instances,
+      :state => :state,
+      :env => :env,
+      :uris => :uris,
+      :services => :services,
+      :debug => :debug,
+
+      :framework => [:staging, :model],
+      :runtime => [:staging, :stack],
+      :command => [:staging, :command],
+
+      :console => [:meta, :console],
+      :meta_version => [:meta, :version],
+      :created => [:meta, :created],
+
+      :memory => [:resources, :memory],
+      :disk => [:resources, :disk],
+      :fds => [:resources, :fds]
+    }
+
     def manifest
       @manifest ||= @client.base.app(@name)
+    end
+
+    def write_manifest(body = read_manifest, onto = {})
+      onto[:name] = @name
+
+      ATTR_MAP.each do |what, where|
+        if body.key?(what)
+          put(body[what], onto, Array(where))
+        end
+      end
+
+      onto
+    end
+
+    def put(what, where, path)
+      if path.size == 1
+        where[path.last] = what
+      elsif name = path.shift
+        where[name] ||= {}
+        put(what, where[name], path)
+      end
+
+      nil
+    end
+
+    def update_manifest
+      write_manifest(@diff, write_manifest)
+    end
+
+    def create_manifest
+      write_manifest(@diff)
+    end
+
+    def read_manifest
+      { :name => @name,
+        :instances => manifest[:instances],
+        :running_instances => manifest[:runningInstances],
+        :state => manifest[:state],
+        :env => manifest[:env],
+        :uris => manifest[:uris],
+        :version => manifest[:version],
+        :services => manifest[:services],
+        :framework => manifest[:staging][:model],
+        :runtime => manifest[:staging][:stack],
+        :console => manifest[:meta][:console],
+        :meta_version => manifest[:meta][:version],
+        :debug => manifest[:meta][:debug],
+        :created => manifest[:meta][:created],
+        :memory => manifest[:resources][:memory],
+        :disk => manifest[:resources][:disk],
+        :fds => manifest[:resources][:fds]
+      }
     end
 
     def prepare_package(path, to)
