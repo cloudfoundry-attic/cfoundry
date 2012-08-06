@@ -2,14 +2,13 @@ require "cfoundry/baseclient"
 
 module CFoundry
   class UAAClient < BaseClient
-    attr_accessor :target, :client_id, :scope, :redirect_uri, :token, :trace
+    attr_accessor :target, :client_id, :redirect_uri, :token, :trace
 
     def initialize(
         target = "https://uaa.cloudfoundry.com",
         client_id = "vmc")
       @target = target
       @client_id = client_id
-      @scope = ["read"]
       @redirect_uri = "http://uaa.cloudfoundry.com/redirect/vmc"
     end
 
@@ -20,7 +19,6 @@ module CFoundry
     def authorize(credentials)
       query = {
         :client_id => @client_id,
-        :scope => Array(@scope).join(" "),
         :response_type => "token",
         :redirect_uri => @redirect_uri
       }
