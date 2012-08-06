@@ -406,9 +406,9 @@ module CFoundry::V1
     def put(what, where, path)
       if path.size == 1
         where[path.last] = what
-      elsif name = path.shift
+      elsif name = path.first
         where[name] ||= {}
-        put(what, where[name], path)
+        put(what, where[name], path[1..-1])
       end
 
       nil
