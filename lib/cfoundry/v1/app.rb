@@ -268,7 +268,11 @@ module CFoundry::V1
     end
 
     def env=(hash)
-      self.env_array = hash.collect { |k, v| "#{k}=#{v}" }
+      unless hash.is_a?(Array)
+        hash = hash.collect { |k, v| "#{k}=#{v}" }
+      end
+
+      self.env_array = hash
     end
 
     def services
