@@ -172,11 +172,11 @@ module CFoundry::V2
     end
 
     def update!(diff = @diff)
-      @client.base.send(:"update_#{object_name}", @guid, diff)
+      @manifest = @client.base.send(:"update_#{object_name}", @guid, diff)
 
       @diff.clear if diff == @diff
 
-      @manifest = nil
+      true
     end
 
     def delete!
