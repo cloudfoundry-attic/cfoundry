@@ -78,6 +78,27 @@ module CFoundry::V2
       end
     end
 
+    def resource_match(fingerprints)
+      post(fingerprints, "v2", "resource_match", :json => :json)
+    end
+
+    def upload_app(guid, zipfile, resources = [])
+      payload = {
+        :resources => resources.to_json,
+        :multipart => true,
+        :application =>
+          if zipfile.is_a? File
+            zipfile
+          elsif zipfile.is_a? String
+            File.new(zipfile, "rb")
+          end
+      }
+
+      put(payload, "v2", "apps", guid, "bits")
+    rescue RestClient::ServerBrokeConnection
+      retry
+    end
+
 
     def params_from(args)
       depth, query = args

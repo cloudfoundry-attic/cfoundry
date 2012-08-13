@@ -1,10 +1,8 @@
-require "fileutils"
-require "digest/sha1"
-require "pathname"
 require "tmpdir"
 require "json"
 
 require "cfoundry/zip"
+require "cfoundry/upload_helpers"
 require "cfoundry/chatty_hash"
 
 require "cfoundry/v2/model"
@@ -17,6 +15,8 @@ module CFoundry::V2
   # retrieval, as the attributes are all lazily retrieved. Setting attributes
   # does not perform any requests; use #update! to commit your changes.
   class App < Model
+    include CFoundry::UploadHelpers
+
     attribute :name
     attribute :production
     to_one    :space
@@ -153,6 +153,64 @@ module CFoundry::V2
       service_bindings.any? { |b|
         b.service_instance == instance
       }
+    end
+
+    # Upload application's code to target. Do this after #create! and before
+    # #start!
+    #
+    # [path]
+    #   A path pointing to either a directory, or a .jar, .war, or .zip
+    #   file.
+    #
+    #   If a .vmcignore file is detected under the given path, it will be used
+    #   to exclude paths from the payload, similar to a .gitignore.
+    #
+    # [check_resources]
+    #   If set to `false`, the entire payload will be uploaded
+    #   without checking the resource cache.
+    #
+    #   Only do this if you know what you're doing.
+    def upload(path, check_resources = true)
+      unless File.exist? path
+        raise "invalid application path '#{path}'"
+      end
+
+      zipfile = "#{Dir.tmpdir}/#{@guid}.zip"
+      tmpdir = "#{Dir.tmpdir}/.vmc_#{@guid}_files"
+
+      FileUtils.rm_f(zipfile)
+      FileUtils.rm_rf(tmpdir)
+
+      prepare_package(path, tmpdir)
+
+      resources = determine_resources(tmpdir) if check_resources
+
+      packed = CFoundry::Zip.pack(tmpdir, zipfile)
+
+      @client.base.upload_app(@guid, packed && zipfile, resources || [])
+    ensure
+      FileUtils.rm_f(zipfile) if zipfile
+      FileUtils.rm_rf(tmpdir) if tmpdir
+    end
+
+    private
+
+    # Minimum size for an application payload to bother checking resources.
+    RESOURCE_CHECK_LIMIT = 64 * 1024
+
+    def determine_resources(path)
+      fingerprints, total_size = make_fingerprints(path)
+
+      return if total_size <= RESOURCE_CHECK_LIMIT
+
+      resources = @client.base.resource_match(fingerprints)
+
+      resources.each do |resource|
+        FileUtils.rm_f resource[:fn]
+        resource[:fn].sub!("#{path}/", "")
+      end
+
+      resources
     end
   end
 end
