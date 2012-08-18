@@ -41,6 +41,12 @@ module CFoundry::V1
       "#<ServiceInstance '#@name'>"
     end
 
+    # Basic equality test by name.
+    def eql?(other)
+      other.is_a?(self.class) && other.name == @name
+    end
+    alias :== :eql?
+
     # Delete the service from the target.
     def delete!
       @client.base.delete_service(@name)

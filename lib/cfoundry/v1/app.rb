@@ -70,6 +70,12 @@ module CFoundry::V1
       "#<App '#@name'>"
     end
 
+    # Basic equality test by name.
+    def eql?(other)
+      other.is_a?(self.class) && other.name == @name
+    end
+    alias :== :eql?
+
     # Delete the application from the target.
     #
     # Keeps the metadata, but clears target-specific state from it.
@@ -300,7 +306,7 @@ module CFoundry::V1
     end
 
     def binds?(instance)
-      services.any? { |s| s == instance.name }
+      services.include? instance
     end
 
     # Retrieve file listing under path for the first instance of the application.

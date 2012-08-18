@@ -9,6 +9,11 @@ module CFoundry::V1
       @detection = detection
     end
 
+    def eql?(other)
+      other.is_a?(self.class) && other.name == @name
+    end
+    alias :== :eql?
+
     def apps
       [] # not supported by v1
     end

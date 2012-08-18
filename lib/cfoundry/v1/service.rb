@@ -9,6 +9,11 @@ module CFoundry::V1
       @type = nil
     end
 
+    def eql?(other)
+      other.is_a?(self.class) && other.label == @label
+    end
+    alias :== :eql?
+
     def provider
       "core"
     end

@@ -23,6 +23,12 @@ module CFoundry::V1
       "#<User '#@email'>"
     end
 
+    # Basic equality test by email.
+    def eql?(other)
+      other.is_a?(self.class) && other.email == @email
+    end
+    alias :== :eql?
+
     # Delete the user from the target.
     def delete!
       @client.base.delete_user(@email)
