@@ -1,3 +1,4 @@
+require "multi_json"
 require "base64"
 
 require "cfoundry/v2/base"
@@ -199,7 +200,7 @@ module CFoundry::V2
     def token_data
       tok = Base64.decode64(@base.token.sub(/^bearer\s+/, ""))
       tok.sub!(/\{.+?\}/, "") # clear algo
-      JSON.parse(tok[/\{.+?\}/], :symbolize_names => true)
+      MultiJson.load(tok[/\{.+?\}/], :symbolize_keys => true)
 
     # normally i don't catch'em all, but can't expect all tokens to be the
     # proper format, so just silently fail as this is not critical

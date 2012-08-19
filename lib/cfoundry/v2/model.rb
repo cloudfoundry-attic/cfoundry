@@ -1,3 +1,5 @@
+require "multi_json"
+
 module CFoundry::V2
   class Model
     class << self
@@ -155,7 +157,7 @@ module CFoundry::V2
             end
           end
         elsif k.to_s.end_with?("_json") && v.is_a?(String)
-          payload[k] = JSON.parse(v)
+          payload[k] = MultiJson.load(v)
         elsif k.to_s.end_with?("_url")
         else
           payload[k] = v

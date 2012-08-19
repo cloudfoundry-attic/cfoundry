@@ -1,4 +1,4 @@
-require "json"
+require "multi_json"
 require "base64"
 
 require "cfoundry/baseclient"
@@ -84,7 +84,7 @@ module CFoundry::V2
 
     def upload_app(guid, zipfile, resources = [])
       payload = {
-        :resources => resources.to_json,
+        :resources => MultiJson.dump(resources),
         :multipart => true,
         :application =>
           if zipfile.is_a? File
@@ -149,7 +149,7 @@ module CFoundry::V2
         begin
           info = parse_json(response)
           raise CFoundry::APIError.new(info[:code], info[:description])
-        rescue JSON::ParserError
+        rescue MultiJson::DecodeError
           raise CFoundry::BadResponse.new(response.code, response)
         end
 

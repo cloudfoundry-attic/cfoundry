@@ -1,5 +1,5 @@
 require "tmpdir"
-require "json"
+require "multi_json"
 
 require "cfoundry/zip"
 require "cfoundry/upload_helpers"
@@ -42,7 +42,7 @@ module CFoundry::V2
     def env
       @env ||= CFoundry::ChattyHash.new(
         method(:env=),
-        JSON.parse(environment_json))
+        MultiJson.load(environment_json))
     end
 
     def env=(hash)

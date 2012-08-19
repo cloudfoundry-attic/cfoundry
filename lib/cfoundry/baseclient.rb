@@ -1,5 +1,5 @@
 require "restclient"
-require "json"
+require "multi_json"
 
 module CFoundry
   class BaseClient # :nodoc:
@@ -30,7 +30,7 @@ module CFoundry
     private
 
     def parse_json(x)
-      JSON.parse(x, :symbolize_names => true)
+      MultiJson.load(x, :symbolize_keys => true)
     end
 
     def request(method, path, options = {})
@@ -54,7 +54,7 @@ module CFoundry
       unless payload.is_a?(String)
         case type
         when :json
-          payload = payload.to_json
+          payload = MultiJson.dump(payload)
         when :form
           payload = encode_params(payload)
         end
@@ -93,7 +93,8 @@ module CFoundry
           $stderr.puts "REQUEST_BODY: #{req[:payload]}" if req[:payload]
           $stderr.puts "RESPONSE: [#{response.code}]"
           begin
-            $stderr.puts JSON.pretty_generate(JSON.parse(response.body))
+            parsed_body = MultiJson.load(response.body)
+            $stderr.puts MultiJson.dump(parsed_body, :pretty => true)
           rescue
             $stderr.puts "#{response.body}"
           end
@@ -127,7 +128,7 @@ module CFoundry
     def encode_params(hash, escape = true)
       hash.keys.map do |k|
         v = hash[k]
-        v = v.to_json if v.is_a?(Hash)
+        v = MultiJson.dump(v) if v.is_a?(Hash)
         v = URI.escape(v.to_s, /[^#{URI::PATTERN::UNRESERVED}]/) if escape
         "#{k}=#{v}"
       end.join("&")

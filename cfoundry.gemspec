@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency "rest-client", "~> 1.6.1"
-  s.add_dependency "json_pure", "~> 1.6.5"
+  s.add_dependency "multi_json", "~> 1.3.6"
   s.add_dependency "rubyzip", "~> 0.9.5"
 
   s.add_development_dependency "rake"

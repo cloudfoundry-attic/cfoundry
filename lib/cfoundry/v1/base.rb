@@ -1,4 +1,4 @@
-require "json"
+require "multi_json"
 
 require "cfoundry/baseclient"
 require "cfoundry/uaaclient"
@@ -105,7 +105,6 @@ module CFoundry::V1
     end
 
     def delete_app(name)
-      # TODO: no JSON response?
       delete("apps", name)
       true
     end
@@ -121,7 +120,7 @@ module CFoundry::V1
     def upload_app(name, zipfile, resources = [])
       payload = {
         :_method => "put",
-        :resources => resources.to_json,
+        :resources => MultiJson.dump(resources),
         :multipart => true,
         :application =>
           if zipfile.is_a? File
@@ -185,7 +184,7 @@ module CFoundry::V1
       when 411, 500, 504
         begin
           raise_error(parse_json(response))
-        rescue JSON::ParserError
+        rescue MultiJson::DecodeError
           raise CFoundry::BadResponse.new(response.code, response)
         end
 

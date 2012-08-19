@@ -74,7 +74,7 @@ module CFoundry
       when 411, 500, 504
         begin
           raise_error(parse_json(response))
-        rescue JSON::ParserError
+        rescue MultiJson::DecodeError
           raise BadResponse.new(response.code, response)
         end
 
