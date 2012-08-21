@@ -79,7 +79,7 @@ module CFoundry::V2
     end
 
     def resource_match(fingerprints)
-      post(fingerprints, "v2", "resource_match", :json => :json)
+      put(fingerprints, "v2", "resource_match", :json => :json)
     end
 
     def upload_app(guid, zipfile, resources = [])
