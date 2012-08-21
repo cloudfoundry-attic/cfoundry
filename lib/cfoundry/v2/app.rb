@@ -131,7 +131,6 @@ module CFoundry::V2
         binding = @client.service_binding
         binding.app = self
         binding.service_instance = i
-        binding.credentials = {} # ?
         binding.create!
       end
 
