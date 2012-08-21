@@ -62,6 +62,7 @@ module CFoundry::V2
     # printed out.
     def trace=(bool)
       @base.trace = bool
+      @base.uaa.trace = bool if @base.uaa
     end
 
     # The currently authenticated user.
