@@ -6,7 +6,5 @@ module CFoundry::V2
     to_one    :space
     to_one    :service_plan
     to_many   :service_bindings
-    attribute :credentials
-    attribute :gateway_data, :default => {}
   end
 end
