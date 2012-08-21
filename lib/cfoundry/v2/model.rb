@@ -191,6 +191,8 @@ module CFoundry::V2
       if @manifest
         @manifest.delete :metadata
       end
+
+      true
     end
 
     def exists?
