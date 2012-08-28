@@ -9,7 +9,7 @@ module CFoundry
         client_id = "vmc")
       @target = target
       @client_id = client_id
-      @redirect_uri = "http://uaa.cloudfoundry.com/redirect/vmc"
+      @redirect_uri = "https://uaa.cloudfoundry.com/redirect/vmc"
     end
 
     def prompts
