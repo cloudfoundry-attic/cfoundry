@@ -2,8 +2,8 @@ require "cfoundry/v2/model"
 
 module CFoundry::V2
   class ServicePlan < Model
-    attribute :name
-    attribute :description
+    attribute :name, :string
+    attribute :description, :string
     to_one    :service
     to_many   :service_instances
   end

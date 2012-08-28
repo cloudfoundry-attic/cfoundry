@@ -2,15 +2,16 @@ require "cfoundry/v2/model"
 
 module CFoundry::V2
   class Service < Model
-    attribute :label
-    attribute :provider
-    attribute :url
-    attribute :description
-    attribute :version
-    attribute :info_url
-    attribute :acls
-    attribute :timeout
-    attribute :active
+    attribute :label, String
+    attribute :provider, String
+    attribute :url, :url
+    attribute :description, String
+    attribute :version, String
+    attribute :info_url, :url
+    attribute :acls, { "users" => [String], "wildcards" => [String] },
+      :default => nil
+    attribute :timeout, Integer, :default => nil
+    attribute :active, :boolean, :default => false
     to_many   :service_plans
   end
 end

@@ -2,7 +2,7 @@ require "cfoundry/v2/model"
 
 module CFoundry::V2
   class Space < Model
-    attribute :name
+    attribute :name, :string
     to_one    :organization
     to_many   :developers, :as => :user
     to_many   :managers, :as => :user

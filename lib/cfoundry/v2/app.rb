@@ -17,17 +17,17 @@ module CFoundry::V2
   class App < Model
     include CFoundry::UploadHelpers
 
-    attribute :name
-    attribute :production
+    attribute :name,             :string
+    attribute :production,       :boolean, :default => false
     to_one    :space
     to_one    :runtime
     to_one    :framework
-    attribute :environment_json,    :default => {}
-    attribute :memory,              :default => 256
-    attribute :instances,           :default => 1
-    attribute :file_descriptors,    :default => 256
-    attribute :disk_quota,          :default => 256
-    attribute :state,               :default => "STOPPED"
+    attribute :environment_json, :hash,    :default => {}
+    attribute :memory,           :integer, :default => 256
+    attribute :instances,        :integer, :default => 1
+    attribute :file_descriptors, :integer, :default => 256
+    attribute :disk_quota,       :integer, :default => 256
+    attribute :state,            :integer, :default => "STOPPED"
     to_many   :service_bindings
 
     alias :total_instances :instances

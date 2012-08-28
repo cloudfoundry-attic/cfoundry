@@ -2,8 +2,8 @@ require "cfoundry/v2/model"
 
 module CFoundry::V2
   class ServiceAuthToken < Model
-    attribute :label
-    attribute :provider
-    attribute :token
+    attribute :label, :string
+    attribute :provider, :string
+    attribute :token, :string
   end
 end

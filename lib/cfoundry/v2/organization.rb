@@ -2,7 +2,7 @@ require "cfoundry/v2/model"
 
 module CFoundry::V2
   class Organization < Model
-    attribute :name
+    attribute :name, :string
     to_many   :spaces
     to_many   :domains
     to_many   :users

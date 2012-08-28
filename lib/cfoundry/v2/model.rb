@@ -3,19 +3,57 @@ require "multi_json"
 module CFoundry::V2
   class Model
     class << self
+      def value_matches?(val, type)
+        case type
+        when Class
+          val.is_a?(type)
+        when Regexp
+          val.is_a?(String) && val =~ type
+        when :url
+          value_matches?(val, URI::regexp(%w(http https)))
+        when :https_url
+          value_matches?(val, URI::regexp("https"))
+        when :boolean
+          val.is_a?(TrueClass) || val.is_a?(FalseClass)
+        when Array
+          val.all? do |x|
+            value_matches?(x, type.first)
+          end
+        when Hash
+          val.is_a?(Hash) &&
+            type.all? { |name, subtype|
+              val.key?(name) && value_matches?(val[name], subtype)
+            }
+        else
+          val.is_a?(Object.const_get(type.to_s.capitalize))
+        end
+      end
+
+      def validate_type(val, type)
+        unless value_matches?(val, type)
+          raise "invalid attribute; expected #{type.inspect} but got #{val.inspect}"
+        end
+      end
+
       def defaults
         @defaults ||= {}
       end
 
-      def attribute(name, opts = {})
+      def attribute(name, type, opts = {})
         default = opts[:default] || nil
-        defaults[name] = default if default
+
+        has_default = opts.key?(:default)
+        defaults[name] = default if has_default
 
         define_method(name) {
           manifest[:entity][name] || default
         }
 
         define_method(:"#{name}=") { |val|
+          unless has_default && val == default
+            Model.validate_type(val, type)
+          end
+
           @manifest ||= {}
           @manifest[:entity] ||= {}
           @manifest[:entity][name] = val
@@ -25,6 +63,7 @@ module CFoundry::V2
 
       def to_one(name, opts = {})
         obj = opts[:as] || name
+        kls = obj.to_s.capitalize
 
         define_method(name) {
           if @manifest && @manifest[:entity].key?(name)
@@ -42,6 +81,8 @@ module CFoundry::V2
         }
 
         define_method(:"#{name}=") { |x|
+          Model.validate_type(x, CFoundry::V2.const_get(kls))
+
           @manifest ||= {}
           @manifest[:entity] ||= {}
           @manifest[:entity][:"#{name}_guid"] =
@@ -51,6 +92,7 @@ module CFoundry::V2
 
       def to_many(plural, opts = {})
         singular = plural.to_s.sub(/s$/, "").to_sym
+        kls = singular.to_s.capitalize
 
         object = opts[:as] || singular
         plural_object = :"#{object}s"
@@ -85,6 +127,8 @@ module CFoundry::V2
 
         # TODO: these are hacky
         define_method(:"add_#{singular}") { |x|
+          Model.validate_type(x, CFoundry::V2.const_get(kls))
+
           @client.base.request_path(
             :put,
             ["v2", "#{object_name}s", @guid, plural, x.guid],
@@ -99,6 +143,8 @@ module CFoundry::V2
         }
 
         define_method(:"#{plural}=") { |xs|
+          Model.validate_type(x, [CFoundry::V2.const_get(kls)])
+
           @manifest ||= {}
           @manifest[:entity] ||= {}
           @manifest[:entity][:"#{singular}_guids"] =
