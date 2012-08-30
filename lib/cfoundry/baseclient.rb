@@ -3,9 +3,13 @@ require "multi_json"
 
 module CFoundry
   class BaseClient # :nodoc:
+    attr_accessor :trace, :no_backtrace
+
     def initialize(target, token = nil)
       @target = target
       @token = token
+      @trace = false
+      @no_backtrace = false
     end
 
     def request_path(method, path, types = {}, options = {})
@@ -78,29 +82,7 @@ module CFoundry
       json = accept == :json
 
       RestClient::Request.execute(req) do |response, request|
-        if @trace
-          $stderr.puts '>>>'
-          $stderr.puts "PROXY: #{RestClient.proxy}" if RestClient.proxy
-          $stderr.puts "REQUEST: #{req[:method]} #{req[:url]}"
-          $stderr.puts "RESPONSE_HEADERS:"
-          response.headers.each do |key, value|
-            $stderr.puts "    #{key} : #{value}"
-          end
-          $stderr.puts "REQUEST_HEADERS:"
-          request.headers.each do |key, value|
-            $stderr.puts "    #{key} : #{value}"
-          end
-          $stderr.puts "REQUEST_BODY: #{req[:payload]}" if req[:payload]
-          $stderr.puts "RESPONSE: [#{response.code}]"
-          begin
-            parsed_body = MultiJson.load(response.body)
-            $stderr.puts MultiJson.dump(parsed_body, :pretty => true)
-          rescue
-            $stderr.puts "#{response.body}"
-          end
-          $stderr.puts '<<<'
-        end
-
+        print_trace(req, request, response, caller) if @trace
         handle_response(response, accept)
       end
     rescue SocketError, Errno::ECONNREFUSED => e
@@ -168,7 +150,46 @@ module CFoundry
       }.join("/")
     end
 
-    private
+    def print_trace(req, request, response, locs)
+      $stderr.puts ">>>"
+      $stderr.puts "PROXY: #{RestClient.proxy}" if RestClient.proxy
+      $stderr.puts "REQUEST: #{req[:method]} #{req[:url]}"
+      $stderr.puts "RESPONSE_HEADERS:"
+      response.headers.each do |key, value|
+        $stderr.puts "    #{key} : #{value}"
+      end
+      $stderr.puts "REQUEST_HEADERS:"
+      request.headers.each do |key, value|
+        $stderr.puts "    #{key} : #{value}"
+      end
+      $stderr.puts "REQUEST_BODY: #{req[:payload]}" if req[:payload]
+      $stderr.puts "RESPONSE: [#{response.code}]"
+      begin
+        parsed_body = MultiJson.load(response.body)
+        $stderr.puts MultiJson.dump(parsed_body, :pretty => true)
+      rescue
+        $stderr.puts "#{response.body}"
+      end
+      $stderr.puts "<<<"
+
+      return if @no_backtrace
+
+      interesting_locs = locs.drop_while { |loc|
+        loc =~ /\/(cfoundry\/|restclient\/|net\/http)/
+      }
+
+      $stderr.puts "--- backtrace:"
+
+      $stderr.puts "... (boring)" unless locs == interesting_locs
+
+      trimmed_locs = interesting_locs[0..5]
+
+      trimmed_locs.each do |loc|
+        $stderr.puts "=== #{loc}"
+      end
+
+      $stderr.puts "... (trimmed)" unless trimmed_locs == interesting_locs
+    end
 
     def handle_response(response, accept)
       json = accept == :json
