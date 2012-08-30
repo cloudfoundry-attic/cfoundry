@@ -6,13 +6,7 @@ module CFoundry::V2
     attribute :description, :string
     to_many   :apps
 
-    def detection
-      nil # TODO for v2?
-    end
-
-    def runtimes
-      [] # TODO for v2?
-    end
+    attr_accessor :detection, :runtimes
   end
 end
 
