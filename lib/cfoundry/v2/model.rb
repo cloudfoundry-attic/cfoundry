@@ -63,7 +63,9 @@ module CFoundry::V2
 
       def to_one(name, opts = {})
         obj = opts[:as] || name
-        kls = obj.to_s.capitalize
+        kls = obj.to_s.capitalize.gsub(/(.)_(.)/) do
+          $1 + $2.upcase
+        end
 
         define_method(name) {
           if @manifest && @manifest[:entity].key?(name)
@@ -92,10 +94,13 @@ module CFoundry::V2
 
       def to_many(plural, opts = {})
         singular = plural.to_s.sub(/s$/, "").to_sym
-        kls = singular.to_s.capitalize
 
         object = opts[:as] || singular
         plural_object = :"#{object}s"
+
+        kls = object.to_s.capitalize.gsub(/(.)_(.)/) do
+          $1 + $2.upcase
+        end
 
         define_method(plural) { |*args|
           depth, query = args
