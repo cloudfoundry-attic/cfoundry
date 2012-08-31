@@ -130,8 +130,8 @@ module CFoundry::V2
           manifest[:entity][:"#{plural}_url"]
         }
 
-        # TODO: these are hacky
         define_method(:"add_#{singular}") { |x|
+          # TODO: reflect this change in the app manifest?
           Model.validate_type(x, CFoundry::V2.const_get(kls))
 
           @client.base.request_path(
@@ -140,7 +140,10 @@ module CFoundry::V2
             nil => :json)
         }
 
-        define_method(:"remove_#{singular}") {
+        define_method(:"remove_#{singular}") { |x|
+          # TODO: reflect this change in the app manifest?
+          Model.validate_type(x, CFoundry::V2.const_get(kls))
+
           @client.base.request_path(
             :delete,
             ["v2", "#{object_name}s", @guid, plural, x.guid],
