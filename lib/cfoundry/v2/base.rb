@@ -47,7 +47,7 @@ module CFoundry::V2
 
 
     [ :app, :organization, :space, :user, :runtime, :framework, :service,
-      :domain, :service_plan, :service_binding, :service_instance,
+      :domain, :route, :service_plan, :service_binding, :service_instance,
       :service_auth_token
     ].each do |obj|
       plural = "#{obj}s"

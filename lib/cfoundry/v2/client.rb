@@ -15,6 +15,7 @@ require "cfoundry/v2/service_auth_token"
 require "cfoundry/v2/space"
 require "cfoundry/v2/user"
 require "cfoundry/v2/domain"
+require "cfoundry/v2/route"
 
 module CFoundry::V2
   # The primary API entrypoint. Wraps a BaseClient to provide nicer return
@@ -123,7 +124,7 @@ module CFoundry::V2
 
 
     [ :app, :organization, :space, :user, :runtime, :framework, :service,
-      :domain, :service_plan, :service_binding, :service_instance,
+      :domain, :route, :service_plan, :service_binding, :service_instance,
       :service_auth_token
     ].each do |singular|
       plural = :"#{singular}s"
