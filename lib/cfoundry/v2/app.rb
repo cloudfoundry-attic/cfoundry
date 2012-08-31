@@ -64,13 +64,15 @@ module CFoundry::V2
       nil
     end
 
-    def uris # TODO v2
-      []
+    def uris
+      routes.collect do |r|
+        "#{r.host}.#{r.domain.name}"
+      end
     end
     alias :urls :uris
 
     def uris=(x)
-      nil
+      raise "App#uris= is invalid against V2 APIs. Use add/remove_route."
     end
     alias :urls= :uris=
 
