@@ -95,6 +95,10 @@ module CFoundry::V1
       get("apps", name, "instances", nil => :json)[:instances]
     end
 
+    def crashes(name)
+      get("apps", name, "crashes", nil => :json)[:crashes]
+    end
+
     def files(name, instance, *path)
       get("apps", name, "instances", instance, "files", *path)
     end

@@ -111,6 +111,13 @@ module CFoundry::V1
       end
     end
 
+    # Retrieve crashed instances
+    def crashes
+      @client.base.crashes(@name).collect do |i|
+        CrashedInstance.new(@name, i[:instance], @client, i)
+      end
+    end
+
     # Retrieve application statistics, e.g. CPU load and memory usage.
     def stats
       @client.base.stats(@name)
@@ -549,6 +556,57 @@ module CFoundry::V1
       #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
       def file(*path)
         @client.base.files(@app, @index, *path)
+      end
+    end
+
+    # Class represnting a crashed instance of an application.
+    class CrashedInstance
+      # The application this instance belonged to.
+      attr_reader :app
+
+      # Crashed instance (pseudo-)unique identifier.
+      attr_reader :id
+
+      # Create a CrashedInstance object.
+      #
+      # You'll usually call App#crashes instead
+      def initialize(appname, id, client, manifest = {})
+        @app = appname
+        @id = id
+        @client = client
+        @manifest = manifest
+      end
+
+      # Show string representing the application instance.
+      def inspect
+        "#<App::CrashedInstance '#@app' \##@id>"
+      end
+
+      # Instance crashed time.
+      def since
+        @manifest[:since] && Time.at(@manifest[:since])
+      end
+
+      # Retrieve file listing under path for this instance.
+      #
+      # [path]
+      #   A sequence of strings representing path segments.
+      #
+      #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
+      def files(*path)
+        @client.base.files(@app, @id, *path).split("\n").collect do |entry|
+          path + [entry.split(/\s+/, 2)[0]]
+        end
+      end
+
+      # Retrieve file contents for this instance.
+      #
+      # [path]
+      #   A sequence of strings representing path segments.
+      #
+      #   For example, <code>file("foo", "bar")</code> for +foo/bar+.
+      def file(*path)
+        @client.base.files(@app, @id, *path)
       end
     end
   end
