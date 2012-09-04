@@ -195,6 +195,73 @@ module CFoundry::V2
       FileUtils.rm_rf(tmpdir) if tmpdir
     end
 
+    def files(*path)
+      Instance.new(self, 0, @client).files(*path)
+    end
+
+    def file(*path)
+      Instance.new(self, 0, @client).file(*path)
+    end
+
+    class Instance
+      attr_reader :app, :id
+
+      def initialize(app, id, client, manifest = {})
+        @app = app
+        @id = id
+        @client = client
+        @manifest = manifest
+      end
+
+      def inspect
+        "#<App::Instance '#{@app.name}' \##@id>"
+      end
+
+      def state
+        @manifest[:state]
+      end
+      alias_method :status, :state
+
+      def since
+        Time.at(@manifest[:since])
+      end
+
+      def debugger
+        return unless @manifest[:debug_ip] and @manifest[:debug_port]
+
+        { :ip => @manifest[:debug_ip],
+          :port => @manifest[:debug_port]
+        }
+      end
+
+      def console
+        return unless @manifest[:console_ip] and @manifest[:console_port]
+
+        { :ip => @manifest[:console_ip],
+          :port => @manifest[:console_port]
+        }
+      end
+
+      def healthy?
+        case state
+        when "STARTING", "RUNNING"
+          true
+        when "DOWN", "FLAPPING"
+          false
+        end
+      end
+
+      def files(*path)
+        @client.base.files(@app.guid, @id, *path).split("\n").collect do |entry|
+          path + [entry.split(/\s+/, 2)[0]]
+        end
+      end
+
+      def file(*path)
+        @client.base.files(@app.guid, @id, *path)
+      end
+    end
+
     private
 
     # Minimum size for an application payload to bother checking resources.

@@ -100,6 +100,11 @@ module CFoundry::V2
       retry
     end
 
+    def files(guid, instance, *path)
+      get("v2", "apps", guid, "instances", instance, "files", *path)
+    end
+    alias :file :files
+
 
     def params_from(args)
       depth, query = args
