@@ -107,14 +107,14 @@ module CFoundry::V1
     # Retrieve all of the instances of the app, as Instance objects.
     def instances
       @client.base.instances(@name).collect do |m|
-        Instance.new(@name, m[:index], @client, m)
+        Instance.new(self, m[:index], @client, m)
       end
     end
 
     # Retrieve crashed instances
     def crashes
       @client.base.crashes(@name).collect do |i|
-        CrashedInstance.new(@name, i[:instance], @client, i)
+        Instance.new(self, i[:instance], @client, i)
       end
     end
 
@@ -477,21 +477,21 @@ module CFoundry::V1
       attr_reader :app
 
       # Application instance number.
-      attr_reader :index
+      attr_reader :id
 
       # Create an Instance object.
       #
       # You'll usually call App#instances instead
-      def initialize(appname, index, client, manifest = {})
-        @app = appname
-        @index = index
+      def initialize(app, id, client, manifest = {})
+        @app = app
+        @id = id
         @client = client
         @manifest = manifest
       end
 
       # Show string representing the application instance.
       def inspect
-        "#<App::Instance '#@app' \##@index>"
+        "#<App::Instance '#{@app.name}' \##@id>"
       end
 
       # Instance state.
@@ -543,7 +543,7 @@ module CFoundry::V1
       #
       #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
       def files(*path)
-        @client.base.files(@app, @index, *path).split("\n").collect do |entry|
+        @client.base.files(@app.name, @id, *path).split("\n").collect do |entry|
           path + [entry.split(/\s+/, 2)[0]]
         end
       end
@@ -555,58 +555,7 @@ module CFoundry::V1
       #
       #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
       def file(*path)
-        @client.base.files(@app, @index, *path)
-      end
-    end
-
-    # Class represnting a crashed instance of an application.
-    class CrashedInstance
-      # The application this instance belonged to.
-      attr_reader :app
-
-      # Crashed instance (pseudo-)unique identifier.
-      attr_reader :id
-
-      # Create a CrashedInstance object.
-      #
-      # You'll usually call App#crashes instead
-      def initialize(appname, id, client, manifest = {})
-        @app = appname
-        @id = id
-        @client = client
-        @manifest = manifest
-      end
-
-      # Show string representing the application instance.
-      def inspect
-        "#<App::CrashedInstance '#@app' \##@id>"
-      end
-
-      # Instance crashed time.
-      def since
-        @manifest[:since] && Time.at(@manifest[:since])
-      end
-
-      # Retrieve file listing under path for this instance.
-      #
-      # [path]
-      #   A sequence of strings representing path segments.
-      #
-      #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
-      def files(*path)
-        @client.base.files(@app, @id, *path).split("\n").collect do |entry|
-          path + [entry.split(/\s+/, 2)[0]]
-        end
-      end
-
-      # Retrieve file contents for this instance.
-      #
-      # [path]
-      #   A sequence of strings representing path segments.
-      #
-      #   For example, <code>file("foo", "bar")</code> for +foo/bar+.
-      def file(*path)
-        @client.base.files(@app, @id, *path)
+        @client.base.files(@app.name, @id, *path)
       end
     end
   end
