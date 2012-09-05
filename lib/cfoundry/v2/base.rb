@@ -105,6 +105,14 @@ module CFoundry::V2
     end
     alias :file :files
 
+    def instances(guid)
+      get("v2", "apps", guid, "instances", nil => :json)
+    end
+
+    def stats(guid)
+      get("v2", "apps", guid, "stats", nil => :json)
+    end
+
 
     def params_from(args)
       depth, query = args
