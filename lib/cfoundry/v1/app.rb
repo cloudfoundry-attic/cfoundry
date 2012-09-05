@@ -107,14 +107,14 @@ module CFoundry::V1
     # Retrieve all of the instances of the app, as Instance objects.
     def instances
       @client.base.instances(@name).collect do |m|
-        Instance.new(self, m[:index], @client, m)
+        Instance.new(self, m[:index].to_s, @client, m)
       end
     end
 
     # Retrieve crashed instances
     def crashes
       @client.base.crashes(@name).collect do |i|
-        Instance.new(self, i[:instance], @client, i)
+        Instance.new(self, i[:instance].to_s, @client, i)
       end
     end
 
@@ -323,7 +323,7 @@ module CFoundry::V1
     #
     #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
     def files(*path)
-      Instance.new(@name, 0, @client).files(*path)
+      Instance.new(@name, "0", @client).files(*path)
     end
 
     # Retrieve file contents for the first instance of the application.
@@ -333,7 +333,7 @@ module CFoundry::V1
     #
     #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
     def file(*path)
-      Instance.new(@name, 0, @client).file(*path)
+      Instance.new(@name, "0", @client).file(*path)
     end
 
     # Upload application's code to target. Do this after #create! and before

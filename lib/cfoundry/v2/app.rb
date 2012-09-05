@@ -206,11 +206,11 @@ module CFoundry::V2
     end
 
     def files(*path)
-      Instance.new(self, 0, @client).files(*path)
+      Instance.new(self, "0", @client).files(*path)
     end
 
     def file(*path)
-      Instance.new(self, 0, @client).file(*path)
+      Instance.new(self, "0", @client).file(*path)
     end
 
     class Instance
