@@ -67,6 +67,19 @@ module CFoundry::V1
       manifest[:password] = str
     end
 
+    def guid
+      @guid ||= @client.base.token_data[:user_id]
+    end
+
+    def change_password!(new, old)
+      if @client.base.uaa
+        @client.base.uaa.change_password(guid, new, old)
+      else
+        self.password = new
+        update!
+      end
+    end
+
     private
 
     def manifest

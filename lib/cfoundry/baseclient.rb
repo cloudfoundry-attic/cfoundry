@@ -31,6 +31,20 @@ module CFoundry
       request(method, path, options)
     end
 
+    # grab the metadata from a token that looks like:
+    #
+    # bearer (base64 ...)
+    def token_data
+      tok = Base64.decode64(@token.sub(/^bearer\s+/, ""))
+      tok.sub!(/\{.+?\}/, "") # clear algo
+      MultiJson.load(tok[/\{.+?\}/], :symbolize_keys => true)
+
+    # normally i don't catch'em all, but can't expect all tokens to be the
+    # proper format, so just silently fail as this is not critical
+    rescue
+      {}
+    end
+
     private
 
     def parse_json(x)

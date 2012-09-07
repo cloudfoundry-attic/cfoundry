@@ -68,9 +68,9 @@ module CFoundry::V2
 
     # The currently authenticated user.
     def current_user
-      if guid = token_data[:user_id]
+      if guid = @base.token_data[:user_id]
         user = user(guid)
-        user.emails = [{ :value => token_data[:email] }]
+        user.emails = [{ :value => @base.token_data[:email] }]
         user
       end
     end
@@ -193,22 +193,6 @@ module CFoundry::V2
           self,
           json)
       end
-    end
-
-    private
-
-    # grab the metadata from a token that looks like:
-    #
-    # bearer (base64 ...)
-    def token_data
-      tok = Base64.decode64(@base.token.sub(/^bearer\s+/, ""))
-      tok.sub!(/\{.+?\}/, "") # clear algo
-      MultiJson.load(tok[/\{.+?\}/], :symbolize_keys => true)
-
-    # normally i don't catch'em all, but can't expect all tokens to be the
-    # proper format, so just silently fail as this is not critical
-    rescue
-      {}
     end
   end
 end

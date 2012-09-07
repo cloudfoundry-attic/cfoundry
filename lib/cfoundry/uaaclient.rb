@@ -35,6 +35,16 @@ module CFoundry
       get("Users", nil => :json)
     end
 
+    def change_password(guid, new, old)
+      put(
+        { :schemas => ["urn:scim:schemas:core:1.0"],
+          :password => new,
+          :oldPassword => old
+        },
+        "User", guid, "password",
+        :json => nil)
+    end
+
     private
 
     def handle_response(response, accept)

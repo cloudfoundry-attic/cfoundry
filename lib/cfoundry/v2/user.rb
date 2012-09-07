@@ -25,6 +25,10 @@ module CFoundry::V2
 
     alias :admin? :admin
 
+    def change_password!(new, old)
+      @client.base.uaa.change_password(@guid, new, old)
+    end
+
     # optional metadata from UAA
     attr_accessor :emails, :name
 
