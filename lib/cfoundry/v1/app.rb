@@ -323,7 +323,7 @@ module CFoundry::V1
     #
     #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
     def files(*path)
-      Instance.new(@name, "0", @client).files(*path)
+      Instance.new(self, "0", @client).files(*path)
     end
 
     # Retrieve file contents for the first instance of the application.
@@ -333,7 +333,7 @@ module CFoundry::V1
     #
     #   For example, <code>files("foo", "bar")</code> for +foo/bar+.
     def file(*path)
-      Instance.new(@name, "0", @client).file(*path)
+      Instance.new(self, "0", @client).file(*path)
     end
 
     # Upload application's code to target. Do this after #create! and before
