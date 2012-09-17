@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rest-client", "~> 1.6.1"
   s.add_dependency "multi_json", "~> 1.3.6"
-  s.add_dependency "rubyzip", "~> 0.9.5"
+  s.add_dependency "rubyzip", "~> 0.9.9"
 
   s.add_development_dependency "rake", "~> 0.9.2.2"
   s.add_development_dependency "rspec", "~> 2.11.0"
