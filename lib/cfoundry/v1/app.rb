@@ -383,12 +383,12 @@ module CFoundry::V1
       :uris => :uris,
       :services => :services,
       :debug => :debug,
+      :console => :console,
 
       :framework => [:staging, :model],
       :runtime => [:staging, :stack],
       :command => [:staging, :command],
 
-      :console => [:meta, :console],
       :meta_version => [:meta, :version],
       :created => [:meta, :created],
 
