@@ -53,7 +53,7 @@ module CFoundry::V2
     def env
       @env ||= CFoundry::ChattyHash.new(
         method(:env=),
-        MultiJson.load(environment_json))
+        environment_json)
     end
 
     def env=(hash)
