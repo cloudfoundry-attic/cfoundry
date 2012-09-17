@@ -81,15 +81,48 @@ module CFoundry::V2
     end
     alias :urls :uris
 
-    def uris=(x)
+    def uris=(uris)
       raise "App#uris= is invalid against V2 APIs. Use add/remove_route."
     end
     alias :urls= :uris=
+
+    def create_routes(*uris)
+      uris.each do |uri|
+        host, domain_name = uri.split(".", 2)
+
+        domain =
+          @client.current_space.domains.find { |d|
+            d.name == domain_name
+          }
+
+        raise "Invalid domain '#{domain_name}'" unless domain
+
+        route = @client.routes.find { |r|
+          r.host == host && r.domain == domain
+        }
+
+        unless route
+          route = @client.route
+          route.host = host
+          route.domain = domain
+          route.organization = @client.current_organization
+          route.create!
+        end
+
+        add_route(route)
+      end
+    end
+    alias :create_route :create_routes
 
     def uri
       uris[0]
     end
     alias :url :uri
+
+    def uri=(x)
+      self.uris = [x]
+    end
+    alias :url= :uri=
 
     # Stop the application.
     def stop!
