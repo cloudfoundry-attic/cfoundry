@@ -95,6 +95,10 @@ module CFoundry::V1
       runtimes
     end
 
+    def runtime_by_name(name)
+      runtimes.find { |r| r.name == name }
+    end
+
     # Retrieve available frameworks.
     def frameworks
       fs = info[:frameworks]
@@ -109,9 +113,13 @@ module CFoundry::V1
         frameworks <<
           Framework.new(name.to_s, nil, runtimes, meta[:detection])
       end
+
       frameworks
     end
 
+    def framework_by_name(name)
+      frameworks.find { |f| f.name == name }
+    end
 
     # Retrieve user list. Admin-only.
     def users
