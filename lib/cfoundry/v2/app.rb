@@ -154,7 +154,11 @@ module CFoundry::V2
     def healthy?
       # invalidate cache so the check is fresh
       @manifest = nil
-      health == "RUNNING"
+
+      case health
+      when "RUNNING", "STARTED"
+        true
+      end
     end
     alias_method :running?, :healthy?
 
