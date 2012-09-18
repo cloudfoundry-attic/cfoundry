@@ -34,7 +34,7 @@ module CFoundry::V2
     alias :total_instances :instances
     alias :total_instances= :instances=
 
-    private :environment_json, :environment_json=
+    private :environment_json
 
     def instances
       @client.base.instances(@guid).collect do |i, m|
@@ -56,11 +56,7 @@ module CFoundry::V2
         environment_json)
     end
 
-    def env=(hash)
-      @env = hash
-      @diff["environment_json"] = hash
-      hash
-    end
+    alias :env= :environment_json=
 
     def command # TODO v2
       nil
