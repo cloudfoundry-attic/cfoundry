@@ -151,7 +151,7 @@ module CFoundry::V2
         }
 
         define_method(:"#{plural}=") { |xs|
-          Model.validate_type(x, [CFoundry::V2.const_get(kls)])
+          Model.validate_type(xs, [CFoundry::V2.const_get(kls)])
 
           @manifest ||= {}
           @manifest[:entity] ||= {}
