@@ -43,7 +43,13 @@ module CFoundry::V2
     end
 
     def stats
-      @client.base.stats(@guid)
+      stats = {}
+
+      @client.base.stats(@guid).each do |idx, info|
+        stats[idx.to_s] = info
+      end
+
+      stats
     end
 
     def services
