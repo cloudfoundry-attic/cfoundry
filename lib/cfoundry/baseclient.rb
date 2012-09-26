@@ -3,6 +3,9 @@ require "multi_json"
 
 module CFoundry
   class BaseClient # :nodoc:
+    LOG_FILE = File.expand_path("~/.cfoundry.log")
+    LOG_LENGTH = 10
+
     attr_accessor :trace, :no_backtrace
 
     def initialize(target, token = nil)
@@ -97,6 +100,7 @@ module CFoundry
 
       RestClient::Request.execute(req) do |response, request|
         print_trace(req, request, response, caller) if @trace
+        log_request(req, response)
         handle_response(response, accept)
       end
     rescue SocketError, Errno::ECONNREFUSED => e
@@ -162,6 +166,23 @@ module CFoundry
       segments.flatten.collect { |x|
         URI.encode x.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")
       }.join("/")
+    end
+
+    def log_request(req, response)
+      file = File.expand_path(LOG_FILE)
+
+      if File.exists?(file)
+        log = File.readlines(file).last(LOG_LENGTH - 1)
+      end
+
+      File.open(file, "w") do |io|
+        log.each { |l| io.print l } if log
+        io.puts log_line(req, response.headers[:x_vcap_request_id])
+      end
+    end
+
+    def log_line(req, id)
+      "#{Time.now.strftime("%F %T")}  #{id}  #{req[:method].to_s.upcase.ljust(6)}  #{req[:url]}"
     end
 
     def print_trace(req, request, response, locs)
