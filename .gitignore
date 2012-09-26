@@ -1,5 +1,6 @@
 *.gem
 .rbenv-gemsets
+.rbenv-version
 .bundle
 Gemfile.lock
 pkg/*
