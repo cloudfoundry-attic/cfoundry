@@ -28,6 +28,7 @@ module CFoundry::V2
     attribute :file_descriptors, :integer, :default => 256
     attribute :disk_quota,       :integer, :default => 256
     attribute :state,            :integer, :default => "STOPPED"
+    attribute :command,          :string,  :default => nil
     to_many   :service_bindings
     to_many   :routes
 
@@ -63,10 +64,6 @@ module CFoundry::V2
     end
 
     alias :env= :environment_json=
-
-    def command # TODO v2
-      nil
-    end
 
     def debug_mode # TODO v2
       nil
