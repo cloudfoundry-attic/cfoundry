@@ -66,6 +66,21 @@ module CFoundry::V2
       @base.trace = bool
     end
 
+    # The current log. See +log=+.
+    def log
+      @base.log
+    end
+
+    # Set the logging mode. Mode can be one of:
+    #
+    # [+String+] Name of a file to log the last 10 requests to.
+    # [+Array+]  Array to append with log data (a Hash).
+    # [+IO+]     An IO object to write to.
+    # [+false+]  No logging.
+    def log=(mode)
+      @base.log = mode
+    end
+
     # The currently authenticated user.
     def current_user
       if guid = @base.token_data[:user_id]

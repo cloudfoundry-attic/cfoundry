@@ -8,19 +8,12 @@ require "cfoundry/errors"
 
 module CFoundry::V2
   class Base < CFoundry::BaseClient
-    attr_accessor :target, :token, :proxy, :trace
+    attr_accessor :target, :token, :proxy, :trace, :backtrace, :log
 
     def initialize(
         target = "https://api.cloudfoundry.com",
         token = nil)
-      @target = target
-      @token = token
-    end
-
-
-    # invalidate token data when changing token
-    def token=(t)
-      @token = t
+      super
     end
 
 
@@ -170,6 +163,17 @@ module CFoundry::V2
       else
         raise CFoundry::BadResponse.new(response.code, response)
       end
+    end
+
+    def log_line(io, data)
+      io.printf(
+        "[%s]  %0.3fs  %s  %6s -> %d  %s\n",
+        Time.now.strftime("%F %T"),
+        data[:time],
+        data[:response][:headers][:x_vcap_request_id],
+        data[:request][:method].to_s.upcase,
+        data[:response][:code],
+        data[:request][:url])
     end
   end
 end

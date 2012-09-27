@@ -1,18 +1,19 @@
 require "restclient"
 require "multi_json"
+require "fileutils"
 
 module CFoundry
   class BaseClient # :nodoc:
-    LOG_FILE = File.expand_path("~/.cfoundry.log")
     LOG_LENGTH = 10
 
-    attr_accessor :trace, :no_backtrace
+    attr_accessor :trace, :backtrace, :log
 
     def initialize(target, token = nil)
       @target = target
       @token = token
       @trace = false
-      @no_backtrace = false
+      @backtrace = false
+      @log = false
     end
 
     def request_path(method, path, types = {}, options = {})
@@ -98,9 +99,13 @@ module CFoundry
 
       json = accept == :json
 
+      before = Time.now
+
       RestClient::Request.execute(req) do |response, request|
+        time = Time.now - before
+
         print_trace(req, request, response, caller) if @trace
-        log_request(req, response)
+        log_request(time, req, response)
         handle_response(response, accept)
       end
     rescue SocketError, Errno::ECONNREFUSED => e
@@ -168,21 +173,55 @@ module CFoundry
       }.join("/")
     end
 
-    def log_request(req, response)
-      file = File.expand_path(LOG_FILE)
-
-      if File.exists?(file)
-        log = File.readlines(file).last(LOG_LENGTH - 1)
-      end
-
-      File.open(file, "w") do |io|
-        log.each { |l| io.print l } if log
-        io.puts log_line(req, response.headers[:x_vcap_request_id])
-      end
+    def log_data(time, request, response)
+      { :time => time,
+        :request => request,
+        :response => {
+          :code => response.code,
+          :headers => response.headers,
+          :body => response
+        }
+      }
     end
 
-    def log_line(req, id)
-      "#{Time.now.strftime("%F %T")}  #{id}  #{req[:method].to_s.upcase.ljust(6)}  #{req[:url]}"
+    def log_line(io, data)
+      io.printf(
+        "[%s]  %0.3fs  %6s -> %d  %s\n",
+        Time.now.strftime("%F %T"),
+        data[:time],
+        data[:request][:method].to_s.upcase,
+        data[:response][:code],
+        data[:request][:url])
+    end
+
+    def log_request(time, request, response)
+      return unless @log
+
+      data = log_data(time, request, response)
+
+      if @log.is_a?(Array)
+        @log << data
+        return
+      end
+
+      case @log
+      when Array
+        @log << data
+        return
+      when IO
+        log_line(@log, data)
+      when String
+        if File.exists?(@log)
+          log = File.readlines(@log).last(LOG_LENGTH - 1)
+        elsif !File.exists?(File.dirname(@log))
+          FileUtils.mkdir_p(File.dirname(@log))
+        end
+
+        File.open(@log, "w") do |io|
+          log.each { |l| io.print l } if log
+          log_line(io, data)
+        end
+      end
     end
 
     def print_trace(req, request, response, locs)
@@ -207,7 +246,7 @@ module CFoundry
       end
       $stderr.puts "<<<"
 
-      return if @no_backtrace
+      return unless @backtrace
 
       interesting_locs = locs.drop_while { |loc|
         loc =~ /\/(cfoundry\/|restclient\/|net\/http)/

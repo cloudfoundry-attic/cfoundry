@@ -7,19 +7,12 @@ require "cfoundry/errors"
 
 module CFoundry::V1
   class Base < CFoundry::BaseClient
-    attr_accessor :target, :token, :proxy, :trace
+    attr_accessor :target, :token, :proxy, :trace, :backtrace, :log
 
     def initialize(
         target = "https://api.cloudfoundry.com",
         token = nil)
-      @target = target
-      @token = token
-    end
-
-
-    # invalidate token data when changing token
-    def token=(t)
-      @token = t
+      super
     end
 
 
