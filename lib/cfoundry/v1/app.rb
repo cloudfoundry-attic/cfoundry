@@ -120,7 +120,13 @@ module CFoundry::V1
 
     # Retrieve application statistics, e.g. CPU load and memory usage.
     def stats
-      @client.base.stats(@name)
+      stats = {}
+
+      @client.base.stats(@name).each do |idx, info|
+        stats[idx.to_s] = info
+      end
+
+      stats
     end
 
     # Update application attributes. Does not restart the application.
