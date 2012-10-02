@@ -199,15 +199,17 @@ module CFoundry
 
       data = log_data(time, request, response)
 
-      if @log.is_a?(Array)
+      if @log.respond_to?(:call)
+        @log.call(data)
+        return
+      end
+
+      if @log.respond_to?(:<<)
         @log << data
         return
       end
 
       case @log
-      when Array
-        @log << data
-        return
       when IO
         log_line(@log, data)
       when String
