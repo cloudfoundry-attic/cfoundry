@@ -199,19 +199,10 @@ module CFoundry
 
       data = log_data(time, request, response)
 
-      if @log.respond_to?(:call)
-        @log.call(data)
-        return
-      end
-
-      if @log.respond_to?(:<<)
-        @log << data
-        return
-      end
-
       case @log
       when IO
         log_line(@log, data)
+        return
       when String
         if File.exists?(@log)
           log = File.readlines(@log).last(LOG_LENGTH - 1)
@@ -223,6 +214,18 @@ module CFoundry
           log.each { |l| io.print l } if log
           log_line(io, data)
         end
+
+        return
+      end
+
+      if @log.respond_to?(:call)
+        @log.call(data)
+        return
+      end
+
+      if @log.respond_to?(:<<)
+        @log << data
+        return
       end
     end
 
