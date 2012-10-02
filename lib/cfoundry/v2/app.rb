@@ -29,6 +29,7 @@ module CFoundry::V2
     attribute :disk_quota,       :integer, :default => 256
     attribute :state,            :integer, :default => "STOPPED"
     attribute :command,          :string,  :default => nil
+    attribute :console,          :boolean, :default => false
     to_many   :service_bindings
     to_many   :routes
 
@@ -66,10 +67,6 @@ module CFoundry::V2
     alias :env= :environment_json=
 
     def debug_mode # TODO v2
-      nil
-    end
-
-    def console # TODO v2
       nil
     end
 
