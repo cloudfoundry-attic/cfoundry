@@ -167,7 +167,7 @@ module CFoundry::V2
           query[:space_guid] ||= current_space.guid
         end
 
-        @base.send(plural, depth, query)[:resources].collect do |json|
+        @base.send(plural, depth, query).collect do |json|
           send(:"make_#{singular}", json)
         end
       end
@@ -193,11 +193,14 @@ module CFoundry::V2
       end
 
       define_method(:"#{plural}_from") do |path, *args|
-        @base.request_path(
+        objs = @base.all_pages(
+          @base.request_path(
             :get,
             path,
             nil => :json,
-            :params => @base.params_from(args))[:resources].collect do |json|
+            :params => @base.params_from(args)))
+
+        objs.collect do |json|
           send(:"make_#{singular}", json)
         end
       end

@@ -68,8 +68,10 @@ module CFoundry::V2
       end
 
       define_method(plural) do |*args|
-        get("v2", plural, nil => :json, :params => params_from(args))
+        all_pages(
+          get("v2", plural, nil => :json, :params => params_from(args)))
       end
+
     end
 
     def resource_match(fingerprints)
@@ -118,6 +120,17 @@ module CFoundry::V2
       end
 
       params
+    end
+
+    def all_pages(paginated)
+      payload = paginated[:resources]
+
+      while next_page = paginated[:next_url]
+        paginated = request_path(:get, next_page, nil => :json)
+        payload += paginated[:resources]
+      end
+
+      payload
     end
 
     private
