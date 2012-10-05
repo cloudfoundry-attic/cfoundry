@@ -111,7 +111,9 @@ module CFoundry::V2
     alias :create_route :create_routes
 
     def uri
-      uris[0]
+      if route = routes.first
+        "#{route.host}.#{route.domain.name}"
+      end
     end
     alias :url :uri
 
