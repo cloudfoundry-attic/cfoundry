@@ -30,5 +30,9 @@ module CFoundry
     def to_json(*args)
       @hash.to_json(*args)
     end
+
+    def to_hash
+      @hash
+    end
   end
 end

@@ -64,7 +64,9 @@ module CFoundry::V2
         environment_json)
     end
 
-    alias :env= :environment_json=
+    def env=(x)
+      self.environment_json = x.to_hash
+    end
 
     def debug_mode # TODO v2
       nil
