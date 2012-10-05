@@ -101,12 +101,19 @@ module CFoundry
 
       before = Time.now
 
-      RestClient::Request.execute(req) do |response, request|
+      RestClient::Request.execute(req) do |response, request, result, &block|
         time = Time.now - before
 
-        print_trace(req, request, response, caller) if @trace
-        log_request(time, req, response)
-        handle_response(response, accept)
+        print_trace(request, response, caller) if @trace
+        log_request(time, request, response)
+
+        if [:get, :head].include?(method) && \
+            [301, 302, 307].include?(response.code) && \
+            accept != :headers
+          response.follow_redirection(request, result, &block)
+        else
+          handle_response(response, accept)
+        end
       end
     rescue SocketError, Errno::ECONNREFUSED => e
       raise TargetRefused, e.message
@@ -175,11 +182,14 @@ module CFoundry
 
     def log_data(time, request, response)
       { :time => time,
-        :request => request,
+        :request => {
+          :method => request.method,
+          :url => request.url,
+          :headers => request.headers
+        },
         :response => {
           :code => response.code,
-          :headers => response.headers,
-          :body => response
+          :headers => response.headers
         }
       }
     end
@@ -229,10 +239,10 @@ module CFoundry
       end
     end
 
-    def print_trace(req, request, response, locs)
+    def print_trace(request, response, locs)
       $stderr.puts ">>>"
       $stderr.puts "PROXY: #{RestClient.proxy}" if RestClient.proxy
-      $stderr.puts "REQUEST: #{req[:method]} #{req[:url]}"
+      $stderr.puts "REQUEST: #{request.method} #{request.url}"
       $stderr.puts "RESPONSE_HEADERS:"
       response.headers.each do |key, value|
         $stderr.puts "    #{key} : #{value}"
@@ -241,7 +251,7 @@ module CFoundry
       request.headers.each do |key, value|
         $stderr.puts "    #{key} : #{value}"
       end
-      $stderr.puts "REQUEST_BODY: #{req[:payload]}" if req[:payload]
+      $stderr.puts "REQUEST_BODY: #{request.payload}" if request.payload
       $stderr.puts "RESPONSE: [#{response.code}]"
       begin
         parsed_body = MultiJson.load(response.body)
@@ -274,7 +284,7 @@ module CFoundry
       json = accept == :json
 
       case response.code
-      when 200, 201, 204, 302
+      when 200, 201, 204, 301, 302, 307
         if accept == :headers
           return response.headers
         end

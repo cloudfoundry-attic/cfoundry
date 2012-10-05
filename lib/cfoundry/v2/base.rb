@@ -139,7 +139,7 @@ module CFoundry::V2
       json = accept == :json
 
       case response.code
-      when 200, 201, 204, 302
+      when 200, 201, 204, 301, 302, 307
         if accept == :headers
           return response.headers
         end
