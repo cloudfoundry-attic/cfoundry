@@ -173,11 +173,14 @@ module CFoundry::V2
       end
 
       if has_name
-        define_method(:"#{singular}_by_name") do |name|
+        define_method(:"#{singular}_by_name") do |name, *args|
+          depth, _ = args
+          depth ||= 1
+
           if has_space && current_space
-            current_space.send(plural, 1, :name => name).first
+            current_space.send(plural, depth, :name => name).first
           else
-            send(plural, 1, :name => name).first
+            send(plural, depth, :name => name).first
           end
         end
       end
