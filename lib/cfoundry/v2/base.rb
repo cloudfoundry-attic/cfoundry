@@ -104,6 +104,10 @@ module CFoundry::V2
       get("v2", "apps", guid, "instances", nil => :json)
     end
 
+    def crashes(guid)
+      get("v2", "apps", guid, "crashes", nil => :json)
+    end
+
     def stats(guid)
       get("v2", "apps", guid, "stats", nil => :json)
     end

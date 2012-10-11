@@ -44,6 +44,12 @@ module CFoundry::V2
       end
     end
 
+    def crashes
+      @client.base.crashes(@guid).collect do |m|
+        Instance.new(self, m[:instance], @client, m)
+      end
+    end
+
     def stats
       stats = {}
 
