@@ -276,7 +276,9 @@ module CFoundry::V2
       alias_method :status, :state
 
       def since
-        Time.at(@manifest[:since])
+        if since = @manifest[:since]
+          Time.at(@manifest[:since])
+        end
       end
 
       def debugger
