@@ -52,7 +52,11 @@ module CFoundry
     private
 
     def parse_json(x)
-      MultiJson.load(x, :symbolize_keys => true)
+      if x.empty?
+        raise MultiJson::DecodeError, "Empty JSON string"
+      end
+        MultiJson.load(x, :symbolize_keys => true)
+      end
     end
 
     def request(method, path, options = {})
