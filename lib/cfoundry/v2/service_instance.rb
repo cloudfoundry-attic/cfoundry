@@ -6,5 +6,7 @@ module CFoundry::V2
     to_one    :space
     to_one    :service_plan
     to_many   :service_bindings
+
+    scoped_to_space
   end
 end

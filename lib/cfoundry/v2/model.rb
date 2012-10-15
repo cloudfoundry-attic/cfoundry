@@ -3,6 +3,8 @@ require "multi_json"
 module CFoundry::V2
   class Model
     class << self
+      attr_reader :scoped_organization, :scoped_space
+
       def value_matches?(val, type)
         case type
         when Class
@@ -59,6 +61,14 @@ module CFoundry::V2
           @manifest[:entity][name] = val
           @diff[name] = val
         }
+      end
+
+      def scoped_to_organization(relation = :organization)
+        @scoped_organization = relation
+      end
+
+      def scoped_to_space(relation = :space)
+        @scoped_space = relation
       end
 
       def to_one(name, opts = {})

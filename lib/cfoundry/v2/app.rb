@@ -33,6 +33,8 @@ module CFoundry::V2
     to_many   :service_bindings
     to_many   :routes
 
+    scoped_to_space
+
     alias :total_instances :instances
     alias :total_instances= :instances=
 

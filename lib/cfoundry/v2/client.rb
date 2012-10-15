@@ -150,21 +150,41 @@ module CFoundry::V2
 
       klass = CFoundry::V2.const_get(classname)
 
-      has_space = klass.method_defined? :space
+      scoped_organization = klass.scoped_organization
+      scoped_space = klass.scoped_space
+
       has_name = klass.method_defined? :name
 
       define_method(singular) do |*args|
         guid, _ = args
-        klass.new(guid, self)
+
+        x = klass.new(guid, self)
+
+        # when creating an object, automatically set the org/space
+        unless guid
+          if scoped_organization && current_organization
+            x.send(:"#{scoped_organization}=", current_organization)
+          end
+
+          if scoped_space && current_space
+            x.send(:"#{scoped_space}=", current_space)
+          end
+        end
+
+        x
       end
 
       define_method(plural) do |*args|
         depth, query = args
         depth ||= 1
 
-        if has_space && current_space
+        # use current org/space
+        if scoped_space && current_space
           query ||= {}
-          query[:space_guid] ||= current_space.guid
+          query[:"#{scoped_space}_guid"] ||= current_space.guid
+        elsif scoped_organization && current_organization
+          query ||= {}
+          query[:"#{scoped_organization}_guid"] ||= current_organization.guid
         end
 
         @base.send(plural, depth, query).collect do |json|
@@ -177,8 +197,11 @@ module CFoundry::V2
           depth, _ = args
           depth ||= 1
 
-          if has_space && current_space
+          # use current org/space
+          if scoped_space && current_space
             current_space.send(plural, depth, :name => name).first
+          elsif scoped_organization && current_organization
+            current_organization.send(plural, depth, :name => name).first
           else
             send(plural, depth, :name => name).first
           end

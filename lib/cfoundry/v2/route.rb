@@ -5,5 +5,7 @@ module CFoundry::V2
     attribute :host, :string
     to_one    :domain
     to_one    :organization
+
+    scoped_to_organization
   end
 end
