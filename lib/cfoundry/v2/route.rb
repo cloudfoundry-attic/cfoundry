@@ -7,5 +7,9 @@ module CFoundry::V2
     to_one    :organization
 
     scoped_to_organization
+
+    def name
+      "#{host}.#{domain.name}"
+    end
   end
 end
