@@ -219,12 +219,15 @@ module CFoundry::V2
       end
 
       define_method(:"#{plural}_from") do |path, *args|
+        params = @base.params_from(args)
+
         objs = @base.all_pages(
+          params,
           @base.request_path(
             :get,
             path,
             nil => :json,
-            :params => @base.params_from(args)))
+            :params => params))
 
         objs.collect do |json|
           send(:"make_#{singular}", json)

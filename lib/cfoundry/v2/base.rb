@@ -68,8 +68,11 @@ module CFoundry::V2
       end
 
       define_method(plural) do |*args|
+        params = params_from(args)
+
         all_pages(
-          get("v2", plural, nil => :json, :params => params_from(args)))
+          params,
+          get("v2", plural, nil => :json, :params => params))
       end
 
     end
@@ -126,11 +129,13 @@ module CFoundry::V2
       params
     end
 
-    def all_pages(paginated)
+    def all_pages(params, paginated)
       payload = paginated[:resources]
 
       while next_page = paginated[:next_url]
-        paginated = request_path(:get, next_page, nil => :json)
+        paginated = request_path(
+          Net::HTTP::Get, next_page, nil => :json, :params => params)
+
         payload += paginated[:resources]
       end
 
