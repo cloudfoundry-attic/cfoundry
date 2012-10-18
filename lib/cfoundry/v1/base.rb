@@ -118,17 +118,18 @@ module CFoundry::V1
       payload = {
         :_method => "put",
         :resources => MultiJson.dump(resources),
-        :multipart => true,
         :application =>
-          if zipfile.is_a? File
-            zipfile
-          elsif zipfile.is_a? String
-            File.new(zipfile, "rb")
-          end
+          UploadIO.new(
+            if zipfile.is_a? File
+              zipfile
+            elsif zipfile.is_a? String
+              File.new(zipfile, "rb")
+            end,
+            "application/zip")
       }
 
       post(payload, "apps", name, "application")
-    rescue RestClient::ServerBrokeConnection
+    rescue EOFError
       retry
     end
 
@@ -155,38 +156,38 @@ module CFoundry::V1
     def handle_response(response, accept)
       json = accept == :json
 
-      case response.code
-      when 200, 201, 204, 301, 302, 307
+      case response
+      when Net::HTTPSuccess, Net::HTTPRedirection
         if accept == :headers
-          return response.headers
+          return sane_headers(response)
         end
 
         if json
-          if response.code == 204
+          if response.is_a?(Net::HTTPNoContent)
             raise "Expected JSON response, got 204 No Content"
           end
 
-          parse_json(response)
+          parse_json(response.body)
         else
-          response
+          response.body
         end
 
-      when 400, 403
-        info = parse_json(response)
+      when Net::HTTPBadRequest, Net::HTTPForbidden
+        info = parse_json(response.body)
         raise CFoundry::Denied.new(403, info[:description])
 
-      when 404
+      when Net::HTTPNotFound
         raise CFoundry::NotFound
 
-      when 411, 500, 504
+      when Net::HTTPServerError
         begin
-          raise_error(parse_json(response))
+          raise_error(parse_json(response.body))
         rescue MultiJson::DecodeError
-          raise CFoundry::BadResponse.new(response.code, response)
+          raise CFoundry::BadResponse.new(response.code, response.body)
         end
 
       else
-        raise CFoundry::BadResponse.new(response.code, response)
+        raise CFoundry::BadResponse.new(response.code, response.body)
       end
     end
 

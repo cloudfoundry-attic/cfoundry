@@ -1,4 +1,5 @@
-require "restclient"
+require "net/https"
+require "net/http/post/multipart"
 require "multi_json"
 require "fileutils"
 
@@ -60,6 +61,15 @@ module CFoundry
     end
 
     def request(method, path, options = {})
+      request_uri(URI.parse(@target + path), method, options)
+    end
+
+    def request_uri(uri, method, options = {})
+      uri = URI.parse(@target + uri.to_s) unless uri.host
+
+      # keep original options in case there's a redirect to follow
+      original_options = options.dup
+
       accept = options.delete(:accept)
       type = options.delete(:type)
       payload = options.delete(:payload)
@@ -86,35 +96,60 @@ module CFoundry
         end
       end
 
-      headers["Content-Length"] = payload ? payload.size : 0
+      if payload.is_a?(String)
+        headers["Content-Length"] = payload.size
+      elsif !payload
+        headers["Content-Length"] = 0
+      end
 
       headers.merge!(options[:headers]) if options[:headers]
 
       if params
-        uri = URI.parse(path)
-        path += (uri.query ? "&" : "?") + encode_params(params)
+        if uri.query
+          uri.query += "&" + encode_params(params)
+        else
+          uri.query = "?" + encode_params(params)
+        end
       end
 
-      req = options.dup
-      req[:method] = method
-      req[:url] = @target + path
-      req[:headers] = headers
-      req[:payload] = payload
+      if payload && payload.is_a?(Hash)
+        multipart = method.const_get(:Multipart)
+        request = multipart.new(uri.request_uri, payload)
+      else
+        request = method.new(uri.request_uri)
+        request.body = payload if payload
+      end
 
-      json = accept == :json
+      request["Authorization"] = @token if @token
+      request["Proxy-User"] = @proxy if @proxy
+
+      headers.each do |k, v|
+        request[k] = v
+      end
+
+      # TODO: test http proxies
+      http = Net::HTTP.new(uri.host, uri.port)
+
+      if uri.is_a?(URI::HTTPS)
+        http.use_ssl = true
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      end
+
+      print_request(request) if @trace
 
       before = Time.now
-
-      RestClient::Request.execute(req) do |response, request, result, &block|
+      http.start do
+        response = http.request(request)
         time = Time.now - before
 
-        print_trace(request, response, caller) if @trace
+        print_response(response) if @trace
+        print_backtrace(caller) if @trace
+
         log_request(time, request, response)
 
-        if [:get, :head].include?(method) && \
-            [301, 302, 307].include?(response.code) && \
-            accept != :headers
-          response.follow_redirection(request, result, &block)
+        if [Net::HTTP::Get, Net::HTTP::Head].include?(method) && \
+            response.is_a?(Net::HTTPRedirection) && accept != :headers
+          request_uri(URI.parse(response["location"]), method, original_options)
         else
           handle_response(response, accept)
         end
@@ -159,19 +194,19 @@ module CFoundry
     end
 
     def get(*path)
-      request_with_types(:get, path)
+      request_with_types(Net::HTTP::Get, path)
     end
 
     def delete(*path)
-      request_with_types(:delete, path)
+      request_with_types(Net::HTTP::Delete, path)
     end
 
     def post(payload, *path)
-      request_with_types(:post, path, :payload => payload)
+      request_with_types(Net::HTTP::Post, path, :payload => payload)
     end
 
     def put(payload, *path)
-      request_with_types(:put, path, :payload => payload)
+      request_with_types(Net::HTTP::Put, path, :payload => payload)
     end
 
     def url(segments)
@@ -188,12 +223,12 @@ module CFoundry
       { :time => time,
         :request => {
           :method => request.method,
-          :url => request.url,
-          :headers => request.headers
+          :url => request.path,
+          :headers => sane_headers(request)
         },
         :response => {
           :code => response.code,
-          :headers => response.headers
+          :headers => sane_headers(response)
         }
       }
     end
@@ -243,20 +278,22 @@ module CFoundry
       end
     end
 
-    def print_trace(request, response, locs)
+    def print_request(request)
       $stderr.puts ">>>"
-      $stderr.puts "PROXY: #{RestClient.proxy}" if RestClient.proxy
-      $stderr.puts "REQUEST: #{request.method} #{request.url}"
-      $stderr.puts "RESPONSE_HEADERS:"
-      response.headers.each do |key, value|
-        $stderr.puts "    #{key} : #{value}"
-      end
+      $stderr.puts "REQUEST: #{request.method} #{request.path}"
       $stderr.puts "REQUEST_HEADERS:"
-      request.headers.each do |key, value|
-        $stderr.puts "    #{key} : #{value}"
+      request.each_header do |key, value|
+        $stderr.puts "  #{key} : #{value}"
       end
-      $stderr.puts "REQUEST_BODY: #{request.payload}" if request.payload
+      $stderr.puts "REQUEST_BODY: #{request.body}" if request.body
+    end
+
+    def print_response(response)
       $stderr.puts "RESPONSE: [#{response.code}]"
+      $stderr.puts "RESPONSE_HEADERS:"
+      response.each_header do |key, value|
+        $stderr.puts "  #{key} : #{value}"
+      end
       begin
         parsed_body = MultiJson.load(response.body)
         $stderr.puts MultiJson.dump(parsed_body, :pretty => true)
@@ -264,7 +301,9 @@ module CFoundry
         $stderr.puts "#{response.body}"
       end
       $stderr.puts "<<<"
+    end
 
+    def print_backtrace(locs)
       return unless @backtrace
 
       interesting_locs = locs.drop_while { |loc|
@@ -287,28 +326,38 @@ module CFoundry
     def handle_response(response, accept)
       json = accept == :json
 
-      case response.code
-      when 200, 201, 204, 301, 302, 307
+      case response
+      when Net::HTTPSuccess, Net::HTTPRedirection
         if accept == :headers
           return response.headers
         end
 
         if json
-          if response.code == 204
+          if response.is_a?(Net::HTTPNoContent)
             raise "Expected JSON response, got 204 No Content"
           end
 
-          parse_json(response)
+          parse_json(response.body)
         else
-          response
+          response.body
         end
 
-      when 404
+      when Net::HTTPNotFound
         raise CFoundry::NotFound
 
       else
-        raise CFoundry::BadResponse.new(response.code, response)
+        raise CFoundry::BadResponse.new(response.code, response.body)
       end
+    end
+
+    def sane_headers(obj)
+      hds = {}
+
+      obj.each_header do |k, v|
+        hds[k] = v
+      end
+
+      hds
     end
   end
 end

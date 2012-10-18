@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.test_files    = Dir.glob("spec/**/*")
   s.require_paths = ["lib"]
 
-  s.add_dependency "rest-client", "~> 1.6.1"
+  s.add_dependency "multipart-post", "~> 1.1.0"
   s.add_dependency "multi_json", "~> 1.3.6"
   s.add_dependency "rubyzip", "~> 0.9.9"
 

@@ -28,7 +28,7 @@ module CFoundry
           { :credentials => credentials },
           "oauth", "authorize",
           :form => :headers,
-          :params => query)[:location])
+          :params => query)["location"])
     end
 
     def users
@@ -50,46 +50,42 @@ module CFoundry
     def handle_response(response, accept)
       json = accept == :json
 
-      case response.code
-      when 200, 204, 302
+      case response
+      when Net::HTTPSuccess, Net::HTTPRedirection
         if accept == :headers
-          return response.headers
+          return sane_headers(response)
         end
 
         if json
-          if response.code == 204
+          if response.is_a?(Net::HTTPNoContent)
             raise "Expected JSON response, got 204 No Content"
           end
 
-          parse_json(response)
+          parse_json(response.body)
         else
-          response
+          response.body
         end
 
-      when 400, 403
-        info = parse_json(response)
-        raise Denied.new(403, info[:error_description])
+      when Net::BadRequest, Net::HTTPUnauthorized, Net::HTTPForbidden
+        info = parse_json(response.body)
+        raise Denied.new(response.code, info[:error_description])
 
-      when 401
-        info = parse_json(response)
-        raise Denied.new(401, info[:error_description])
-
-      when 404
+      when Net::HTTPNotFound
         raise NotFound
 
-      when 409
-        info = parse_json(response)
-        raise CFoundry::Denied.new(409, info[:message])
+      when Net::HTTPConflict
+        info = parse_json(response.body)
+        raise CFoundry::Denied.new(response.code, info[:message])
 
-      when 411, 500, 504
+      when Net::HTTPServerError
         begin
-          raise_error(parse_json(response))
+          raise_error(parse_json(response.body))
         rescue MultiJson::DecodeError
-          raise BadResponse.new(response.code, response)
+          raise BadResponse.new(response.code, response.body)
         end
 
       else
-        raise BadResponse.new(response.code, response)
+        raise BadResponse.new(response.code, response.body)
       end
     end
 

@@ -212,7 +212,7 @@ module CFoundry::V2
         send(
           :"make_#{singular}",
           @base.request_path(
-            :get,
+            Net::HTTP::Get,
             path,
             nil => :json,
             :params => @base.params_from(args)))
@@ -224,7 +224,7 @@ module CFoundry::V2
         objs = @base.all_pages(
           params,
           @base.request_path(
-            :get,
+            Net::HTTP::Get,
             path,
             nil => :json,
             :params => params))

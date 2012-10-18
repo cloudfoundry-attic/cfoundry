@@ -145,7 +145,7 @@ module CFoundry::V2
           Model.validate_type(x, CFoundry::V2.const_get(kls))
 
           @client.base.request_path(
-            :put,
+            Net::HTTP::Put,
             ["v2", "#{object_name}s", @guid, plural, x.guid],
             nil => :json)
         }
@@ -155,7 +155,7 @@ module CFoundry::V2
           Model.validate_type(x, CFoundry::V2.const_get(kls))
 
           @client.base.request_path(
-            :delete,
+            Net::HTTP::Delete,
             ["v2", "#{object_name}s", @guid, plural, x.guid],
             nil => :json)
         }
