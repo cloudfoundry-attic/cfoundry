@@ -17,21 +17,8 @@ module CFoundry
       @log = false
     end
 
-    def request_path(method, path, types = {}, options = {})
+    def request_path(method, path, options = {})
       path = url(path) if path.is_a?(Array)
-
-      unless types.empty?
-        if params = types.delete(:params)
-          options[:params] = params
-        end
-
-        if types.size > 1
-          raise "request types must contain only one Content-Type => Accept"
-        end
-
-        options[:type] = types.keys.first
-        options[:accept] = types.values.first
-      end
 
       request(method, path, options)
     end
@@ -71,9 +58,10 @@ module CFoundry
       original_options = options.dup
 
       accept = options.delete(:accept)
-      type = options.delete(:type)
+      content = options.delete(:content)
       payload = options.delete(:payload)
       params = options.delete(:params)
+      return_headers = options.delete(:return_headers)
 
       headers = {}
       headers["Authorization"] = @token if @token
@@ -83,12 +71,12 @@ module CFoundry
         headers["Accept"] = accept_type
       end
 
-      if content_type = mimetype(type)
+      if content_type = mimetype(content)
         headers["Content-Type"] = content_type
       end
 
       unless payload.is_a?(String)
-        case type
+        case content
         when :json
           payload = MultiJson.dump(payload)
         when :form
@@ -147,8 +135,10 @@ module CFoundry
 
         log_request(time, request, response)
 
-        if [Net::HTTP::Get, Net::HTTP::Head].include?(method) && \
-            response.is_a?(Net::HTTPRedirection) && accept != :headers
+        if return_headers
+          sane_headers(response)
+        elsif [Net::HTTP::Get, Net::HTTP::Head].include?(method) && \
+            response.is_a?(Net::HTTPRedirection)
           request_uri(URI.parse(response["location"]), method, original_options)
         else
           handle_response(response, accept)
@@ -158,10 +148,10 @@ module CFoundry
       raise TargetRefused, e.message
     end
 
-    def mimetype(type)
-      case type
+    def mimetype(content)
+      case content
       when String
-        type
+        content
       when :json
         "application/json"
       when :form
@@ -169,10 +159,8 @@ module CFoundry
       when nil
         nil
       # return request headers (not really Accept)
-      when :headers
-        nil
       else
-        raise "unknown mimetype #{type.inspect}"
+        raise "unknown mimetype #{content.inspect}"
       end
     end
 
@@ -185,28 +173,26 @@ module CFoundry
       end.join("&")
     end
 
-    def request_with_types(method, path, options = {})
-      if path.last.is_a?(Hash)
-        types = path.pop
-      end
+    def request_with_options(method, path, options = {})
+      options.merge!(path.pop) if path.last.is_a?(Hash)
 
-      request_path(method, url(path), types || {}, options)
+      request_path(method, url(path), options)
     end
 
     def get(*path)
-      request_with_types(Net::HTTP::Get, path)
+      request_with_options(Net::HTTP::Get, path)
     end
 
     def delete(*path)
-      request_with_types(Net::HTTP::Delete, path)
+      request_with_options(Net::HTTP::Delete, path)
     end
 
     def post(payload, *path)
-      request_with_types(Net::HTTP::Post, path, :payload => payload)
+      request_with_options(Net::HTTP::Post, path, :payload => payload)
     end
 
     def put(payload, *path)
-      request_with_types(Net::HTTP::Put, path, :payload => payload)
+      request_with_options(Net::HTTP::Put, path, :payload => payload)
     end
 
     def url(segments)
@@ -324,15 +310,9 @@ module CFoundry
     end
 
     def handle_response(response, accept)
-      json = accept == :json
-
       case response
       when Net::HTTPSuccess, Net::HTTPRedirection
-        if accept == :headers
-          return response.headers
-        end
-
-        if json
+        if accept == :json
           if response.is_a?(Net::HTTPNoContent)
             raise "Expected JSON response, got 204 No Content"
           end

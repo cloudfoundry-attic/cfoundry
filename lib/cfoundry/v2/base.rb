@@ -35,7 +35,7 @@ module CFoundry::V2
 
     # Cloud metadata
     def info
-      get("info", nil => :json)
+      get("info", :accept => :json)
     end
 
 
@@ -51,11 +51,11 @@ module CFoundry::V2
 
         params = { :"inline-relations-depth" => depth }
 
-        get("v2", plural, guid, nil => :json, :params => params)
+        get("v2", plural, guid, :accept => :json, :params => params)
       end
 
       define_method(:"create_#{obj}") do |payload|
-        post(payload, "v2", plural, :json => :json)
+        post(payload, "v2", plural, :content => :json, :accept => :json)
       end
 
       define_method(:"delete_#{obj}") do |guid|
@@ -64,7 +64,7 @@ module CFoundry::V2
       end
 
       define_method(:"update_#{obj}") do |guid, payload|
-        put(payload, "v2", plural, guid, :json => :json)
+        put(payload, "v2", plural, guid, :content => :json, :accept => :json)
       end
 
       define_method(plural) do |*args|
@@ -72,12 +72,13 @@ module CFoundry::V2
 
         all_pages(
           params,
-          get("v2", plural, nil => :json, :params => params))
+          get("v2", plural, :accept => :json, :params => params))
       end
     end
 
     def resource_match(fingerprints)
-      put(fingerprints, "v2", "resource_match", :json => :json)
+      put(fingerprints, "v2", "resource_match",
+          :content => :json, :accept => :json)
     end
 
     def upload_app(guid, zipfile, resources = [])
@@ -104,15 +105,15 @@ module CFoundry::V2
     alias :file :files
 
     def instances(guid)
-      get("v2", "apps", guid, "instances", nil => :json)
+      get("v2", "apps", guid, "instances", :accept => :json)
     end
 
     def crashes(guid)
-      get("v2", "apps", guid, "crashes", nil => :json)
+      get("v2", "apps", guid, "crashes", :accept => :json)
     end
 
     def stats(guid)
-      get("v2", "apps", guid, "stats", nil => :json)
+      get("v2", "apps", guid, "stats", :accept => :json)
     end
 
 
@@ -134,7 +135,7 @@ module CFoundry::V2
 
       while next_page = paginated[:next_url]
         paginated = request_path(
-          Net::HTTP::Get, next_page, nil => :json, :params => params)
+          Net::HTTP::Get, next_page, :accept => :json, :params => params)
 
         payload += paginated[:resources]
       end
@@ -145,15 +146,13 @@ module CFoundry::V2
     private
 
     def handle_response(response, accept)
-      json = accept == :json
-
       case response
       when Net::HTTPSuccess, Net::HTTPRedirection
         if accept == :headers
           return sane_headers(response)
         end
 
-        if json
+        if accept == :json
           if response.is_a?(Net::HTTPNoContent)
             raise "Expected JSON response, got 204 No Content"
           end

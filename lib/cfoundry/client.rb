@@ -19,7 +19,7 @@ module CFoundry
     end
 
     def info
-      get("info", nil => :json)
+      get("info", :accept => :json)
     end
   end
 end

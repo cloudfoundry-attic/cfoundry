@@ -214,7 +214,7 @@ module CFoundry::V2
           @base.request_path(
             Net::HTTP::Get,
             path,
-            nil => :json,
+            :accept => :json,
             :params => @base.params_from(args)))
       end
 
@@ -226,7 +226,7 @@ module CFoundry::V2
           @base.request_path(
             Net::HTTP::Get,
             path,
-            nil => :json,
+            :accept => :json,
             :params => params))
 
         objs.collect do |json|

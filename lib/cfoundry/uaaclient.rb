@@ -13,7 +13,7 @@ module CFoundry
     end
 
     def prompts
-      get("login", nil => :json)[:prompts]
+      get("login", :accept => :json)[:prompts]
     end
 
     def authorize(credentials)
@@ -27,12 +27,14 @@ module CFoundry
         post(
           { :credentials => credentials },
           "oauth", "authorize",
-          :form => :headers,
+          :return_headers => true,
+          :content => :form,
+          :accept => :json,
           :params => query)["location"])
     end
 
     def users
-      get("Users", nil => :json)
+      get("Users", :accept => :json)
     end
 
     def change_password(guid, new, old)
@@ -42,21 +44,15 @@ module CFoundry
           :oldPassword => old
         },
         "User", guid, "password",
-        :json => nil)
+        :content => :json)
     end
 
     private
 
     def handle_response(response, accept)
-      json = accept == :json
-
       case response
       when Net::HTTPSuccess, Net::HTTPRedirection
-        if accept == :headers
-          return sane_headers(response)
-        end
-
-        if json
+        if accept == :json
           if response.is_a?(Net::HTTPNoContent)
             raise "Expected JSON response, got 204 No Content"
           end

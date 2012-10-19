@@ -147,7 +147,7 @@ module CFoundry::V2
           @client.base.request_path(
             Net::HTTP::Put,
             ["v2", "#{object_name}s", @guid, plural, x.guid],
-            nil => :json)
+            :accept => :json)
         }
 
         define_method(:"remove_#{singular}") { |x|
@@ -157,7 +157,7 @@ module CFoundry::V2
           @client.base.request_path(
             Net::HTTP::Delete,
             ["v2", "#{object_name}s", @guid, plural, x.guid],
-            nil => :json)
+            :accept => :json)
         }
 
         define_method(:"#{plural}=") { |xs|

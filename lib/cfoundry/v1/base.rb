@@ -34,62 +34,63 @@ module CFoundry::V1
 
     # Cloud metadata
     def info
-      get("info", nil => :json)
+      get("info", :accept => :json)
     end
 
     def system_services
-      get("info", "services", nil => :json)
+      get("info", "services", :accept => :json)
     end
 
     def system_runtimes
-      get("info", "runtimes", nil => :json)
+      get("info", "runtimes", :accept => :json)
     end
 
     # Users
     def users
-      get("users", nil => :json)
+      get("users", :accept => :json)
     end
 
     def create_user(payload)
-      post(payload, "users", :json => nil)
+      post(payload, "users", :content => :json)
     end
 
     def user(email)
-      get("users", email, nil => :json)
+      get("users", email, :accept => :json)
     end
 
     def delete_user(email)
-      delete("users", email, nil => :json)
+      delete("users", email, :accept => :json)
       true
     end
 
     def update_user(email, payload)
-      put(payload, "users", email, :json => nil)
+      put(payload, "users", email, :content => :json)
     end
 
     def create_token(payload, email)
-      post(payload, "users", email, "tokens", :json => :json)
+      post(payload, "users", email, "tokens",
+           :content => :json, :accept => :json)
     end
 
     # Applications
     def apps
-      get("apps", nil => :json)
+      get("apps", :accept => :json)
     end
 
     def create_app(payload)
-      post(payload, "apps", :json => :json)
+      post(payload, "apps", :content => :json, :accept => :json)
     end
 
     def app(name)
-      get("apps", name, nil => :json)
+      get("apps", name, :accept => :json)
     end
 
     def instances(name)
-      get("apps", name, "instances", nil => :json)[:instances]
+      get("apps", name, "instances", :accept => :json)[:instances]
     end
 
     def crashes(name)
-      get("apps", name, "crashes", nil => :json)[:crashes]
+      get("apps", name, "crashes", :accept => :json)[:crashes]
     end
 
     def files(name, instance, *path)
@@ -98,7 +99,7 @@ module CFoundry::V1
     alias :file :files
 
     def update_app(name, payload)
-      put(payload, "apps", name, :json => nil)
+      put(payload, "apps", name, :content => :json)
     end
 
     def delete_app(name)
@@ -107,11 +108,11 @@ module CFoundry::V1
     end
 
     def stats(name)
-      get("apps", name, "stats", nil => :json)
+      get("apps", name, "stats", :accept => :json)
     end
 
     def check_resources(fingerprints)
-      post(fingerprints, "resources", :json => :json)
+      post(fingerprints, "resources", :content => :json, :accept => :json)
     end
 
     def upload_app(name, zipfile, resources = [])
@@ -135,34 +136,28 @@ module CFoundry::V1
 
     # Services
     def services
-      get("services", nil => :json)
+      get("services", :accept => :json)
     end
 
     def create_service(manifest)
-      post(manifest, "services", :json => :json)
+      post(manifest, "services", :content => :json, :accept => :json)
     end
 
     def service(name)
-      get("services", name, nil => :json)
+      get("services", name, :accept => :json)
     end
 
     def delete_service(name)
-      delete("services", name, nil => :json)
+      delete("services", name, :accept => :json)
       true
     end
 
     private
 
     def handle_response(response, accept)
-      json = accept == :json
-
       case response
       when Net::HTTPSuccess, Net::HTTPRedirection
-        if accept == :headers
-          return sane_headers(response)
-        end
-
-        if json
+        if accept == :json
           if response.is_a?(Net::HTTPNoContent)
             raise "Expected JSON response, got 204 No Content"
           end
