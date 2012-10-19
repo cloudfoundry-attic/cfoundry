@@ -74,7 +74,6 @@ module CFoundry::V2
           params,
           get("v2", plural, nil => :json, :params => params))
       end
-
     end
 
     def resource_match(fingerprints)
@@ -155,7 +154,7 @@ module CFoundry::V2
         end
 
         if json
-          if response.is_a?(Net:::HTTPNoContent)
+          if response.is_a?(Net::HTTPNoContent)
             raise "Expected JSON response, got 204 No Content"
           end
 

@@ -66,7 +66,7 @@ module CFoundry
           response.body
         end
 
-      when Net::BadRequest, Net::HTTPUnauthorized, Net::HTTPForbidden
+      when Net::HTTPBadRequest, Net::HTTPUnauthorized, Net::HTTPForbidden
         info = parse_json(response.body)
         raise Denied.new(response.code, info[:error_description])
 

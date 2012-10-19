@@ -108,7 +108,7 @@ module CFoundry
         if uri.query
           uri.query += "&" + encode_params(params)
         else
-          uri.query = "?" + encode_params(params)
+          uri.query = encode_params(params)
         end
       end
 
