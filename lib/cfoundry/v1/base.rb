@@ -38,7 +38,7 @@ module CFoundry::V1
     end
 
     def system_services
-      get("info", "services", :accept => :json)
+      get("services", "v1", "offerings", :content => :json, :accept => :json)
     end
 
     def system_runtimes

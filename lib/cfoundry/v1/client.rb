@@ -87,10 +87,13 @@ module CFoundry::V1
       services = []
 
       @base.system_services.each do |type, vendors|
-        vendors.each do |vendor, versions|
-          versions.each do |num, meta|
-            services <<
-              Service.new(vendor.to_s, num.to_s, meta[:description], type)
+        vendors.each do |vendor, providers|
+          providers.each do |provider, versions|
+            versions.each do |num, meta|
+              services <<
+                Service.new(vendor.to_s, num.to_s, meta[:description],
+                            type, provider.to_s)
+            end
           end
         end
       end
