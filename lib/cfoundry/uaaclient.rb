@@ -23,14 +23,24 @@ module CFoundry
         :redirect_uri => @redirect_uri
       }
 
-      extract_token(
+      auth =
         post(
           { :credentials => credentials },
           "oauth", "authorize",
-          :return_headers => true,
+          :return_response => true,
           :content => :form,
           :accept => :json,
-          :params => query)["location"])
+          :params => query)
+
+      case auth
+      when Net::HTTPRedirection
+        extract_token(auth["location"])
+      else
+        json = parse_json(auth.body)
+        raise CFoundry::Denied.new(
+          auth.code.to_i,
+          json[:error_description])
+      end
     end
 
     def users

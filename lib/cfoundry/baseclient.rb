@@ -62,6 +62,7 @@ module CFoundry
       payload = options.delete(:payload)
       params = options.delete(:params)
       return_headers = options.delete(:return_headers)
+      return_response = options.delete(:return_response)
 
       headers = {}
       headers["Authorization"] = @token if @token
@@ -137,6 +138,8 @@ module CFoundry
 
         if return_headers
           sane_headers(response)
+        elsif return_response
+          response
         elsif [Net::HTTP::Get, Net::HTTP::Head].include?(method) && \
             response.is_a?(Net::HTTPRedirection)
           request_uri(URI.parse(response["location"]), method, original_options)
