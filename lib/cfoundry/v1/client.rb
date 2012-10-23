@@ -24,6 +24,16 @@ module CFoundry::V1
       @base.target
     end
 
+    # Current authentication token.
+    def token
+      @base.token
+    end
+
+    # Set the authentication token.
+    def token=(token)
+      @base.token = token
+    end
+
     # Current proxy user. Usually nil.
     def proxy
       @base.proxy
