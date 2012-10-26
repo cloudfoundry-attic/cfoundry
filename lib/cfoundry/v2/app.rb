@@ -155,18 +155,40 @@ module CFoundry::V2
     #
     # Otherwise, returns application's status.
     def health
-      state
+      if state == "STARTED"
+        healthy_count = running_instances
+        expected = total_instances
+
+        if expected > 0
+          ratio = healthy_count / expected.to_f
+          if ratio == 1.0
+            "RUNNING"
+          else
+            "#{(ratio * 100).to_i}%"
+          end
+        else
+          "N/A"
+        end
+      else
+        state
+      end
+    end
+
+    def running_instances
+      running = 0
+
+      instances.each do |i|
+        running += 1 if i.state == "RUNNING"
+      end
+
+      running
     end
 
     # Check that all application instances are running.
     def healthy?
       # invalidate cache so the check is fresh
       @manifest = nil
-
-      case health
-      when "RUNNING", "STARTED"
-        true
-      end
+      health == "RUNNING"
     end
     alias_method :running?, :healthy?
 
