@@ -78,11 +78,19 @@ module CFoundry::V2
           $1 + $2.upcase
         end
 
+        default = opts[:default]
+
+        if has_default = opts.key?(:default)
+          defaults[:"#{name}_guid"] = default
+        end
+
         define_method(name) {
           if @manifest && @manifest[:entity].key?(name)
             @client.send(:"make_#{obj}", @manifest[:entity][name])
           elsif url = send("#{name}_url")
             @client.send(:"#{obj}_from", url, opts[:depth] || 1)
+          else
+            default
           end
         }
 
@@ -91,12 +99,14 @@ module CFoundry::V2
         }
 
         define_method(:"#{name}=") { |x|
-          Model.validate_type(x, CFoundry::V2.const_get(kls))
+          unless has_default && x == default
+            Model.validate_type(x, CFoundry::V2.const_get(kls))
+          end
 
           @manifest ||= {}
           @manifest[:entity] ||= {}
           @manifest[:entity][:"#{name}_guid"] =
-            @diff[:"#{name}_guid"] = x.guid
+            @diff[:"#{name}_guid"] = x && x.guid
         }
       end
 
