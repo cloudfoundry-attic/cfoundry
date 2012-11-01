@@ -42,10 +42,11 @@ module CFoundry::V2
       end
 
       def attribute(name, type, opts = {})
-        default = opts[:default] || nil
+        default = opts[:default]
 
-        has_default = opts.key?(:default)
-        defaults[name] = default if has_default
+        if has_default = opts.key?(:default)
+          defaults[name] = default
+        end
 
         define_method(name) {
           manifest[:entity][name] || default
@@ -80,11 +81,8 @@ module CFoundry::V2
         define_method(name) {
           if @manifest && @manifest[:entity].key?(name)
             @client.send(:"make_#{obj}", @manifest[:entity][name])
-          else
-            @client.send(
-              :"#{obj}_from",
-              send("#{name}_url"),
-              opts[:depth] || 1)
+          elsif url = send("#{name}_url")
+            @client.send(:"#{obj}_from", url, opts[:depth] || 1)
           end
         }
 
