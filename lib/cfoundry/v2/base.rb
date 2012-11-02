@@ -186,7 +186,7 @@ module CFoundry::V2
         "[%s]  %0.3fs  %s  %6s -> %d  %s\n",
         Time.now.strftime("%F %T"),
         data[:time],
-        data[:response][:headers][:x_vcap_request_id],
+        data[:response][:headers]["x-vcap-request-id"],
         data[:request][:method].to_s.upcase,
         data[:response][:code],
         data[:request][:url])
