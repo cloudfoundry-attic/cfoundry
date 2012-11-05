@@ -111,7 +111,7 @@ module CFoundry::V2
           route = @client.route
           route.host = host
           route.domain = domain
-          route.organization = @client.current_organization
+          route.space = space
           route.create!
         end
 
