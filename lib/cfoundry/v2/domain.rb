@@ -5,5 +5,8 @@ module CFoundry::V2
     attribute :name, :string
     attribute :wildcard, :boolean, :default => true
     to_one    :owning_organization, :as => :organization, :default => nil
+
+    # hide wildcard support for now
+    private :wildcard=
   end
 end
