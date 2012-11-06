@@ -117,7 +117,8 @@ module CFoundry::V1
 
       @base.system_runtimes.each do |name, meta|
         runtimes <<
-          Runtime.new(name.to_s, meta[:version], meta[:debug_modes])
+          Runtime.new(name.to_s, meta[:description], meta[:debug_modes],
+            meta[:version], meta[:status], meta[:series], meta[:category])
       end
 
       runtimes
@@ -135,7 +136,8 @@ module CFoundry::V1
       frameworks = []
       fs.each do |name, meta|
         runtimes = meta[:runtimes].collect do |r|
-          Runtime.new(r[:name], r[:description])
+          Runtime.new(r[:name], r[:description], nil, meta[:version],
+            meta[:status], meta[:series], meta[:category])
         end
 
         frameworks <<
