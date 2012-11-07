@@ -23,5 +23,17 @@ module CFoundry::V1
     def apps
       [] # not supported by v1
     end
+
+    def deprecated?
+      status && status[:name] == "deprecated"
+    end
+
+    def next?
+      status && status[:name] == "next"
+    end
+
+    def current?
+      status.nil? || status[:name] == "current"
+    end
   end
 end
