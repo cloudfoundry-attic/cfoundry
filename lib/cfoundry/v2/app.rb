@@ -27,7 +27,7 @@ module CFoundry::V2
     attribute :instances,        :integer, :default => 1
     attribute :file_descriptors, :integer, :default => 256
     attribute :disk_quota,       :integer, :default => 256
-    attribute :state,            :integer, :default => "STOPPED"
+    attribute :state,            :string,  :default => "STOPPED"
     attribute :command,          :string,  :default => nil
     attribute :console,          :boolean, :default => false
     to_many   :service_bindings
