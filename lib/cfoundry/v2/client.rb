@@ -166,9 +166,9 @@ module CFoundry::V2
       has_name = klass.method_defined? :name
 
       define_method(singular) do |*args|
-        guid, _ = args
+        guid, partial, _ = args
 
-        x = klass.new(guid, self)
+        x = klass.new(guid, self, nil, partial)
 
         # when creating an object, automatically set the org/space
         unless guid

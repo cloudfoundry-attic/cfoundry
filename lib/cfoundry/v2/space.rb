@@ -12,5 +12,7 @@ module CFoundry::V2
     to_many   :service_instances
 
     scoped_to_organization
+
+    has_summary
   end
 end

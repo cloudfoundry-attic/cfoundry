@@ -41,7 +41,21 @@ module CFoundry::V2
         @defaults ||= {}
       end
 
+      def attributes
+        @attributes ||= {}
+      end
+
+      def to_one_relations
+        @to_one_relations ||= {}
+      end
+
+      def to_many_relations
+        @to_many_relations ||= {}
+      end
+
       def attribute(name, type, opts = {})
+        attributes[name] = opts
+
         default = opts[:default]
 
         if has_default = opts.key?(:default)
@@ -77,6 +91,8 @@ module CFoundry::V2
       end
 
       def to_one(name, opts = {})
+        to_one_relations[name] = opts
+
         obj = opts[:as] || name
         kls = obj.to_s.capitalize.gsub(/(.)_(.)/) do
           $1 + $2.upcase
@@ -120,6 +136,8 @@ module CFoundry::V2
       end
 
       def to_many(plural, opts = {})
+        to_many_relations[plural] = opts
+
         singular = plural.to_s.sub(/s$/, "").to_sym
 
         object = opts[:as] || singular
@@ -200,22 +218,68 @@ module CFoundry::V2
             @diff[:"#{singular}_guids"] = xs.collect(&:guid)
         }
       end
+
+      def has_summary(actions = {})
+        define_method(:summary) do
+          @client.base.request_path(
+            Net::HTTP::Get,
+            ["v2", "#{object_name}s", @guid, "summary"],
+            :accept => :json)
+        end
+
+        define_method(:summarize!) do |*args|
+          body, _ = args
+
+          body ||= summary
+
+          body.each do |key, val|
+            if act = actions[key]
+              instance_exec(val, &act)
+
+            elsif self.class.attributes[key]
+              self.send(:"#{key}=", val)
+
+            elsif self.class.to_many_relations[key]
+              singular = key.to_s.sub(/s$/, "").to_sym
+
+              vals = val.collect { |sub|
+                obj = @client.send(singular, sub[:guid], true)
+                obj.summarize! sub
+                obj
+              }
+
+              self.send(:"#{key}=", vals)
+
+            elsif self.class.to_one_relations[key]
+              obj = @client.send(key, val[:guid], true)
+              obj.summarize! val
+
+              self.send(:"#{key}=", obj)
+            end
+          end
+
+          nil
+        end
+      end
     end
 
-    attr_reader :guid
+    attr_accessor :guid, :cache
 
-    attr_accessor :cache
-
-    def initialize(guid, client, manifest = nil)
+    def initialize(guid, client, manifest = nil, partial = false)
       @guid = guid
       @client = client
       @manifest = manifest
+      @partial = partial
       @cache = {}
       @diff = {}
     end
 
     def manifest
       @manifest ||= @client.base.send(object_name, @guid)
+    end
+
+    def partial?
+      @partial
     end
 
     def inspect
@@ -231,6 +295,7 @@ module CFoundry::V2
 
     def invalidate!
       @manifest = nil
+      @partial = false
       @cache = {}
       @diff = {}
     end

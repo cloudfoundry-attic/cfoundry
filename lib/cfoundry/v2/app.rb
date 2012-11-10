@@ -35,6 +35,43 @@ module CFoundry::V2
 
     scoped_to_space
 
+    has_summary :urls => proc { |x| self.cache[:uris] = x },
+      :running_instances => proc { |x|
+        self.cache[:running_instances] = x
+      },
+
+      # TODO: remove these when cc consistently returns nested hashes
+      :framework_guid => proc { |x|
+        if f = self.cache[:framework]
+          f.guid = x
+        else
+          self.framework = @client.framework(x, true)
+        end
+      },
+      :framework_name => proc { |x|
+        if f = self.cache[:framework]
+          f.name = x
+        else
+          self.framework = @client.framework(nil, true)
+          self.framework.name = x
+        end
+      },
+      :runtime_guid => proc { |x|
+        if f = self.cache[:runtime]
+          f.guid = x
+        else
+          self.runtime = @client.runtime(x, true)
+        end
+      },
+      :runtime_name => proc { |x|
+        if f = self.cache[:runtime]
+          f.name = x
+        else
+          self.runtime = @client.runtime(nil, true)
+          self.runtime.name = x
+        end
+      }
+
     alias :total_instances :instances
     alias :total_instances= :instances=
 
