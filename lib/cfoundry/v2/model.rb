@@ -49,13 +49,17 @@ module CFoundry::V2
         end
 
         define_method(name) {
-          manifest[:entity][name] || default
+          return @cache[name] if @cache.key?(name)
+
+          @cache[name] = manifest[:entity][name] || default
         }
 
         define_method(:"#{name}=") { |val|
           unless has_default && val == default
             Model.validate_type(val, type)
           end
+
+          @cache[name] = val
 
           @manifest ||= {}
           @manifest[:entity] ||= {}
@@ -85,13 +89,16 @@ module CFoundry::V2
         end
 
         define_method(name) {
-          if @manifest && @manifest[:entity].key?(name)
-            @client.send(:"make_#{obj}", @manifest[:entity][name])
-          elsif url = send("#{name}_url")
-            @client.send(:"#{obj}_from", url, opts[:depth] || 1)
-          else
-            default
-          end
+          return @cache[name] if @cache.key?(name)
+
+          @cache[name] =
+            if @manifest && @manifest[:entity].key?(name)
+              @client.send(:"make_#{obj}", @manifest[:entity][name])
+            elsif url = send("#{name}_url")
+              @client.send(:"#{obj}_from", url, opts[:depth] || 1)
+            else
+              default
+            end
         }
 
         define_method(:"#{name}_url") {
@@ -102,6 +109,8 @@ module CFoundry::V2
           unless has_default && x == default
             Model.validate_type(x, CFoundry::V2.const_get(kls))
           end
+
+          @cache[name] = x
 
           @manifest ||= {}
           @manifest[:entity] ||= {}
@@ -121,6 +130,10 @@ module CFoundry::V2
         end
 
         define_method(plural) { |*args|
+          if cache = @cache[plural]
+            return cache
+          end
+
           depth, query = args
 
           if @manifest && @manifest[:entity].key?(plural) && !depth
@@ -132,15 +145,17 @@ module CFoundry::V2
               objs = objs.select { |o| o[:entity][find_by] == find_val }
             end
 
-            objs.collect do |json|
-              @client.send(:"make_#{object}", json)
-            end
+            @cache[plural] =
+              objs.collect do |json|
+                @client.send(:"make_#{object}", json)
+              end
           else
-            @client.send(
-              :"#{plural_object}_from",
-              "/v2/#{object_name}s/#@guid/#{plural}",
-              depth || opts[:depth],
-              query)
+            @cache[plural] =
+              @client.send(
+                :"#{plural_object}_from",
+                "/v2/#{object_name}s/#@guid/#{plural}",
+                depth || opts[:depth],
+                query)
           end
         }
 
@@ -149,8 +164,11 @@ module CFoundry::V2
         }
 
         define_method(:"add_#{singular}") { |x|
-          # TODO: reflect this change in the app manifest?
           Model.validate_type(x, CFoundry::V2.const_get(kls))
+
+          if cache = @cache[plural]
+            cache << x unless cache.include?(x)
+          end
 
           @client.base.request_path(
             Net::HTTP::Put,
@@ -159,8 +177,11 @@ module CFoundry::V2
         }
 
         define_method(:"remove_#{singular}") { |x|
-          # TODO: reflect this change in the app manifest?
           Model.validate_type(x, CFoundry::V2.const_get(kls))
+
+          if cache = @cache[plural]
+            cache.delete(x)
+          end
 
           @client.base.request_path(
             Net::HTTP::Delete,
@@ -170,6 +191,8 @@ module CFoundry::V2
 
         define_method(:"#{plural}=") { |xs|
           Model.validate_type(xs, [CFoundry::V2.const_get(kls)])
+
+          @cache[plural] = xs
 
           @manifest ||= {}
           @manifest[:entity] ||= {}
@@ -181,10 +204,13 @@ module CFoundry::V2
 
     attr_reader :guid
 
+    attr_accessor :cache
+
     def initialize(guid, client, manifest = nil)
       @guid = guid
       @client = client
       @manifest = manifest
+      @cache = {}
       @diff = {}
     end
 
@@ -205,6 +231,7 @@ module CFoundry::V2
 
     def invalidate!
       @manifest = nil
+      @cache = {}
       @diff = {}
     end
 

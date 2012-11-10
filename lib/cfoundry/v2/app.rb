@@ -81,6 +81,8 @@ module CFoundry::V2
     end
 
     def uris
+      return @cache[:uris] if @cache[:uris]
+
       routes.collect do |r|
         "#{r.host}.#{r.domain.name}"
       end
@@ -121,6 +123,10 @@ module CFoundry::V2
     alias :create_route :create_routes
 
     def uri
+      if uris = @cache[:uris]
+        return uris.first
+      end
+
       if route = routes.first
         "#{route.host}.#{route.domain.name}"
       end
@@ -175,6 +181,8 @@ module CFoundry::V2
     end
 
     def running_instances
+      return @cache[:running_instances] if @cache[:running_instances]
+
       running = 0
 
       instances.each do |i|
