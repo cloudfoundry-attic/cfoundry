@@ -148,11 +148,11 @@ module CFoundry::V2
         end
 
         define_method(plural) { |*args|
-          if cache = @cache[plural]
+          depth, query = args
+
+          if !depth && !query && cache = @cache[plural]
             return cache
           end
-
-          depth, query = args
 
           if @manifest && @manifest[:entity].key?(plural) && !depth
             objs = @manifest[:entity][plural]
@@ -163,18 +163,24 @@ module CFoundry::V2
               objs = objs.select { |o| o[:entity][find_by] == find_val }
             end
 
-            @cache[plural] =
+            res =
               objs.collect do |json|
                 @client.send(:"make_#{object}", json)
               end
           else
-            @cache[plural] =
+            res =
               @client.send(
                 :"#{plural_object}_from",
                 "/v2/#{object_name}s/#@guid/#{plural}",
                 depth || opts[:depth],
                 query)
           end
+
+          unless depth || query
+            @cache[plural] = res
+          end
+
+          res
         }
 
         define_method(:"#{plural}_url") {
