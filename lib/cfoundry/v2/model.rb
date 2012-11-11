@@ -33,7 +33,7 @@ module CFoundry::V2
 
       def validate_type(val, type)
         unless value_matches?(val, type)
-          raise "invalid attribute; expected #{type.inspect} but got #{val.inspect}"
+          raise CFoundry::Mismatch.new(type, val)
         end
       end
 

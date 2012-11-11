@@ -360,7 +360,7 @@ module CFoundry::V1
     #   Only do this if you know what you're doing.
     def upload(path, check_resources = true)
       unless File.exist? path
-        raise "invalid application path '#{path}'"
+        raise CFoundry::Error, "Invalid application path '#{path}'"
       end
 
       zipfile = "#{Dir.tmpdir}/#{@name}.zip"

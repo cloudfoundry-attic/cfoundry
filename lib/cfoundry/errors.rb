@@ -1,4 +1,20 @@
 module CFoundry
+  # Base class for CFoundry errors (not from the server).
+  class Error < RuntimeError; end
+
+  class Deprecated < Error; end
+
+  class Mismatch < Error
+    def initialize(expected, got)
+      @expected = expected
+      @got = got
+    end
+
+    def to_s
+      "Invalid value type; expected #{@expected.inspect}, got #{@got.inspect}"
+    end
+  end
+
   # Exception representing errors returned by the API.
   class APIError < RuntimeError
     class << self

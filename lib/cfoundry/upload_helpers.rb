@@ -88,7 +88,8 @@ module CFoundry
 
       unless unreachable.empty?
         root = Pathname.new(path).relative_path_from(pwd)
-        raise "Can't deploy application containing links '#{unreachable}' that reach outside its root '#{root}'"
+        raise CFoundry::Error,
+          "Path contains links '#{unreachable}' that point outside '#{root}'"
       end
     end
 

@@ -149,7 +149,9 @@ module CFoundry::V2
 
         if accept == :json
           if response.is_a?(Net::HTTPNoContent)
-            raise "Expected JSON response, got 204 No Content"
+            raise CFoundry::BadResponse.new(
+              204,
+              "Expected JSON response, got 204 No Content")
           end
 
           parse_json(response.body)

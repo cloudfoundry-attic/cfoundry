@@ -127,7 +127,8 @@ module CFoundry::V2
     alias :urls :uris
 
     def uris=(uris)
-      raise "App#uris= is invalid against V2 APIs. Use add/remove_route."
+      raise CFoundry::Deprecated,
+        "App#uris= is invalid against V2 APIs; use add/remove_route"
     end
     alias :urls= :uris=
 
@@ -140,7 +141,9 @@ module CFoundry::V2
             d.name == domain_name
           }
 
-        raise "Invalid domain '#{domain_name}'" unless domain
+        unless domain
+          raise CFoundry::Error, "Invalid domain '#{domain_name}'"
+        end
 
         route = @client.routes.find { |r|
           r.host == host && r.domain == domain
@@ -296,7 +299,7 @@ module CFoundry::V2
     #   Only do this if you know what you're doing.
     def upload(path, check_resources = true)
       unless File.exist? path
-        raise "invalid application path '#{path}'"
+        raise CFoundry::Error, "Invalid application path '#{path}'"
       end
 
       zipfile = "#{Dir.tmpdir}/#{@guid}.zip"

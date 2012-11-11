@@ -163,7 +163,7 @@ module CFoundry
         nil
       # return request headers (not really Accept)
       else
-        raise "unknown mimetype #{content.inspect}"
+        raise CFoundry::Error, "Unknown mimetype '#{content.inspect}'"
       end
     end
 
@@ -317,7 +317,9 @@ module CFoundry
       when Net::HTTPSuccess, Net::HTTPRedirection
         if accept == :json
           if response.is_a?(Net::HTTPNoContent)
-            raise "Expected JSON response, got 204 No Content"
+            raise CFoundry::BadResponse.new(
+              204,
+              "Expected JSON response, got 204 No Content")
           end
 
           parse_json(response.body)
