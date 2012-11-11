@@ -62,13 +62,13 @@ module CFoundry::V2
           defaults[name] = default
         end
 
-        define_method(name) {
+        define_method(name) do
           return @cache[name] if @cache.key?(name)
 
           @cache[name] = manifest[:entity][name] || default
-        }
+        end
 
-        define_method(:"#{name}=") { |val|
+        define_method(:"#{name}=") do |val|
           unless has_default && val == default
             Model.validate_type(val, type)
           end
@@ -79,7 +79,7 @@ module CFoundry::V2
           @manifest[:entity] ||= {}
           @manifest[:entity][name] = val
           @diff[name] = val
-        }
+        end
       end
 
       def scoped_to_organization(relation = :organization)
@@ -104,7 +104,7 @@ module CFoundry::V2
           defaults[:"#{name}_guid"] = default
         end
 
-        define_method(name) {
+        define_method(name) do
           return @cache[name] if @cache.key?(name)
 
           @cache[name] =
@@ -115,13 +115,13 @@ module CFoundry::V2
             else
               default
             end
-        }
+        end
 
-        define_method(:"#{name}_url") {
+        define_method(:"#{name}_url") do
           manifest[:entity][:"#{name}_url"]
-        }
+        end
 
-        define_method(:"#{name}=") { |x|
+        define_method(:"#{name}=") do |x|
           unless has_default && x == default
             Model.validate_type(x, CFoundry::V2.const_get(kls))
           end
@@ -132,7 +132,7 @@ module CFoundry::V2
           @manifest[:entity] ||= {}
           @manifest[:entity][:"#{name}_guid"] =
             @diff[:"#{name}_guid"] = x && x.guid
-        }
+        end
       end
 
       def to_many(plural, opts = {})
@@ -147,7 +147,7 @@ module CFoundry::V2
           $1 + $2.upcase
         end
 
-        define_method(plural) { |*args|
+        define_method(plural) do |*args|
           depth, query = args
 
           if !depth && !query && cache = @cache[plural]
@@ -181,13 +181,13 @@ module CFoundry::V2
           end
 
           res
-        }
+        end
 
-        define_method(:"#{plural}_url") {
+        define_method(:"#{plural}_url") do
           manifest[:entity][:"#{plural}_url"]
-        }
+        end
 
-        define_method(:"add_#{singular}") { |x|
+        define_method(:"add_#{singular}") do |x|
           Model.validate_type(x, CFoundry::V2.const_get(kls))
 
           if cache = @cache[plural]
@@ -198,9 +198,9 @@ module CFoundry::V2
             Net::HTTP::Put,
             ["v2", "#{object_name}s", @guid, plural, x.guid],
             :accept => :json)
-        }
+        end
 
-        define_method(:"remove_#{singular}") { |x|
+        define_method(:"remove_#{singular}") do |x|
           Model.validate_type(x, CFoundry::V2.const_get(kls))
 
           if cache = @cache[plural]
@@ -211,9 +211,9 @@ module CFoundry::V2
             Net::HTTP::Delete,
             ["v2", "#{object_name}s", @guid, plural, x.guid],
             :accept => :json)
-        }
+        end
 
-        define_method(:"#{plural}=") { |xs|
+        define_method(:"#{plural}=") do |xs|
           Model.validate_type(xs, [CFoundry::V2.const_get(kls)])
 
           @cache[plural] = xs
@@ -222,7 +222,7 @@ module CFoundry::V2
           @manifest[:entity] ||= {}
           @manifest[:entity][:"#{singular}_guids"] =
             @diff[:"#{singular}_guids"] = xs.collect(&:guid)
-        }
+        end
       end
 
       def has_summary(actions = {})
@@ -248,11 +248,11 @@ module CFoundry::V2
             elsif self.class.to_many_relations[key]
               singular = key.to_s.sub(/s$/, "").to_sym
 
-              vals = val.collect { |sub|
+              vals = val.collect do |sub|
                 obj = @client.send(singular, sub[:guid], true)
                 obj.summarize! sub
                 obj
-              }
+              end
 
               self.send(:"#{key}=", vals)
 
