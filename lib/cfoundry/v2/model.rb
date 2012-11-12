@@ -368,7 +368,7 @@ module CFoundry::V2
     def exists?
       @client.base.send(object_name, @guid)
       true
-    rescue CFoundry::APIError # TODO: NotFound would be better
+    rescue CFoundry::NotFound
       false
     end
 
