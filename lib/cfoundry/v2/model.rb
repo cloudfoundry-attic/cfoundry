@@ -343,12 +343,10 @@ module CFoundry::V2
       true
     end
 
-    def update!(diff = {})
-      diff = @diff.merge(diff)
+    def update!
+      @manifest = @client.base.send(:"update_#{object_name}", @guid, @diff)
 
-      @manifest = @client.base.send(:"update_#{object_name}", @guid, diff)
-
-      @diff.clear if diff == @diff
+      @diff.clear
 
       true
     end

@@ -180,12 +180,14 @@ module CFoundry::V2
 
     # Stop the application.
     def stop!
-      update! :state => "STOPPED"
+      self.state = "STOPPED"
+      update!
     end
 
     # Start the application.
     def start!
-      update! :state => "STARTED"
+      self.state = "STARTED"
+      update!
     end
 
     # Restart the application.
