@@ -131,7 +131,7 @@ module CFoundry::V2
       payload = paginated[:resources]
 
       while next_page = paginated[:next_url]
-        paginated = request_path(:get, next_page, nil => :json)
+        paginated = request_path(Net::HTTP::Get, next_page, :accept => :json)
         payload += paginated[:resources]
       end
 
