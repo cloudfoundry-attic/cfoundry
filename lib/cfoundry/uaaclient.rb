@@ -85,13 +85,6 @@ module CFoundry
         info = parse_json(response.body)
         raise CFoundry::Denied.new(response.code, info[:message])
 
-      when Net::HTTPServerError
-        begin
-          raise_error(parse_json(response.body))
-        rescue MultiJson::DecodeError
-          raise BadResponse.new(response.code, response.body)
-        end
-
       else
         raise BadResponse.new(response.code, response.body)
       end

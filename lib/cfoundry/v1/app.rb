@@ -100,7 +100,7 @@ module CFoundry::V1
     def exists?
       @client.base.app(@name)
       true
-    rescue CFoundry::NotFound
+    rescue CFoundry::AppNotFound
       false
     end
 

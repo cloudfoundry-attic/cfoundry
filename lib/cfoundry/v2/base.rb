@@ -159,27 +159,19 @@ module CFoundry::V2
           response.body
         end
 
-      when Net::HTTPBadRequest
-        info = parse_json(response.body)
-        raise CFoundry::APIError.new(info[:code], info[:description])
-
-      when Net::HTTPUnauthorized, Net::HTTPForbidden
-        info = parse_json(response.body)
-        raise CFoundry::Denied.new(info[:code], info[:description])
-
-      when Net::HTTPNotFound
-        raise CFoundry::NotFound
-
-      when Net::HTTPServerError
+      when Net::HTTPBadRequest, Net::HTTPUnauthorized, Net::HTTPNotFound,
+            Net::HTTPNotImplemented, Net::HTTPServiceUnavailable
         begin
           info = parse_json(response.body)
-          raise CFoundry::APIError.new(info[:code], info[:description])
+          cls = CFoundry::APIError.v2_classes[info[:code]]
+
+          raise (cls || CFoundry::APIError).new(info[:code], info[:description])
         rescue MultiJson::DecodeError
-          raise CFoundry::BadResponse.new(response.code, response.body)
+          super
         end
 
       else
-        raise CFoundry::BadResponse.new(response.code, response.body)
+        super
       end
     end
 
