@@ -59,7 +59,7 @@ module CFoundry::V2
       end
 
       define_method(:"delete_#{obj}") do |guid|
-        delete("v2", plural, guid, nil => nil)
+        delete("v2", plural, guid)
         true
       end
 
