@@ -14,6 +14,7 @@ end
 
 task :install => :build do
   sh "gem install --local cfoundry-#{CFoundry::VERSION}"
+  sh "rm cfoundry-#{CFoundry::VERSION}.gem"
 end
 
 task :uninstall do
