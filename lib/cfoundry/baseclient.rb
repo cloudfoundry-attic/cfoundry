@@ -328,7 +328,10 @@ module CFoundry
         end
 
       when Net::HTTPNotFound
-        raise CFoundry::NotFound
+        raise CFoundry::NotFound(response.code, response.body)
+
+      when Net::HTTPForbidden
+        raise CFoundry::Denied.new(response.code, response.body)
 
       else
         raise CFoundry::BadResponse.new(response.code, response.body)
