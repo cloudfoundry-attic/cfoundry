@@ -237,7 +237,7 @@ module CFoundry::V2
     # Check that all application instances are running.
     def healthy?
       # invalidate cache so the check is fresh
-      @manifest = nil
+      invalidate!
       health == "RUNNING"
     end
     alias_method :running?, :healthy?

@@ -9,5 +9,7 @@ module CFoundry::V2
     to_many   :managers, :as => :user
     to_many   :billing_managers, :as => :user
     to_many   :auditors, :as => :user
+
+    has_summary
   end
 end
