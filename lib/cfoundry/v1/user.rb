@@ -55,6 +55,10 @@ module CFoundry::V1
       false
     end
 
+    def invalidate!
+      @manifest = nil
+    end
+
     # Check if the user is an administrator.
     def admin?
       manifest[:admin]

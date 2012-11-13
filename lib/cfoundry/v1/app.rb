@@ -96,6 +96,10 @@ module CFoundry::V1
       @diff = {}
     end
 
+    def invalidate!
+      @manifest = nil
+    end
+
     # Check if the application exists on the target.
     def exists?
       @client.base.app(@name)
