@@ -77,11 +77,7 @@ module CFoundry
         APIError
       end
 
-    klass = Class.new(base) do
-      define_method(:initialize) do |*args|
-        super
-      end
-    end
+    klass = Class.new(base)
 
     APIError.v1_classes[v1_code] = klass if v1_code
     APIError.v2_classes[v2_code] = klass if v2_code
