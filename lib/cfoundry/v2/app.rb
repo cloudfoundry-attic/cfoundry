@@ -330,6 +330,10 @@ module CFoundry::V2
       Instance.new(self, "0", @client).file(*path)
     end
 
+    def stream_file(*path, &blk)
+      Instance.new(self, "0", @client).stream_file(*path, &blk)
+    end
+
     class Instance
       attr_reader :app, :id
 
@@ -388,6 +392,10 @@ module CFoundry::V2
 
       def file(*path)
         @client.base.files(@app.guid, @id, *path)
+      end
+
+      def stream_file(*path, &blk)
+        @client.base.stream_file(@app.guid, @id, *path, &blk)
       end
     end
 

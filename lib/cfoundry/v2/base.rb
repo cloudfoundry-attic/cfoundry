@@ -101,6 +101,31 @@ module CFoundry::V2
     end
     alias :file :files
 
+    def stream_file(guid, instance, *path)
+      redirect =
+        request_with_options(
+          Net::HTTP::Get,
+          ["v2", "apps", guid, "instances", instance, "files", *path],
+          :return_response => true)
+
+      if loc = redirect["location"]
+        uri = URI.parse(loc + "&tail")
+
+        Net::HTTP.start(uri.host, uri.port) do |http|
+          req = Net::HTTP::Get.new(uri.request_uri)
+          req["Authorization"] = @token
+
+          http.request(req) do |response|
+            response.read_body do |chunk|
+              yield chunk
+            end
+          end
+        end
+      else
+        yield redirect.body
+      end
+    end
+
     def instances(guid)
       get("v2", "apps", guid, "instances", :accept => :json)
     end
