@@ -55,8 +55,10 @@ module CFoundry
     def to_s
       if error_code
         "#{error_code}: #{description}"
-      else
+      elsif description
         description
+      else
+        super
       end
     end
   end
