@@ -93,7 +93,7 @@ module CFoundry::V1
     end
 
     # Retrieve available services.
-    def services
+    def services(depth = 0, query = {})
       services = []
 
       @base.system_services.each do |type, vendors|
@@ -112,7 +112,7 @@ module CFoundry::V1
     end
 
     # Retrieve available runtimes.
-    def runtimes
+    def runtimes(depth = 1, query = {})
       runtimes = []
 
       @base.system_runtimes.each do |name, meta|
@@ -129,7 +129,7 @@ module CFoundry::V1
     end
 
     # Retrieve available frameworks.
-    def frameworks
+    def frameworks(depth = 1, query = {})
       fs = info[:frameworks]
       return unless fs
 
@@ -152,7 +152,7 @@ module CFoundry::V1
     end
 
     # Retrieve user list. Admin-only.
-    def users
+    def users(depth = 1, query = {})
       @base.users.collect do |json|
         User.new(
           json[:email],
