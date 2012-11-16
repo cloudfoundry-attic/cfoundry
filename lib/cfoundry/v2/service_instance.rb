@@ -8,5 +8,7 @@ module CFoundry::V2
     to_many   :service_bindings
 
     scoped_to_space
+
+    queryable_by :name, :space_guid, :service_plan_guid, :service_binding_guid
   end
 end

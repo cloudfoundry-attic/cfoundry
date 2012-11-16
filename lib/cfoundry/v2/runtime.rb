@@ -5,5 +5,7 @@ module CFoundry::V2
     attribute :name, :string
     attribute :description, :string
     to_many   :apps
+
+    queryable_by :name, :app_guid
   end
 end
