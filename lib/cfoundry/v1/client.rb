@@ -98,11 +98,15 @@ module CFoundry::V1
 
       @base.system_services.each do |type, vendors|
         vendors.each do |vendor, providers|
-          providers.each do |provider, versions|
-            versions.each do |num, meta|
-              services <<
-                Service.new(vendor.to_s, num.to_s, meta[:description],
-                            type, provider.to_s)
+          providers.each do |provider, properties|
+            properties.each do |_, meta|
+              meta[:supported_versions].each do |ver|
+                state = meta[:version_aliases].find { |k, v| v == ver }
+
+                services <<
+                  Service.new(vendor.to_s, ver.to_s, meta[:description],
+                              type, provider.to_s, state && state.first)
+              end
             end
           end
         end
