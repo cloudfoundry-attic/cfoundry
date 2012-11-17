@@ -1,18 +1,11 @@
 module CFoundry::V1
   class Runtime
-    attr_accessor :name, :description, :debug_modes,
-      :version, :status, :series, :category
+    attr_accessor :name, :description, :debug_modes
 
-    def initialize(name, description = nil, debug_modes = nil,
-                   version = nil, status = nil, series = nil,
-                   category = nil)
+    def initialize(name, description = nil, debug_modes = nil)
       @name = name
       @description = description
       @debug_modes = debug_modes
-      @version = version
-      @status = status
-      @series = series
-      @category = category
     end
 
     def eql?(other)
@@ -22,18 +15,6 @@ module CFoundry::V1
 
     def apps
       [] # not supported by v1
-    end
-
-    def deprecated?
-      status && status[:name] == "deprecated"
-    end
-
-    def next?
-      status && status[:name] == "next"
-    end
-
-    def current?
-      status.nil? || status[:name] == "current"
     end
   end
 end
