@@ -105,24 +105,6 @@ module CFoundry::V2
     end
 
 
-    def params_from(args)
-      options, _ = args
-      options ||= {}
-      options[:depth] ||= 1
-
-      params = {}
-      options.each do |k, v|
-        case k
-        when :depth
-          params[:"inline-relations-depth"] = v
-        when :query
-          params[:q] = v.join(":")
-        end
-      end
-
-      params
-    end
-
     def all_pages(paginated)
       payload = paginated[:resources]
 

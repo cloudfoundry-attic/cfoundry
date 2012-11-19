@@ -45,7 +45,7 @@ module CFoundry::V2
       BaseClientMethods.module_eval do
         define_method(singular) do |guid, *args|
           get("v2", plural, guid, :accept => :json,
-              :params => params_from(args))
+              :params => ModelMagic.params_from(args))
         end
 
         define_method(:"create_#{singular}") do |payload|
@@ -63,7 +63,8 @@ module CFoundry::V2
 
         define_method(plural) do |*args|
           all_pages(
-            get("v2", plural, :accept => :json, :params => params_from(args)))
+            get("v2", plural, :accept => :json,
+                :params => ModelMagic.params_from(args)))
         end
       end
 
@@ -107,7 +108,7 @@ module CFoundry::V2
               Net::HTTP::Get,
               path,
               :accept => :json,
-              :params => @base.params_from(args)))
+              :params => ModelMagic.params_from(args)))
         end
 
         define_method(:"#{plural}_from") do |path, *args|
@@ -116,7 +117,7 @@ module CFoundry::V2
               Net::HTTP::Get,
               path,
               :accept => :json,
-              :params => @base.params_from(args)))
+              :params => ModelMagic.params_from(args)))
 
           objs.collect do |json|
             send(:"make_#{singular}", json)
@@ -409,6 +410,24 @@ module CFoundry::V2
         unless value_matches?(val, type)
           raise CFoundry::Mismatch.new(type, val)
         end
+      end
+
+      def params_from(args)
+        options, _ = args
+        options ||= {}
+        options[:depth] ||= 1
+
+        params = {}
+        options.each do |k, v|
+          case k
+          when :depth
+            params[:"inline-relations-depth"] = v
+          when :query
+            params[:q] = v.join(":")
+          end
+        end
+
+        params
       end
     end
   end
