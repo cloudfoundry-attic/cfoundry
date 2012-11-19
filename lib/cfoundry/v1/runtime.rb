@@ -16,5 +16,9 @@ module CFoundry::V1
     def apps
       [] # not supported by v1
     end
+
+    def debug_modes
+      @debug_modes || []
+    end
   end
 end
