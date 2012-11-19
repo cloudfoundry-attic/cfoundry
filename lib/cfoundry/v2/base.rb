@@ -161,7 +161,7 @@ module CFoundry::V2
           info = parse_json(response.body)
           return super unless info[:code]
 
-          cls = CFoundry::APIError.v2_classes[info[:code]]
+          cls = CFoundry::APIError.error_classes[info[:code]]
 
           raise (cls || CFoundry::APIError).new(info[:code], info[:description])
         rescue MultiJson::DecodeError

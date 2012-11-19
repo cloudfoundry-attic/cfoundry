@@ -174,7 +174,9 @@ module CFoundry::V1
             Net::HTTPBadGateWay
         begin
           info = parse_json(response.body)
-          cls = CFoundry::APIError.v1_classes[info[:code]]
+          return super unless info[:code]
+
+          cls = CFoundry::APIError.error_classes[info[:code]]
 
           raise (cls || CFoundry::APIError).new(info[:code], info[:description])
         rescue MultiJson::DecodeError

@@ -34,12 +34,8 @@ module CFoundry
   # Exception representing errors returned by the API.
   class APIError < RuntimeError
     class << self
-      def v2_classes
-        @v2_classes ||= {}
-      end
-
-      def v1_classes
-        @v1_classes ||= {}
+      def error_classes
+        @error_classes ||= {}
       end
     end
 
@@ -70,7 +66,7 @@ module CFoundry
   class BadResponse < APIError; end
 
 
-  def self.define_error(class_name, v2_code, v1_code = nil)
+  def self.define_error(class_name, *codes)
     base =
       case class_name
       when /NotFound$/
@@ -81,8 +77,9 @@ module CFoundry
 
     klass = Class.new(base)
 
-    APIError.v1_classes[v1_code] = klass if v1_code
-    APIError.v2_classes[v2_code] = klass if v2_code
+    codes.each do |code|
+      APIError.error_classes[code] = klass
+    end
 
     const_set(class_name, klass)
   end
@@ -174,45 +171,45 @@ module CFoundry
     ["BillingEventQueryInvalid", 230001],
 
     # V1 Errors
-    ["BadRequest",    nil, 100],
-    ["DatabaseError", nil, 101],
-    ["LockingError",  nil, 102],
-    ["SystemError",   nil, 111],
+    ["BadRequest",    100],
+    ["DatabaseError", 101],
+    ["LockingError",  102],
+    ["SystemError",   111],
 
-    ["Forbidden",     nil, 200],
-    ["HttpsRequired", nil, 202],
+    ["Forbidden",     200],
+    ["HttpsRequired", 202],
 
-    ["AppNoResources",      nil, 302],
-    ["AppFileNotFound",     nil, 303],
-    ["AppInstanceNotFound", nil, 304],
-    ["AppStopped",          nil, 305],
-    ["AppFileError",        nil, 306],
-    ["AppInvalidRuntime",   nil, 307],
-    ["AppInvalidFramework", nil, 308],
-    ["AppDebugDisallowed",  nil, 309],
-    ["AppStagingError",     nil, 310],
+    ["AppNoResources",      302],
+    ["AppFileNotFound",     303],
+    ["AppInstanceNotFound", 304],
+    ["AppStopped",          305],
+    ["AppFileError",        306],
+    ["AppInvalidRuntime",   307],
+    ["AppInvalidFramework", 308],
+    ["AppDebugDisallowed",  309],
+    ["AppStagingError",     310],
 
-    ["ResourcesUnknownPackageType", nil, 400],
-    ["ResourcesMissingResource",    nil, 401],
-    ["ResourcesPackagingFailed",    nil, 402],
+    ["ResourcesUnknownPackageType", 400],
+    ["ResourcesMissingResource",    401],
+    ["ResourcesPackagingFailed",    402],
 
-    ["BindingNotFound",        nil, 501],
-    ["TokenNotFound",          nil, 502],
-    ["AccountTooManyServices", nil, 504],
-    ["ExtensionNotImpl",       nil, 505],
-    ["UnsupportedVersion",     nil, 506],
-    ["SdsError",               nil, 507],
-    ["SdsNotFound",            nil, 508],
+    ["BindingNotFound",        501],
+    ["TokenNotFound",          502],
+    ["AccountTooManyServices", 504],
+    ["ExtensionNotImpl",       505],
+    ["UnsupportedVersion",     506],
+    ["SdsError",               507],
+    ["SdsNotFound",            508],
 
-    ["AccountNotEnoughMemory", nil, 600],
-    ["AccountAppsTooMany",     nil, 601],
-    ["AccountAppTooManyUris",  nil, 602],
+    ["AccountNotEnoughMemory", 600],
+    ["AccountAppsTooMany",     601],
+    ["AccountAppTooManyUris",  602],
 
-    ["UriInvalid",      nil, 700],
-    ["UriAlreadyTaken", nil, 701],
-    ["UriNotAllowed",   nil, 702],
-    ["StagingTimedOut", nil, 800],
-    ["StagingFailed",   nil, 801]
+    ["UriInvalid",      700],
+    ["UriAlreadyTaken", 701],
+    ["UriNotAllowed",   702],
+    ["StagingTimedOut", 800],
+    ["StagingFailed",   801]
   ].each do |args|
     define_error(*args)
   end
