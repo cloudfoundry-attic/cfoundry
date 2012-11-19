@@ -14,6 +14,10 @@ module CFoundry::V2
 
     attribute :guid, :string # guid is explicitly set for users
 
+    queryable_by :space_guid, :organization_guid, :managed_organization_guid,
+      :billing_managed_organization_guid, :audited_organization_guid,
+      :managed_space_guid, :audited_space_guid
+
     def guid
       @guid
     end

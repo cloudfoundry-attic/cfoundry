@@ -1,5 +1,4 @@
 require "multi_json"
-require "base64"
 
 require "cfoundry/baseclient"
 require "cfoundry/uaaclient"
@@ -8,6 +7,8 @@ require "cfoundry/errors"
 
 module CFoundry::V2
   class Base < CFoundry::BaseClient
+    include BaseClientMethods
+
     attr_accessor :target, :token, :proxy, :trace, :backtrace, :log
 
     def initialize(
@@ -36,41 +37,6 @@ module CFoundry::V2
     # Cloud metadata
     def info
       get("info", :accept => :json)
-    end
-
-
-    [ :app, :organization, :space, :user, :runtime, :framework, :service,
-      :domain, :route, :service_plan, :service_binding, :service_instance,
-      :service_auth_token
-    ].each do |obj|
-      plural = "#{obj}s"
-
-      define_method(obj) do |guid, *args|
-        depth, _ = args
-        depth ||= 1
-
-        params = { :"inline-relations-depth" => depth }
-
-        get("v2", plural, guid, :accept => :json, :params => params)
-      end
-
-      define_method(:"create_#{obj}") do |payload|
-        post(payload, "v2", plural, :content => :json, :accept => :json)
-      end
-
-      define_method(:"delete_#{obj}") do |guid|
-        delete("v2", plural, guid)
-        true
-      end
-
-      define_method(:"update_#{obj}") do |guid, payload|
-        put(payload, "v2", plural, guid, :content => :json, :accept => :json)
-      end
-
-      define_method(plural) do |*args|
-        all_pages(
-          get("v2", plural, :accept => :json, :params => params_from(args)))
-      end
     end
 
     def resource_match(fingerprints)
@@ -140,13 +106,18 @@ module CFoundry::V2
 
 
     def params_from(args)
-      depth, query = args
-      depth ||= 1
+      options, _ = args
+      options ||= {}
+      options[:depth] ||= 1
 
-      params = { :"inline-relations-depth" => depth }
-
-      if query
-        params[:q] = "#{query.keys.first}:#{query.values.first}"
+      params = {}
+      options.each do |k, v|
+        case k
+        when :depth
+          params[:"inline-relations-depth"] = v
+        when :query
+          params[:q] = v.join(":")
+        end
       end
 
       params

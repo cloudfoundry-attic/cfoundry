@@ -6,6 +6,8 @@ module CFoundry::V2
     to_one    :domain
     to_one    :space
 
+    queryable_by :host, :domain_guid
+
     def name
       "#{host}.#{domain.name}"
     end

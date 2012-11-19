@@ -1,27 +1,10 @@
-require "multi_json"
-require "base64"
-
-require "cfoundry/v2/base"
-
-require "cfoundry/v2/app"
-require "cfoundry/v2/framework"
-require "cfoundry/v2/organization"
-require "cfoundry/v2/runtime"
-require "cfoundry/v2/service"
-require "cfoundry/v2/service_binding"
-require "cfoundry/v2/service_instance"
-require "cfoundry/v2/service_plan"
-require "cfoundry/v2/service_auth_token"
-require "cfoundry/v2/space"
-require "cfoundry/v2/user"
-require "cfoundry/v2/domain"
-require "cfoundry/v2/route"
-
 module CFoundry::V2
   # The primary API entrypoint. Wraps a BaseClient to provide nicer return
   # values. Initialize with the target and, optionally, an auth token. These
   # are the only two internal states.
   class Client
+    include ClientMethods
+
     # Internal BaseClient instance. Normally won't be touching this.
     attr_reader :base
 
@@ -147,105 +130,13 @@ module CFoundry::V2
       !!@base.token
     end
 
-
-    [ :app, :organization, :space, :user, :runtime, :framework, :service,
-      :domain, :route, :service_plan, :service_binding, :service_instance,
-      :service_auth_token
-    ].each do |singular|
-      plural = :"#{singular}s"
-
-      classname = singular.to_s.capitalize.gsub(/(.)_(.)/) do
-        $1 + $2.upcase
-      end
-
-      klass = CFoundry::V2.const_get(classname)
-
-      scoped_organization = klass.scoped_organization
-      scoped_space = klass.scoped_space
-
-      has_name = klass.method_defined? :name
-
-      define_method(singular) do |*args|
-        guid, partial, _ = args
-
-        x = klass.new(guid, self, nil, partial)
-
-        # when creating an object, automatically set the org/space
-        unless guid
-          if scoped_organization && current_organization
-            x.send(:"#{scoped_organization}=", current_organization)
-          end
-
-          if scoped_space && current_space
-            x.send(:"#{scoped_space}=", current_space)
-          end
-        end
-
-        x
-      end
-
-      define_method(plural) do |*args|
-        depth, query = args
-        depth ||= 1
-
-        # use current org/space
-        if scoped_space && current_space
-          query ||= {}
-          query[:"#{scoped_space}_guid"] ||= current_space.guid
-        elsif scoped_organization && current_organization
-          query ||= {}
-          query[:"#{scoped_organization}_guid"] ||= current_organization.guid
-        end
-
-        @base.send(plural, depth, query).collect do |json|
-          send(:"make_#{singular}", json)
-        end
-      end
-
-      if has_name
-        define_method(:"#{singular}_by_name") do |name, *args|
-          depth, _ = args
-          depth ||= 1
-
-          # use current org/space
-          if scoped_space && current_space
-            current_space.send(plural, depth, :name => name).first
-          elsif scoped_organization && current_organization
-            current_organization.send(plural, depth, :name => name).first
-          else
-            send(plural, depth, :name => name).first
-          end
-        end
-      end
-
-      define_method(:"#{singular}_from") do |path, *args|
-        send(
-          :"make_#{singular}",
-          @base.request_path(
-            Net::HTTP::Get,
-            path,
-            :accept => :json,
-            :params => @base.params_from(args)))
-      end
-
-      define_method(:"#{plural}_from") do |path, *args|
-        objs = @base.all_pages(
-          @base.request_path(
-            Net::HTTP::Get,
-            path,
-            :accept => :json,
-            :params => @base.params_from(args)))
-
-        objs.collect do |json|
-          send(:"make_#{singular}", json)
-        end
-      end
-
-      define_method(:"make_#{singular}") do |json|
-        klass.new(
-          json[:metadata][:guid],
-          self,
-          json)
+    def query_target(klass)
+      if klass.scoped_space && space = current_space
+        space
+      elsif klass.scoped_organization && org = current_org
+        org
+      else
+        self
       end
     end
   end

@@ -35,6 +35,9 @@ module CFoundry::V2
 
     scoped_to_space
 
+    queryable_by :name, :space_guid, :organization_guid, :framework_guid,
+      :runtime_guid
+
     has_summary :urls => proc { |x| self.cache[:uris] = x },
       :running_instances => proc { |x|
         self.cache[:running_instances] = x

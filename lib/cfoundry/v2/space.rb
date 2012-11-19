@@ -13,6 +13,8 @@ module CFoundry::V2
 
     scoped_to_organization
 
+    queryable_by :name, :organization_guid, :developer_guid, :app_guid
+
     has_summary
   end
 end
