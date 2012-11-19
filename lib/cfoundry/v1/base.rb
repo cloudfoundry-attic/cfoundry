@@ -171,7 +171,7 @@ module CFoundry::V1
 
       when Net::HTTPBadRequest, Net::HTTPForbidden, Net::HTTPNotFound,
             Net::HTTPInternalServerError, Net::HTTPNotImplemented,
-            Net::HTTPBadGateWay
+            Net::HTTPBadGateway
         begin
           info = parse_json(response.body)
           return super unless info[:code]
