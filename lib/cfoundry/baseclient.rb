@@ -17,12 +17,6 @@ module CFoundry
       @log = false
     end
 
-    def request_path(method, path, options = {})
-      path = url(path) if path.is_a?(Array)
-
-      request(method, path, options)
-    end
-
     # grab the metadata from a token that looks like:
     #
     # bearer (base64 ...)
@@ -37,14 +31,10 @@ module CFoundry
       {}
     end
 
-    private
+    def request_path(method, path, options = {})
+      path = url(path) if path.is_a?(Array)
 
-    def parse_json(x)
-      if x.empty?
-        raise MultiJson::DecodeError.new("Empty JSON string", [], "")
-      else
-        MultiJson.load(x, :symbolize_keys => true)
-      end
+      request(method, path, options)
     end
 
     def request(method, path, options = {})
@@ -149,6 +139,16 @@ module CFoundry
       end
     rescue SocketError, Errno::ECONNREFUSED => e
       raise TargetRefused, e.message
+    end
+
+    private
+
+    def parse_json(x)
+      if x.empty?
+        raise MultiJson::DecodeError.new("Empty JSON string", [], "")
+      else
+        MultiJson.load(x, :symbolize_keys => true)
+      end
     end
 
     def mimetype(content)
