@@ -2,6 +2,7 @@ require "net/https"
 require "net/http/post/multipart"
 require "multi_json"
 require "fileutils"
+require "base64"
 
 module CFoundry
   class BaseClient # :nodoc:
@@ -25,9 +26,8 @@ module CFoundry
       tok.sub!(/\{.+?\}/, "") # clear algo
       MultiJson.load(tok[/\{.+?\}/], :symbolize_keys => true)
 
-    # normally i don't catch'em all, but can't expect all tokens to be the
-    # proper format, so just silently fail as this is not critical
-    rescue
+    # can't expect all tokens to be the proper format
+    rescue MultiJson::DecodeError
       {}
     end
 
