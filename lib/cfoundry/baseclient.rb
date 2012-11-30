@@ -130,9 +130,11 @@ module CFoundry
           sane_headers(response)
         elsif return_response
           response
-        elsif [Net::HTTP::Get, Net::HTTP::Head].include?(method) && \
-            response.is_a?(Net::HTTPRedirection)
-          request_uri(URI.parse(response["location"]), method, original_options)
+        elsif response.is_a?(Net::HTTPRedirection)
+          request_uri(
+            URI.parse(response["location"]),
+            Net::HTTP::Get,
+            original_options)
         else
           handle_response(response, accept)
         end
