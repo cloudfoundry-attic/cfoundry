@@ -4,7 +4,7 @@ require "cfoundry/version"
 
 Gem::Specification.new do |s|
   s.name        = "cfoundry"
-  s.version     = CFoundry::VERSION
+  s.version     = CFoundry::VERSION.dup
   s.authors     = ["Alex Suraci"]
   s.email       = ["asuraci@vmware.com"]
   s.homepage    = "http://cloudfoundry.com/"
