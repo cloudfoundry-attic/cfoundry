@@ -157,7 +157,11 @@ module CFoundry::V2
 
         @manifest ||= {}
         @manifest[:entity] ||= {}
+
+        old = @manifest[:entity][name]
+        @changes[name] = [old, val] if old != val
         @manifest[:entity][name] = val
+
         @diff[name] = val
       end
     end
@@ -201,17 +205,28 @@ module CFoundry::V2
         manifest[:entity][:"#{name}_url"]
       end
 
-      define_method(:"#{name}=") do |x|
-        unless has_default && x == default
-          ModelMagic.validate_type(x, CFoundry::V2.const_get(kls))
-        end
+      define_method(:"#{name}=") do |val|
+        klass = CFoundry::V2.const_get(kls)
 
-        @cache[name] = x
+        unless has_default && val == default
+          ModelMagic.validate_type(val, klass)
+        end
 
         @manifest ||= {}
         @manifest[:entity] ||= {}
+
+        old = @manifest[:entity][:"#{name}_guid"]
+        if old != val.guid
+          old_obj = klass.new(@client, old, @manifest[:entity][name])
+
+          @changes[name] = [old_obj, val]
+        end
+
+        @cache[name] = val
+
+        @manifest[:entity][name] = val.manifest
         @manifest[:entity][:"#{name}_guid"] =
-          @diff[:"#{name}_guid"] = x && x.guid
+          @diff[:"#{name}_guid"] = val && val.guid
       end
     end
 
@@ -295,12 +310,29 @@ module CFoundry::V2
       end
 
       define_method(:"#{plural}=") do |xs|
-        ModelMagic.validate_type(xs, [CFoundry::V2.const_get(kls)])
+        klass = CFoundry::V2.const_get(kls)
 
-        @cache[plural] = xs
+        ModelMagic.validate_type(xs, [klass])
 
         @manifest ||= {}
         @manifest[:entity] ||= {}
+
+        old = @manifest[:entity][:"#{singular}_guids"]
+        if old != xs.collect(&:guid)
+          old_objs =
+            if all = @manifest[:entity][plural]
+              all.collect do |m|
+                klass.new(@client, m[:metadata][:guid], m)
+              end
+            else
+              old.collect { |id| klass.new(@client, id) }
+            end
+
+          @changes[name] = [old_objs, val]
+        end
+
+        @cache[plural] = xs
+
         @manifest[:entity][:"#{singular}_guids"] =
           @diff[:"#{singular}_guids"] = xs.collect(&:guid)
       end

@@ -7,7 +7,7 @@ module CFoundry::V2
   class Model
     extend ModelMagic
 
-    attr_accessor :guid, :cache
+    attr_accessor :guid, :cache, :changes
 
     def initialize(guid, client, manifest = nil, partial = false)
       @guid = guid
@@ -16,6 +16,7 @@ module CFoundry::V2
       @partial = partial
       @cache = {}
       @diff = {}
+      @changes = {}
     end
 
     def manifest
@@ -24,6 +25,10 @@ module CFoundry::V2
 
     def partial?
       @partial
+    end
+
+    def changed?
+      !@changes.empty?
     end
 
     def inspect
@@ -39,6 +44,7 @@ module CFoundry::V2
       @partial = false
       @cache = {}
       @diff = {}
+      @changes = {}
     end
 
     # this does a bit of extra processing to allow for
