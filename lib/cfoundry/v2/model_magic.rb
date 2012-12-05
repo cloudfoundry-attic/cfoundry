@@ -328,7 +328,7 @@ module CFoundry::V2
               old.collect { |id| klass.new(@client, id) }
             end
 
-          @changes[name] = [old_objs, val]
+          @changes[name] = [old_objs, xs]
         end
 
         @cache[plural] = xs
