@@ -324,7 +324,7 @@ module CFoundry::V2
               all.collect do |m|
                 klass.new(@client, m[:metadata][:guid], m)
               end
-            else
+            elsif old
               old.collect { |id| klass.new(@client, id) }
             end
 
