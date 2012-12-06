@@ -22,9 +22,11 @@ module CFoundry::V2
       @guid
     end
 
+    alias set_guid_attribute guid=
+
     def guid=(x)
       @guid = x
-      super
+      set_guid_attribute(x)
     end
 
     alias :admin? :admin
