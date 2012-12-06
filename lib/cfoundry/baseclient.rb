@@ -22,6 +22,8 @@ module CFoundry
     #
     # bearer (base64 ...)
     def token_data
+      return {} unless @token
+
       tok = Base64.decode64(@token.sub(/^bearer\s+/, ""))
       tok.sub!(/\{.+?\}/, "") # clear algo
       MultiJson.load(tok[/\{.+?\}/], :symbolize_keys => true)
