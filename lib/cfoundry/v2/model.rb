@@ -52,10 +52,13 @@ module CFoundry::V2
     def create!
       payload = {}
 
+      @manifest ||= {}
+      @manifest[:entity] ||= {}
+
       self.class.defaults.merge(@manifest[:entity]).each do |k, v|
         if v.is_a?(Hash) && v.key?(:metadata)
           # skip; there's a _guid attribute already
-        elsif v.is_a?(Array) && v.all? { |x|
+        elsif v.is_a?(Array) && !v.empty? && v.all? { |x|
                 x.is_a?(Hash) && x.key?(:metadata)
               }
           singular = k.to_s.sub(/s$/, "")
