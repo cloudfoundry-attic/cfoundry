@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency "multipart-post", "~> 1.1.0"
-  s.add_dependency "multi_json", "~> 1.3.6"
+  s.add_dependency "multi_json", "~> 1.4.0"
   s.add_dependency "rubyzip", "~> 0.9.9"
 
   s.add_development_dependency "rake", "~> 0.9.2.2"
