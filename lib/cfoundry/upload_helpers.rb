@@ -1,31 +1,54 @@
+require "tmpdir"
 require "fileutils"
 require "pathname"
 require "digest/sha1"
+
+require "cfoundry/zip"
 
 module CFoundry
   module UploadHelpers
     # Default paths to exclude from upload payload.
     UPLOAD_EXCLUDE = %w{.git _darcs .svn}
 
-    def make_fingerprints(path)
-      fingerprints = []
-      total_size = 0
+    # Minimum size for an application payload to bother checking resources.
+    RESOURCE_CHECK_LIMIT = 64 * 1024
 
-      Dir.glob("#{path}/**/*", File::FNM_DOTMATCH) do |filename|
-        next if File.directory?(filename)
-
-        size = File.size(filename)
-
-        total_size += size
-
-        fingerprints << {
-          :size => size,
-          :sha1 => Digest::SHA1.file(filename).hexdigest,
-          :fn => filename
-        }
+    # Upload application's code to target. Do this after #create! and before
+    # #start!
+    #
+    # [path]
+    #   A path pointing to either a directory, or a .jar, .war, or .zip
+    #   file.
+    #
+    #   If a .vmcignore file is detected under the given path, it will be used
+    #   to exclude paths from the payload, similar to a .gitignore.
+    #
+    # [check_resources]
+    #   If set to `false`, the entire payload will be uploaded
+    #   without checking the resource cache.
+    #
+    #   Only do this if you know what you're doing.
+    def upload(path, check_resources = true)
+      unless File.exist? path
+        raise CFoundry::Error, "Invalid application path '#{path}'"
       end
 
-      [fingerprints, total_size]
+      zipfile = "#{Dir.tmpdir}/#{@guid}.zip"
+      tmpdir = "#{Dir.tmpdir}/.vmc_#{@guid}_files"
+
+      FileUtils.rm_f(zipfile)
+      FileUtils.rm_rf(tmpdir)
+
+      prepare_package(path, tmpdir)
+
+      resources = determine_resources(tmpdir) if check_resources
+
+      packed = CFoundry::Zip.pack(tmpdir, zipfile)
+
+      @client.base.upload_app(@guid, packed && zipfile, resources || [])
+    ensure
+      FileUtils.rm_f(zipfile) if zipfile
+      FileUtils.rm_rf(tmpdir) if tmpdir
     end
 
     def prepare_package(path, to)
@@ -96,6 +119,42 @@ module CFoundry
     def find_sockets(path)
       files = Dir.glob("#{path}/**/*", File::FNM_DOTMATCH)
       files && files.select { |f| File.socket? f }
+    end
+
+    def determine_resources(path)
+      fingerprints, total_size = make_fingerprints(path)
+
+      return if total_size <= RESOURCE_CHECK_LIMIT
+
+      resources = @client.base.resource_match(fingerprints)
+
+      resources.each do |resource|
+        FileUtils.rm_f resource[:fn]
+        resource[:fn].sub!("#{path}/", "")
+      end
+
+      resources
+    end
+
+    def make_fingerprints(path)
+      fingerprints = []
+      total_size = 0
+
+      Dir.glob("#{path}/**/*", File::FNM_DOTMATCH) do |filename|
+        next if File.directory?(filename)
+
+        size = File.size(filename)
+
+        total_size += size
+
+        fingerprints << {
+          :size => size,
+          :sha1 => Digest::SHA1.file(filename).hexdigest,
+          :fn => filename
+        }
+      end
+
+      [fingerprints, total_size]
     end
   end
 end

@@ -110,7 +110,8 @@ module CFoundry::V2
     end
 
     def exists?
-      @client.base.send(object_name, @guid)
+      invalidate!
+      manifest
       true
     rescue CFoundry::NotFound
       false

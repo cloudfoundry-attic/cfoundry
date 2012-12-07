@@ -34,5 +34,13 @@ module CFoundry
     def to_hash
       @hash
     end
+
+    def to_s
+      @hash.to_s
+    end
+
+    def inspect
+      @hash.inspect
+    end
   end
 end

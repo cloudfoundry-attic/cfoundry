@@ -1,3 +1,5 @@
+require "cfoundry/validator"
+
 module CFoundry::V2
   # object name -> module containing query methods
   #
@@ -150,7 +152,7 @@ module CFoundry::V2
 
       define_method(:"#{name}=") do |val|
         unless has_default && val == default
-          ModelMagic.validate_type(val, type)
+          CFoundry::Validator.validate_type(val, type)
         end
 
         @cache[name] = val
@@ -209,7 +211,7 @@ module CFoundry::V2
         klass = CFoundry::V2.const_get(kls)
 
         unless has_default && val == default
-          ModelMagic.validate_type(val, klass)
+          CFoundry::Validator.validate_type(val, klass)
         end
 
         @manifest ||= {}
@@ -284,7 +286,7 @@ module CFoundry::V2
       end
 
       define_method(:"add_#{singular}") do |x|
-        ModelMagic.validate_type(x, CFoundry::V2.const_get(kls))
+        CFoundry::Validator.validate_type(x, CFoundry::V2.const_get(kls))
 
         if cache = @cache[plural]
           cache << x unless cache.include?(x)
@@ -297,7 +299,7 @@ module CFoundry::V2
       end
 
       define_method(:"remove_#{singular}") do |x|
-        ModelMagic.validate_type(x, CFoundry::V2.const_get(kls))
+        CFoundry::Validator.validate_type(x, CFoundry::V2.const_get(kls))
 
         if cache = @cache[plural]
           cache.delete(x)
@@ -312,7 +314,7 @@ module CFoundry::V2
       define_method(:"#{plural}=") do |xs|
         klass = CFoundry::V2.const_get(kls)
 
-        ModelMagic.validate_type(xs, [klass])
+        CFoundry::Validator.validate_type(xs, [klass])
 
         @manifest ||= {}
         @manifest[:entity] ||= {}
@@ -411,56 +413,22 @@ module CFoundry::V2
       end
     end
 
-    class << self
-      def value_matches?(val, type)
-        case type
-        when Class
-          val.is_a?(type)
-        when Regexp
-          val.is_a?(String) && val =~ type
-        when :url
-          value_matches?(val, URI::regexp(%w(http https)))
-        when :https_url
-          value_matches?(val, URI::regexp("https"))
-        when :boolean
-          val.is_a?(TrueClass) || val.is_a?(FalseClass)
-        when Array
-          val.all? do |x|
-            value_matches?(x, type.first)
-          end
-        when Hash
-          val.is_a?(Hash) &&
-            type.all? { |name, subtype|
-              val.key?(name) && value_matches?(val[name], subtype)
-            }
-        else
-          val.is_a?(Object.const_get(type.to_s.capitalize))
+    def self.params_from(args)
+      options, _ = args
+      options ||= {}
+      options[:depth] ||= 1
+
+      params = {}
+      options.each do |k, v|
+        case k
+        when :depth
+          params[:"inline-relations-depth"] = v
+        when :query
+          params[:q] = v.join(":")
         end
       end
 
-      def validate_type(val, type)
-        unless value_matches?(val, type)
-          raise CFoundry::Mismatch.new(type, val)
-        end
-      end
-
-      def params_from(args)
-        options, _ = args
-        options ||= {}
-        options[:depth] ||= 1
-
-        params = {}
-        options.each do |k, v|
-          case k
-          when :depth
-            params[:"inline-relations-depth"] = v
-          when :query
-            params[:q] = v.join(":")
-          end
-        end
-
-        params
-      end
+      params
     end
   end
 end

@@ -1,15 +1,10 @@
-require "cfoundry/v1/base"
-require "cfoundry/v1/app"
-require "cfoundry/v1/service"
-require "cfoundry/v1/service_instance"
-require "cfoundry/v1/user"
-
-
 module CFoundry::V1
   # The primary API entrypoint. Wraps a BaseClient to provide nicer return
   # values. Initialize with the target and, optionally, an auth token. These
   # are the only two internal states.
   class Client
+    include ClientMethods
+
     attr_reader :base
 
     # Create a new Client for interfacing with the given target.
@@ -93,7 +88,7 @@ module CFoundry::V1
     end
 
     # Retrieve available services.
-    def services(depth = 0, query = {})
+    def services(options = {})
       services = []
 
       @base.system_services.each do |type, vendors|
@@ -105,7 +100,7 @@ module CFoundry::V1
 
                 services <<
                   Service.new(vendor.to_s, ver.to_s, meta[:description],
-                              type, provider.to_s, state && state.first)
+                              type.to_s, provider.to_s, state && state.first)
               end
             end
           end
@@ -116,7 +111,7 @@ module CFoundry::V1
     end
 
     # Retrieve available runtimes.
-    def runtimes(depth = 1, query = {})
+    def runtimes(options = {})
       runtimes = []
 
       @base.system_runtimes.each do |name, meta|
@@ -127,12 +122,16 @@ module CFoundry::V1
       runtimes
     end
 
+    def runtime(name)
+      Runtime.new(name)
+    end
+
     def runtime_by_name(name)
       runtimes.find { |r| r.name == name }
     end
 
     # Retrieve available frameworks.
-    def frameworks(depth = 1, query = {})
+    def frameworks(options = {})
       fs = info[:frameworks]
       return unless fs
 
@@ -149,28 +148,12 @@ module CFoundry::V1
       frameworks
     end
 
+    def framework(name)
+      Framework.new(name)
+    end
+
     def framework_by_name(name)
       frameworks.find { |f| f.name == name }
-    end
-
-    # Retrieve user list. Admin-only.
-    def users(depth = 1, query = {})
-      @base.users.collect do |json|
-        User.new(
-          json[:email],
-          self,
-          { :email => json[:email],
-            :admin => json[:admin] })
-      end
-    end
-
-    # Construct a User object. The return value is lazy, and no requests are
-    # made from this alone.
-    #
-    # This should be used for both user creation (after calling User#create!)
-    # and retrieval.
-    def user(email)
-      User.new(email, self)
     end
 
     # Create a user on the target and return a User object representing them.
@@ -216,49 +199,6 @@ module CFoundry::V1
     # Is an authentication token set on the client?
     def logged_in?
       !!@base.token
-    end
-
-
-    # Retreive all of the current user's applications.
-    def apps(depth = 1, query = {})
-      @base.apps.collect do |json|
-        App.new(json[:name], self, json)
-      end
-    end
-
-    # Construct an App object. The return value is lazy, and no requests are
-    # made from this method alone.
-    #
-    # This should be used for both app creation (after calling App#create!)
-    # and retrieval.
-    def app(name = nil)
-      App.new(name, self)
-    end
-
-    def app_by_name(name)
-      app = app(name)
-      app if app.exists?
-    end
-
-    # Retrieve all of the current user's services.
-    def service_instances(depth = 1, query = {})
-      @base.services.collect do |json|
-        ServiceInstance.new(json[:name], self, json)
-      end
-    end
-
-    # Construct a Service object. The return value is lazy, and no requests are
-    # made from this method alone.
-    #
-    # This should be used for both service creation (after calling
-    # Service#create!) and retrieval.
-    def service_instance(name = nil)
-      ServiceInstance.new(name, self)
-    end
-
-    def service_instance_by_name(name)
-      service = service_instance(name)
-      service if service.exists?
     end
   end
 end
