@@ -133,7 +133,7 @@ module CFoundry::V2
     def query_target(klass)
       if klass.scoped_space && space = current_space
         space
-      elsif klass.scoped_organization && org = current_org
+      elsif klass.scoped_organization && org = current_organization
         org
       else
         self
