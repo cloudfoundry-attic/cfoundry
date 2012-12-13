@@ -18,10 +18,13 @@ Gem::Specification.new do |s|
   s.test_files    = Dir.glob("spec/**/*")
   s.require_paths = ["lib"]
 
-  s.add_dependency "multipart-post", "~> 1.1.0"
-  s.add_dependency "multi_json", "~> 1.4.0"
-  s.add_dependency "rubyzip", "~> 0.9.9"
+  s.add_dependency "multipart-post", "~> 1.1"
+  s.add_dependency "multi_json", "~> 1.3"
+  s.add_dependency "rubyzip", "~> 0.9"
 
-  s.add_development_dependency "rake", "~> 0.9.2.2"
-  s.add_development_dependency "rspec", "~> 2.11.0"
+  s.add_development_dependency "rake", "~> 0.9"
+  s.add_development_dependency "rspec", "~> 2.11"
+  s.add_development_dependency "webmock", "~> 1.9"
+  s.add_development_dependency "rr", "~> 1.0"
+  s.add_development_dependency "factory_girl", "~> 2.6"
 end
