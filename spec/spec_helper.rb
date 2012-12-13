@@ -2,9 +2,8 @@ SPEC_ROOT = File.dirname(__FILE__).freeze
 
 require "rspec"
 require "cfoundry"
-require "vmc"
-require 'factory_girl'
-require 'webmock/rspec'
+require "factory_girl"
+require "webmock/rspec"
 
 Dir[File.expand_path('../support/**/*.rb', __FILE__)].each do |file|
   require file
