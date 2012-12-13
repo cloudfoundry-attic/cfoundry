@@ -36,6 +36,6 @@ end
 
 namespace "test" do
   task "spec" do |t|
-    sh("cd spec && bundle exec rake spec")
+    sh("bundle exec rspec")
   end
 end
