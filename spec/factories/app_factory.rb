@@ -17,8 +17,9 @@ FactoryGirl.define do
     end
 
     after_build do |app, evaluator|
-      RR.stub(app).routes { evaluator.routes }
-      RR.stub(app).service_bindings { evaluator.service_bindings }
+      %w{name routes service_bindings}.each do |attr|
+        RR.stub(app).__send__(attr) { evaluator.send(attr) }
+      end
     end
   end
 end
