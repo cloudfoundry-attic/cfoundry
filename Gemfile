@@ -1,4 +1,7 @@
 source "http://rubygems.org"
 
-# Specify your gem's dependencies in cf.gemspec
-gemspec
+gemspec :name => "cfoundry"
+
+group :development do
+  gem "gerrit-cli"
+end
