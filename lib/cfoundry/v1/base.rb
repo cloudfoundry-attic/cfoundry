@@ -48,6 +48,11 @@ module CFoundry::V1
     end
 
     # Users
+    def create_user(payload)
+      # no JSON response
+      post(payload, "users", :content => :json)
+    end
+
     def create_token(payload, email)
       post(payload, "users", email, "tokens",
            :content => :json, :accept => :json)
