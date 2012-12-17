@@ -30,6 +30,20 @@ module CFoundry
     end
   end
 
+  class Timeout < Timeout::Error
+    attr_reader :method, :uri, :parent
+
+    def initialize(method, uri, parent = nil)
+      @method = method
+      @uri = uri
+      @parent = parent
+      super(to_s)
+    end
+
+    def to_s
+      "#{method::METHOD} #{uri} timed out"
+    end
+  end
 
   # Exception representing errors returned by the API.
   class APIError < RuntimeError

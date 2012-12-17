@@ -8,6 +8,8 @@ module CFoundry
   class BaseClient # :nodoc:
     LOG_LENGTH = 10
 
+    attr_reader :target
+
     attr_accessor :trace, :backtrace, :log
 
     def initialize(target, token = nil)
@@ -141,6 +143,8 @@ module CFoundry
           handle_response(response, accept)
         end
       end
+    rescue ::Timeout::Error => e
+      raise Timeout.new(method, uri, e)
     rescue SocketError, Errno::ECONNREFUSED => e
       raise TargetRefused, e.message
     end
