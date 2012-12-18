@@ -129,4 +129,56 @@ EOF
       expect(req).to have_been_requested
     end
   end
+
+  describe '#password_score' do
+    let(:password) { "password" }
+    let(:response) { MultiJson.encode({}) }
+
+    subject { uaa.password_score(password) }
+
+    before do
+      @request = stub_request(:post, "#{target}/password/score").with(
+        :body => {:password => password, },
+        :headers => { "Accept" => "application/json" }
+      ).to_return(
+        :status => 200,
+        :body => response
+      )
+    end
+
+    it 'sends a password change request' do
+      subject
+      expect(@request).to have_been_requested
+    end
+
+    context 'when the score is less than the required core' do
+      let(:response) { MultiJson.encode "score" => 1, "requiredScore" => 5 }
+      it { should == :weak }
+    end
+
+    context 'and the score is equal to the required score' do
+      let(:response) { MultiJson.encode "score" => 5, "requiredScore" => 5 }
+      it { should == :weak }
+    end
+
+    context 'and the score is greater than the required score' do
+      let(:response) { MultiJson.encode "score" => 6, "requiredScore" => 5 }
+      it { should == :good }
+    end
+
+    context 'and the score is 10' do
+      let(:response) { MultiJson.encode "score" => 10, "requiredScore" => 5 }
+      it { should == :strong }
+    end
+
+    context 'and the score is 10' do
+      let(:response) { MultiJson.encode "score" => 10, "requiredScore" => 10 }
+      it { should == :strong }
+    end
+
+    context 'and the score is invalid' do
+      let(:response) { MultiJson.encode "score" => 11, "requiredScore" => 5 }
+      it { should == :weak }
+    end
+  end
 end
