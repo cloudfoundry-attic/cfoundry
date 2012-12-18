@@ -147,7 +147,12 @@ module CFoundry::V2
       define_method(name) do
         return @cache[name] if @cache.key?(name)
 
-        @cache[name] = manifest[:entity][name] || default
+        @cache[name] =
+          if manifest[:entity].key?(name)
+            manifest[:entity][name]
+          else
+            default
+          end
       end
 
       define_method(:"#{name}=") do |val|

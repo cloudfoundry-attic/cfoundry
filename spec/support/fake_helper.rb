@@ -17,6 +17,16 @@ module Fake
 
       objs
     end
+
+    def fake_model(name = :my_fake_model, &init)
+      klass = Class.new(CFoundry::V2::FakeModel) do
+        self.object_name = name
+      end
+
+      klass.class_eval(&init) if init
+
+      klass
+    end
   end
 
   def fake(attributes = {})
@@ -151,6 +161,15 @@ module CFoundry::V2
           setup_reverse_relationship(x)
         end
       end
+    end
+  end
+
+
+  class FakeModel < CFoundry::V2::Model
+    attr_reader :diff
+
+    class << self
+      attr_writer :object_name
     end
   end
 
