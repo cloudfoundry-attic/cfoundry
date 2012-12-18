@@ -67,10 +67,8 @@ module CFoundry
       required_score = response[:requiredScore] || 0
       case (response[:score] || 0)
         when 10 then :strong
-        when 0..required_score then :weak
         when required_score..9 then :good
-        else
-          :weak
+        else :weak
       end
     end
 

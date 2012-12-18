@@ -151,6 +151,11 @@ EOF
       expect(@request).to have_been_requested
     end
 
+    context 'when the score is 0 and the required is 0' do
+      let(:response) { MultiJson.encode "score" => 0, "requiredScore" => 0 }
+      it { should == :good }
+    end
+
     context 'when the score is less than the required core' do
       let(:response) { MultiJson.encode "score" => 1, "requiredScore" => 5 }
       it { should == :weak }
@@ -158,7 +163,7 @@ EOF
 
     context 'and the score is equal to the required score' do
       let(:response) { MultiJson.encode "score" => 5, "requiredScore" => 5 }
-      it { should == :weak }
+      it { should == :good }
     end
 
     context 'and the score is greater than the required score' do
