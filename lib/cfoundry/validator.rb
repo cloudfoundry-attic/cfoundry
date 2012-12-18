@@ -22,6 +22,8 @@ module CFoundry
             type.all? { |name, subtype|
               val.key?(name) && value_matches?(val[name], subtype)
             }
+        when nil
+          true
         else
           val.is_a?(Object.const_get(type.to_s.capitalize))
         end

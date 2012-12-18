@@ -24,6 +24,14 @@ module CFoundry::V2
           '\1_\2').downcase.to_sym
     end
 
+    def define_client_methods(&blk)
+      ClientMethods.module_eval(&blk)
+    end
+
+    def define_base_client_methods(&blk)
+      BaseClientMethods.module_eval(&blk)
+    end
+
     def defaults
       @defaults ||= {}
     end
@@ -44,7 +52,7 @@ module CFoundry::V2
       singular = klass.object_name
       plural = :"#{singular}s"
 
-      BaseClientMethods.module_eval do
+      define_base_client_methods do
         define_method(singular) do |guid, *args|
           get("v2", plural, guid, :accept => :json,
               :params => ModelMagic.params_from(args))
@@ -70,7 +78,7 @@ module CFoundry::V2
         end
       end
 
-      ClientMethods.module_eval do
+      define_client_methods do
         define_method(singular) do |*args|
           guid, partial, _ = args
 
@@ -213,7 +221,7 @@ module CFoundry::V2
       end
 
       define_method(:"#{name}=") do |val|
-        klass = CFoundry::V2.const_get(kls)
+        klass = self.class.objects[obj]
 
         unless has_default && val == default
           CFoundry::Validator.validate_type(val, klass)
@@ -223,15 +231,15 @@ module CFoundry::V2
         @manifest[:entity] ||= {}
 
         old = @manifest[:entity][:"#{name}_guid"]
-        if old != val.guid
-          old_obj = klass.new(@client, old, @manifest[:entity][name])
+        if old != (val && val.guid)
+          old_obj =
+            @cache[name] || klass.new(@client, old, @manifest[:entity][name])
 
           @changes[name] = [old_obj, val]
         end
 
         @cache[name] = val
 
-        @manifest[:entity][name] = val.manifest
         @manifest[:entity][:"#{name}_guid"] =
           @diff[:"#{name}_guid"] = val && val.guid
       end
@@ -291,7 +299,9 @@ module CFoundry::V2
       end
 
       define_method(:"add_#{singular}") do |x|
-        CFoundry::Validator.validate_type(x, CFoundry::V2.const_get(kls))
+        klass = self.class.objects[object]
+
+        CFoundry::Validator.validate_type(x, klass)
 
         if cache = @cache[plural]
           cache << x unless cache.include?(x)
@@ -304,7 +314,9 @@ module CFoundry::V2
       end
 
       define_method(:"remove_#{singular}") do |x|
-        CFoundry::Validator.validate_type(x, CFoundry::V2.const_get(kls))
+        klass = self.class.objects[object]
+
+        CFoundry::Validator.validate_type(x, klass)
 
         if cache = @cache[plural]
           cache.delete(x)
@@ -317,7 +329,7 @@ module CFoundry::V2
       end
 
       define_method(:"#{plural}=") do |xs|
-        klass = CFoundry::V2.const_get(kls)
+        klass = self.class.objects[object]
 
         CFoundry::Validator.validate_type(xs, [klass])
 
@@ -327,15 +339,16 @@ module CFoundry::V2
         old = @manifest[:entity][:"#{singular}_guids"]
         if old != xs.collect(&:guid)
           old_objs =
-            if all = @manifest[:entity][plural]
-              all.collect do |m|
-                klass.new(@client, m[:metadata][:guid], m)
+            @cache[plural] ||
+              if all = @manifest[:entity][plural]
+                all.collect do |m|
+                  klass.new(@client, m[:metadata][:guid], m)
+                end
+              elsif old
+                old.collect { |id| klass.new(@client, id) }
               end
-            elsif old
-              old.collect { |id| klass.new(@client, id) }
-            end
 
-          @changes[name] = [old_objs, xs]
+          @changes[plural] = [old_objs, xs]
         end
 
         @cache[plural] = xs

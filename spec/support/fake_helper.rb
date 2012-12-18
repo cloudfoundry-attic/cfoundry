@@ -136,11 +136,15 @@ module CFoundry::V2
   end
 
 
+  class FakeBase < Base
+  end
+
+
   class FakeClient < Client
     include Fake
 
-    def initialize(target = nil, token = nil)
-      super
+    def initialize(target = "http://example.com", token = nil)
+      @base = FakeBase.new(target, token)
     end
 
     private
@@ -174,7 +178,18 @@ module CFoundry::V2
   end
 
 
-  Model.objects.each do |klass|
+  module ModelMagic
+    def self.define_client_methods(&blk)
+      FakeClient.module_eval(&blk)
+    end
+
+    def self.define_base_client_methods(&blk)
+      FakeBase.module_eval(&blk)
+    end
+  end
+
+
+  Model.objects.each_value do |klass|
     klass.to_many_relations.each do |plural, _|
       Fake.define_many_association(klass, plural)
     end

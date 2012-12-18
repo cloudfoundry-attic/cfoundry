@@ -69,4 +69,47 @@ describe CFoundry::V2::ModelMagic do
       end
     end
   end
+
+  describe 'to_one relationships' do
+    describe 'writing' do
+      let!(:mymodel) { fake_model { to_one :foo } }
+      let!(:othermodel) { fake_model :foo }
+
+      let(:myobject) { mymodel.new(nil, client).fake }
+      let(:otherobject) { othermodel.new(nil, client).fake }
+
+      subject { myobject.foo = otherobject }
+
+      it "sets the GUID in the manifest to the object's GUID" do
+        expect { subject }.to change {
+          myobject.manifest[:entity][:foo_guid]
+        }.to(otherobject.guid)
+      end
+
+      it "tracks internal changes in the diff" do
+        expect { subject }.to change { myobject.diff }.to(
+          :foo_guid => otherobject.guid)
+      end
+
+      it "tracks high-level changes in .changes" do
+        before = myobject.foo
+        expect { subject }.to change { myobject.changes }.to(
+          :foo => [before, otherobject])
+      end
+
+      context "when there is a default" do
+        let(:mymodel) { fake_model { to_one :foo, :default => nil } }
+
+        subject { myobject.foo = nil }
+
+        it "allows setting to the default" do
+          myobject.foo = otherobject
+
+          expect { subject }.to change {
+            myobject.manifest[:entity][:foo_guid]
+          }.from(otherobject.guid).to(nil)
+        end
+      end
+    end
+  end
 end

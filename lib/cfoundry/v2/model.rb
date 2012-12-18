@@ -5,15 +5,17 @@ require "cfoundry/v2/model_magic"
 
 module CFoundry::V2
   class Model
+    @@objects = {}
+
     extend ModelMagic
 
     class << self
       def objects
-        @objects ||= []
+        @@objects
       end
 
       def inherited(klass)
-        objects << klass
+        @@objects[klass.object_name] = klass
         super
       end
     end
