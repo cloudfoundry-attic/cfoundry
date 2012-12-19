@@ -7,6 +7,17 @@ module CFoundry::V2
   class Model
     extend ModelMagic
 
+    class << self
+      def objects
+        @objects ||= []
+      end
+
+      def inherited(klass)
+        objects << klass
+        super
+      end
+    end
+
     attr_accessor :guid, :cache, :changes
 
     def initialize(guid, client, manifest = nil, partial = false)

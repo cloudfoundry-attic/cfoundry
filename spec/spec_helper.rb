@@ -1,17 +1,16 @@
 require "rspec"
 require "cfoundry"
-require "factory_girl"
 require "webmock/rspec"
 
-Dir[File.expand_path('../support/**/*.rb', __FILE__)].each do |file|
+Dir[File.expand_path('../{support,fakes}/**/*.rb', __FILE__)].each do |file|
   require file
 end
 
-FactoryGirl.definition_file_paths =
-  [File.expand_path("../factories", __FILE__)]
-
-FactoryGirl.find_definitions
+def random_string(tag = "random")
+  sprintf("%s-%x", tag, rand(10 ** 6))
+end
 
 RSpec.configure do |c|
+  c.include Fake::FakeMethods
   c.mock_with :rr
 end
