@@ -49,11 +49,9 @@ module CFoundry
 
     def change_password(guid, new, old)
       put(
-        { :schemas => ["urn:scim:schemas:core:1.0"],
-          :password => new,
-          :oldPassword => old
-        },
-        "User", guid, "password",
+        { :password => new, :oldPassword => old },
+        "Users", guid, "password",
+        :accept => :json,
         :content => :json)
     end
 

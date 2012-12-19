@@ -114,15 +114,26 @@ EOF
     it 'sends a password change request' do
       req = stub_request(
         :put,
-        "#{target}/User/#{guid}/password"
+        "#{target}/Users/#{guid}/password"
       ).with(
         :body => {
-          :schemas => ["urn:scim:schemas:core:1.0"],
           :password => new,
           :oldPassword => old
         },
-        :headers => { "Content-Type" => "application/json" }
+        :headers => {
+          "Content-Type" => "application/json",
+          "Accept" => "application/json"
+        }
+      ).to_return(
+        :status => 200,
+        :body => <<EOF
+          {
+            "status": "ok",
+            "message": "password_updated"
+          }
+EOF
       )
+
 
       subject
 
