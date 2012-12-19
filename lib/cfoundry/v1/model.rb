@@ -20,6 +20,14 @@ module CFoundry::V1
       def base_object_name
         @base_object_name ||= object_name
       end
+
+      def plural_object_name
+        "#{object_name}s"
+      end
+
+      def plural_base_object_name
+        "#{base_object_name}s"
+      end
     end
 
     attr_accessor :guid, :changes

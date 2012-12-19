@@ -121,7 +121,7 @@ module CFoundry::V2
 
     def find_reverse_relationship(v)
       singular = object_name
-      plural = :"#{object_name}s"
+      plural = plural_object_name
 
       v.class.to_one_relations.each do |attr, opts|
         return [attr, :one] if attr == singular
@@ -195,7 +195,7 @@ module CFoundry::V2
     end
 
     FakeClient.class_eval do
-      plural = :"#{klass.object_name}s"
+      plural = klass.plural_object_name
 
       attr_writer plural
       Fake.define_many_association(self, plural)

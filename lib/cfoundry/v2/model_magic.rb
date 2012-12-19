@@ -24,6 +24,10 @@ module CFoundry::V2
           '\1_\2').downcase.to_sym
     end
 
+    def plural_object_name
+      :"#{object_name}s"
+    end
+
     def define_client_methods(&blk)
       ClientMethods.module_eval(&blk)
     end
@@ -50,7 +54,7 @@ module CFoundry::V2
 
     def inherited(klass)
       singular = klass.object_name
-      plural = :"#{singular}s"
+      plural = klass.plural_object_name
 
       define_base_client_methods do
         define_method(singular) do |guid, *args|
@@ -253,13 +257,14 @@ module CFoundry::V2
       include QUERIES[singular]
 
       object = opts[:as] || singular
-      plural_object = :"#{object}s"
 
       kls = object.to_s.capitalize.gsub(/(.)_(.)/) do
         $1 + $2.upcase
       end
 
       define_method(plural) do |*args|
+        klass = CFoundry::V2.const_get(kls)
+
         opts, _ = args
         opts ||= {}
 
@@ -282,8 +287,8 @@ module CFoundry::V2
         else
           res =
             @client.send(
-              :"#{plural_object}_from",
-              "/v2/#{object_name}s/#@guid/#{plural}",
+              :"#{klass.plural_object_name}_from",
+              "/v2/#{plural_object_name}/#@guid/#{plural}",
               opts)
         end
 
@@ -309,7 +314,7 @@ module CFoundry::V2
 
         @client.base.request_path(
           Net::HTTP::Put,
-          ["v2", "#{object_name}s", @guid, plural, x.guid],
+          ["v2", plural_object_name, @guid, plural, x.guid],
           :accept => :json)
       end
 
@@ -324,7 +329,7 @@ module CFoundry::V2
 
         @client.base.request_path(
           Net::HTTP::Delete,
-          ["v2", "#{object_name}s", @guid, plural, x.guid],
+          ["v2", plural_object_name, @guid, plural, x.guid],
           :accept => :json)
       end
 
@@ -362,7 +367,7 @@ module CFoundry::V2
       define_method(:summary) do
         @client.base.request_path(
           Net::HTTP::Get,
-          ["v2", "#{object_name}s", @guid, "summary"],
+          ["v2", plural_object_name, @guid, "summary"],
           :accept => :json)
       end
 
@@ -404,7 +409,7 @@ module CFoundry::V2
     def queryable_by(*names)
       klass = self
       singular = object_name
-      plural = :"#{singular}s"
+      plural = plural_object_name
 
       query = QUERIES[singular]
 

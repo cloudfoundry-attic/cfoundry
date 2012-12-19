@@ -52,6 +52,10 @@ module CFoundry::V2
       @object_name ||= self.class.object_name
     end
 
+    def plural_object_name
+      @plural_object_name ||= self.class.plural_object_name
+    end
+
     def invalidate!
       @manifest = nil
       @partial = false

@@ -20,10 +20,10 @@ module CFoundry::V1
 
     def define_client_methods(klass = self)
       singular = klass.object_name
-      plural = :"#{singular}s"
+      plural = klass.plural_object_name
 
       base_singular = klass.base_object_name
-      base_plural = :"#{base_singular}s"
+      base_plural = klass.plural_base_object_name
 
       BaseClientMethods.module_eval do
         define_method(base_singular) do |guid|
