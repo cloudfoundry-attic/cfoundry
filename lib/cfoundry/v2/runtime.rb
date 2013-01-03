@@ -4,6 +4,7 @@ module CFoundry::V2
   class Runtime < Model
     attribute :name, :string
     attribute :description, :string
+    attribute :version, :string
     to_many   :apps
 
     queryable_by :name, :app_guid
