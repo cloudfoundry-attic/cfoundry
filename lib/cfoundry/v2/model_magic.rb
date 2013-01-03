@@ -145,6 +145,8 @@ module CFoundry::V2
             json)
         end
       end
+
+      has_summary
     end
 
     def attribute(name, type, opts = {})

@@ -12,7 +12,5 @@ module CFoundry::V2
 
     queryable_by :name, :space_guid, :user_guid, :manager_guid,
       :billing_manager_guid, :auditor_guid
-
-    has_summary
   end
 end

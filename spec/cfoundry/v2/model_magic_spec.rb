@@ -112,4 +112,13 @@ describe CFoundry::V2::ModelMagic do
       end
     end
   end
+
+  describe 'summarization for an arbitrary model' do
+    let(:mymodel) { fake_model { attribute :foo, :string } }
+    let(:summary_attributes) { { :foo => "abcd" } }
+
+    subject { myobject }
+
+    it_behaves_like 'a summarizeable model'
+  end
 end
