@@ -19,6 +19,13 @@ module Fake
     end
 
     def fake_model(name = :my_fake_model, &init)
+      # There is a difference between ruby 1.8.7 and 1.8.8 in the order that
+      # the inherited callback gets called. In 1.8.7 the inherited callback
+      # is called after the block; in 1.8.8 and later it's called before.
+      # The upshot for us is we need a failproof way of getting the name
+      # to klass. So we're using a global variable to hand off the value.
+      # Please don't shoot us. - ESH & MMB
+      $object_name = name
       klass = Class.new(CFoundry::V2::FakeModel) do
         self.object_name = name
       end
@@ -171,6 +178,21 @@ module CFoundry::V2
 
   class FakeModel < CFoundry::V2::Model
     attr_reader :diff
+
+    def self.inherited(klass)
+      class << klass
+        attr_writer :object_name
+      end
+
+      # There is a difference between ruby 1.8.7 and 1.8.8 in the order that
+      # the inherited callback gets called. In 1.8.7 the inherited callback
+      # is called after the block; in 1.8.8 and later it's called before.
+      # The upshot for us is we need a failproof way of getting the name
+      # to klass. So we're using a global variable to hand off the value.
+      # Please don't shoot us. - ESH & MMB
+      klass.object_name = $object_name
+      super
+    end
 
     class << self
       attr_writer :object_name
