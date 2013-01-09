@@ -8,7 +8,7 @@ module CFoundry
       return nil unless request
       info = ["REQUEST: #{request.method} #{request.path}"]
       info << "REQUEST_HEADERS:"
-      request.each_header do |key, value|
+      request.to_hash.sort.each do |key, value|
         info << "  #{key} : #{value}"
       end
       info << "REQUEST_BODY: #{request.body}" if request.body
@@ -20,7 +20,7 @@ module CFoundry
       return nil unless response
       info = ["RESPONSE: [#{response.code}]"]
       info << "RESPONSE_HEADERS:"
-      response.each_header do |key, value|
+      response.to_hash.sort.each do |key, value|
         info << "  #{key} : #{value}"
       end
       begin
