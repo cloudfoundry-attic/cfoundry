@@ -1,3 +1,4 @@
+require "cfoundry/trace_helpers"
 require "net/https"
 require "net/http/post/multipart"
 require "multi_json"
@@ -6,6 +7,8 @@ require "base64"
 
 module CFoundry
   class BaseClient # :nodoc:
+    include CFoundry::TraceHelpers
+
     LOG_LENGTH = 10
 
     attr_reader :target
@@ -140,7 +143,7 @@ module CFoundry
             Net::HTTP::Get,
             original_options)
         else
-          handle_response(response, accept)
+          handle_response(response, accept, request)
         end
       end
     rescue ::Timeout::Error => e
@@ -277,26 +280,11 @@ module CFoundry
 
     def print_request(request)
       $stderr.puts ">>>"
-      $stderr.puts "REQUEST: #{request.method} #{request.path}"
-      $stderr.puts "REQUEST_HEADERS:"
-      request.each_header do |key, value|
-        $stderr.puts "  #{key} : #{value}"
-      end
-      $stderr.puts "REQUEST_BODY: #{request.body}" if request.body
+      $stderr.puts request_trace(request)
     end
 
     def print_response(response)
-      $stderr.puts "RESPONSE: [#{response.code}]"
-      $stderr.puts "RESPONSE_HEADERS:"
-      response.each_header do |key, value|
-        $stderr.puts "  #{key} : #{value}"
-      end
-      begin
-        parsed_body = MultiJson.load(response.body)
-        $stderr.puts MultiJson.dump(parsed_body, :pretty => true)
-      rescue
-        $stderr.puts "#{response.body}"
-      end
+      $stderr.puts response_trace(response)
       $stderr.puts "<<<"
     end
 
@@ -320,29 +308,19 @@ module CFoundry
       $stderr.puts "... (trimmed)" unless trimmed_locs == interesting_locs
     end
 
-    def handle_response(response, accept)
+    def handle_response(response, accept, request)
       case response
-      when Net::HTTPSuccess, Net::HTTPRedirection
-        if accept == :json
-          if response.is_a?(Net::HTTPNoContent)
-            raise CFoundry::BadResponse.new(
-              204,
-              "Expected JSON response, got 204 No Content")
-          end
+        when Net::HTTPSuccess, Net::HTTPRedirection
+          accept == :json ? parse_json(response.body) : response.body
 
-          parse_json(response.body)
+        when Net::HTTPNotFound
+          raise CFoundry::NotFound.new(request, response)
+
+        when Net::HTTPForbidden
+          raise CFoundry::Denied.new(request, response)
+
         else
-          response.body
-        end
-
-      when Net::HTTPNotFound
-        raise CFoundry::NotFound.new(response.code, response.body)
-
-      when Net::HTTPForbidden
-        raise CFoundry::Denied.new(response.code, response.body)
-
-      else
-        raise CFoundry::BadResponse.new(response.code, response.body)
+          raise CFoundry::BadResponse.new(request, response)
       end
     end
 

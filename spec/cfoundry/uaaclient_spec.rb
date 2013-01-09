@@ -197,4 +197,70 @@ EOF
       it { should == :weak }
     end
   end
+
+  describe '#request_uri' do
+    subject { uaa.request_uri URI.parse(uaa.target + "/foo"), Net::HTTP::Get }
+
+    context 'when an HTTPNotFound error occurs' do
+      before {
+
+        stub_request(:get, 'https://uaa.example.com/foo').to_return :status => 404,
+          :body => "NOT FOUND"
+      }
+
+      it 'raises the correct error' do
+        expect {subject}.to raise_error CFoundry::NotFound, "404: NOT FOUND"
+      end
+    end
+
+
+    shared_examples "Denied tests" do
+      before {
+        stub_request(:get, 'https://uaa.example.com/foo').to_return :status => error_code,
+          :body => "{\"error_description\":\"Something detailed\"}"
+      }
+
+      it 'raises the correct error' do
+        expect {subject}.to raise_error CFoundry::Denied, "#{error_code}: Something detailed"
+      end
+    end
+
+
+    context 'when an HTTPForbidden error occurs' do
+      let(:error_code) { 403 }
+       include_examples "Denied tests"
+    end
+
+    context 'when an HTTPUnauthorized error occurs' do
+      let(:error_code) { 401 }
+      include_examples "Denied tests"
+    end
+
+    context 'when an HTTPBadRequest error occurs' do
+      let(:error_code) { 400 }
+      include_examples "Denied tests"
+    end
+
+    context "when an HTTPConflict error occurs" do
+      before {
+        stub_request(:get, 'https://uaa.example.com/foo').to_return :status => 409,
+          :body => "{\"message\":\"There was a conflict\"}"
+      }
+
+      it 'raises the correct error' do
+        expect {subject}.to raise_error CFoundry::Denied, "409: There was a conflict"
+      end
+    end
+
+    context "when any other type of error occurs" do
+      before {
+        stub_request(:get, 'https://uaa.example.com/foo').to_return :status => 411,
+          :body => "NOT LONG ENOUGH"
+      }
+
+      it 'raises the correct error' do
+        expect {subject}.to raise_error CFoundry::BadResponse, "411: NOT LONG ENOUGH"
+      end
+    end
+  end
 end

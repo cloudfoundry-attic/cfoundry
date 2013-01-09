@@ -1,3 +1,6 @@
+require "net/https"
+require "multi_json"
+
 module CFoundry
   # Base class for CFoundry errors (not from the server).
   class Error < RuntimeError; end
@@ -53,22 +56,35 @@ module CFoundry
       end
     end
 
-    attr_reader :error_code, :description
+    attr_reader :error_code, :description, :request, :response
 
-    # Create an APIError with a given error code and description.
-    def initialize(error_code = nil, description = nil)
-      @error_code = error_code
-      @description = description
+    # Create an APIError with a given request and response.
+    def initialize(request, response, description = nil, error_code = nil)
+      @response = response
+      @request = request
+      @error_code = error_code || response.code
+      @description = description || parse_description
     end
 
     # Exception message.
     def to_s
-      if error_code
-        "#{error_code}: #{description}"
-      elsif description
-        description
+      "#{error_code}: #{description}"
+    end
+
+    private
+    def parse_description
+      begin
+       parse_json(response.body)[:description]
+      rescue MultiJson::DecodeError
+        response.body
+      end
+    end
+
+    def parse_json(x)
+      if x.empty?
+        raise MultiJson::DecodeError.new("Empty JSON string", [], "")
       else
-        super
+        MultiJson.load(x, :symbolize_keys => true)
       end
     end
   end

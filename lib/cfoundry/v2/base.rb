@@ -118,41 +118,18 @@ module CFoundry::V2
 
     private
 
-    def handle_response(response, accept)
-      case response
-      when Net::HTTPSuccess, Net::HTTPRedirection
-        if accept == :headers
-          return sane_headers(response)
-        end
+    def handle_response(response, accept, request)
+      # this is a copy paste of v1
+      return super if response.is_a?(Net::HTTPSuccess) || response.is_a?(Net::HTTPRedirection)
 
-        if accept == :json
-          if response.is_a?(Net::HTTPNoContent)
-            raise CFoundry::BadResponse.new(
-              204,
-              "Expected JSON response, got 204 No Content")
-          end
+      info = parse_json(response.body)
+      return super unless info[:code]
 
-          parse_json(response.body)
-        else
-          response.body
-        end
+      cls = CFoundry::APIError.error_classes[info[:code]]
 
-      when Net::HTTPBadRequest, Net::HTTPUnauthorized, Net::HTTPNotFound,
-            Net::HTTPNotImplemented, Net::HTTPServiceUnavailable
-        begin
-          info = parse_json(response.body)
-          return super unless info[:code]
-
-          cls = CFoundry::APIError.error_classes[info[:code]]
-
-          raise (cls || CFoundry::APIError).new(info[:code], info[:description])
-        rescue MultiJson::DecodeError
-          super
-        end
-
-      else
-        super
-      end
+      raise (cls || CFoundry::APIError).new(request, response, info[:description],  info[:code])
+    rescue MultiJson::DecodeError
+      super
     end
 
     def log_line(io, data)

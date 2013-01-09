@@ -32,15 +32,13 @@ module CFoundry
           :accept => :json,
           :params => query)
 
-      case auth
-      when Net::HTTPRedirection
+      if auth.is_a? Net::HTTPRedirection
         extract_token(auth["location"])
       else
         json = parse_json(auth.body)
-        raise CFoundry::Denied.new(
-          auth.code.to_i,
-          json[:error_description])
+        raise CFoundry::Denied.new(nil, nil, json[:error_description], auth.code)
       end
+
     end
 
     def users
@@ -72,34 +70,23 @@ module CFoundry
 
     private
 
-    def handle_response(response, accept)
+    def handle_response(response, accept, request)
       case response
       when Net::HTTPSuccess, Net::HTTPRedirection
-        if accept == :json
-          if response.is_a?(Net::HTTPNoContent)
-            raise CFoundry::BadResponse.new(
-              204,
-              "Expected JSON response, got 204 No Content")
-          end
-
-          parse_json(response.body)
-        else
-          response.body
-        end
-
+        accept == :json ? parse_json(response.body) : response.body
       when Net::HTTPBadRequest, Net::HTTPUnauthorized, Net::HTTPForbidden
         info = parse_json(response.body)
-        raise Denied.new(response.code, info[:error_description])
+        raise Denied.new(request, response, info[:error_description])
 
       when Net::HTTPNotFound
-        raise NotFound
+        raise CFoundry::NotFound.new(request, response)
 
       when Net::HTTPConflict
         info = parse_json(response.body)
-        raise CFoundry::Denied.new(response.code, info[:message])
+        raise CFoundry::Denied.new(request, response, info[:message])
 
       else
-        raise BadResponse.new(response.code, response.body)
+        raise BadResponse.new(request, response)
       end
     end
 
