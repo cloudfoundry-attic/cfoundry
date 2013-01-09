@@ -8,9 +8,7 @@ module CFoundry
       return nil unless request
       info = ["REQUEST: #{request.method} #{request.path}"]
       info << "REQUEST_HEADERS:"
-      request.to_hash.sort.each do |key, value|
-        info << "  #{key} : #{value}"
-      end
+      info << header_trace(request)
       info << "REQUEST_BODY: #{request.body}" if request.body
       info.join("\n")
     end
@@ -20,9 +18,8 @@ module CFoundry
       return nil unless response
       info = ["RESPONSE: [#{response.code}]"]
       info << "RESPONSE_HEADERS:"
-      response.to_hash.sort.each do |key, value|
-        info << "  #{key} : #{value}"
-      end
+      info << header_trace(response)
+      info << "RESPONSE_BODY:"
       begin
         parsed_body = MultiJson.load(response.body)
         info << MultiJson.dump(parsed_body, :pretty => true)
@@ -32,5 +29,12 @@ module CFoundry
       info.join("\n")
     end
 
+    private
+
+    def header_trace(headers)
+      headers.to_hash.sort.map do |key, value|
+        "  #{key} : #{value.join(", ")}"
+      end
+    end
   end
 end

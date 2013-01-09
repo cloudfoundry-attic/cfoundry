@@ -46,7 +46,7 @@ describe CFoundry::TraceHelpers do
 
   describe "#response_trace" do
     context "with a non-JSON response body" do
-      let(:response_trace) { "RESPONSE: [404]\nRESPONSE_HEADERS:\nSome body" }
+      let(:response_trace) { "RESPONSE: [404]\nRESPONSE_HEADERS:\n\nRESPONSE_BODY:\nSome body" }
       let(:response_body) { "Some body"}
 
       include_examples "response_trace tests"
@@ -55,7 +55,7 @@ describe CFoundry::TraceHelpers do
     context "with a JSON response body" do
 
       let(:response_body) { "{\"name\": \"vcap\",\"build\": 2222,\"support\": \"http://support.cloudfoundry.com\"}" }
-      let(:response_trace) { "RESPONSE: [404]\nRESPONSE_HEADERS:\n#{MultiJson.dump(MultiJson.load(response_body), :pretty => true)}" }
+      let(:response_trace) { "RESPONSE: [404]\nRESPONSE_HEADERS:\n\nRESPONSE_BODY:\n#{MultiJson.dump(MultiJson.load(response_body), :pretty => true)}" }
 
       include_examples "response_trace tests"
     end
