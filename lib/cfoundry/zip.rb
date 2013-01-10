@@ -5,7 +5,7 @@ module CFoundry
   # to use system zip command if necessary.
   module Zip
     # Directory entries to exclude from packing.
-    PACK_EXCLUSION_GLOBS = ['..', '.', '*~', '#*#', '*.log']
+    PACK_EXCLUSION_GLOBS = %w(.. . *~ #*# *.log)
 
     module_function
 

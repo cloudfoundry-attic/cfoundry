@@ -51,6 +51,8 @@ module CFoundry
       FileUtils.rm_rf(tmpdir) if tmpdir
     end
 
+    private
+
     def prepare_package(path, to)
       if path =~ /\.(jar|war|zip)$/
         CFoundry::Zip.unpack(path, to)
