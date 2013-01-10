@@ -50,6 +50,8 @@ module CFoundry
 
   # Exception representing errors returned by the API.
   class APIError < RuntimeError
+    include TraceHelpers
+
     class << self
       def error_classes
         @error_classes ||= {}
@@ -69,6 +71,14 @@ module CFoundry
     # Exception message.
     def to_s
       "#{error_code}: #{description}"
+    end
+
+    def request_trace
+      super(request)
+    end
+
+    def response_trace
+      super(response)
     end
 
     private

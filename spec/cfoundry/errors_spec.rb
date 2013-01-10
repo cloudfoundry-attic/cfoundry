@@ -55,6 +55,14 @@ describe 'Errors' do
 
     end
 
+    describe "#request_trace" do
+      its(:request_trace) { should include "REQUEST: " }
+    end
+
+    describe "#response_trace" do
+      its(:response_trace) { should include "RESPONSE: " }
+    end
+
     it "sets error code to response error code by default" do
       CFoundry::APIError.new(request, response).error_code.should == 404
     end
