@@ -18,6 +18,14 @@ module CFoundry::V1
       @write_locations ||= {}
     end
 
+    def on_client(&blk)
+      ClientMethods.module_eval(&blk)
+    end
+
+    def on_base_client(&blk)
+      BaseClientMethods.module_eval(&blk)
+    end
+
     def define_client_methods(klass = self)
       singular = klass.object_name
       plural = klass.plural_object_name
@@ -25,7 +33,7 @@ module CFoundry::V1
       base_singular = klass.base_object_name
       base_plural = klass.plural_base_object_name
 
-      BaseClientMethods.module_eval do
+      on_base_client do
         define_method(base_singular) do |guid|
           get(base_plural, guid, :accept => :json)
         end
@@ -48,7 +56,7 @@ module CFoundry::V1
         end
       end
 
-      ClientMethods.module_eval do
+      on_client do
         if klass.guid_name
           define_method(:"#{singular}_by_#{klass.guid_name}") do |guid|
             obj = send(singular, guid)

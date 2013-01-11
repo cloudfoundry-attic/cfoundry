@@ -5,6 +5,8 @@ require "cfoundry/v1/model_magic"
 
 module CFoundry::V1
   class Model
+    @@objects = {}
+
     extend ModelMagic
 
     class << self
@@ -27,6 +29,15 @@ module CFoundry::V1
 
       def plural_base_object_name
         "#{base_object_name}s"
+      end
+
+      def objects
+        @@objects
+      end
+
+      def inherited(klass)
+        @@objects[klass.object_name] = klass
+        super
       end
     end
 

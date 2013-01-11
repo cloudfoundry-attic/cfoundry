@@ -10,5 +10,6 @@ end
 
 RSpec.configure do |c|
   c.include Fake::FakeMethods
+  c.include V1Fake::FakeMethods
   c.mock_with :rr
 end
