@@ -138,7 +138,7 @@ module CFoundry::V1
     end
 
     def write_manifest(body = read_manifest, onto = {})
-      onto[guid_name] = @guid
+      onto[guid_name] = @guid if guid_name
 
       self.class.write_locations.each do |what, where|
         next if self.class.read_only_attributes.include? what
