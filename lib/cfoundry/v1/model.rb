@@ -90,8 +90,6 @@ module CFoundry::V1
     def update!
       @client.base.send(:"update_#{base_object_name}", @guid, write_manifest)
 
-      invalidate!
-
       true
     end
 
