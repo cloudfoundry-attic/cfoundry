@@ -10,7 +10,8 @@ describe CFoundry::UAAClient do
     # GET (target)/login
     it "receives the prompts from /login" do
       stub_request(:get, "#{target}/login").to_return :status => 200,
-        :body => <<EOF
+                                                      :headers => {'Content-Type' => 'application/json'},
+                                                      :body => <<EOF
           {
             "timestamp": "2012-11-08T13:32:18+0000",
             "commit_id": "ebbf817",
@@ -42,8 +43,14 @@ EOF
   describe '#authorize' do
     let(:username) { "foo@bar.com" }
     let(:password) { "test" }
+    let(:state) { 'somestate' }
+    let(:redirect_uri) { 'https://uaa.cloudfoundry.com/redirect/vmc' }
 
     subject { uaa.authorize(:username => username, :password => password) }
+
+    before(:each) do
+      any_instance_of(CF::UAA::TokenIssuer, :random_state => state)
+    end
 
     it 'returns the token on successful authentication' do
       stub_request(
@@ -52,44 +59,47 @@ EOF
       ).with(
         :query => {
           "client_id" => uaa.client_id,
-          "redirect_uri" => uaa.redirect_uri,
-          "response_type" => "token"
+          "redirect_uri" => redirect_uri,
+          'response_type' => 'token',
+          'state' => state,
         }
       ).to_return(
         :status => 302,
         :headers => {
-          "Location" => "#{uaa.redirect_uri}#access_token=bar&token_type=foo&fizz=buzz&foo=bar"
+          'Location' => "#{redirect_uri}#access_token=bar&token_type=foo&fizz=buzz&foo=bar&state=#{state}"
         }
       )
 
       expect(subject).to eq "foo bar"
     end
 
-    it 'raises CFoundry::Denied if authentication fails' do
-      stub_request(
-        :post,
-        "#{target}/oauth/authorize"
-      ).with(
-        :query => {
-          "client_id" => uaa.client_id,
-          "redirect_uri" => uaa.redirect_uri,
-          "response_type" => "token"
-        }
-      ).to_return(
-        :status => 401,
-        :headers => {
-          "Location" => "#{uaa.redirect_uri}#access_token=bar&token_type=foo&fizz=buzz&foo=bar"
-        },
-        :body => <<EOF
-          {
-            "error": "unauthorized",
-            "error_description": "Bad credentials"
-          }
-EOF
-      )
+    context 'when authorization fails' do
+      context 'in the expected way' do
+        it 'raises a CFoundry::Denied error' do
+          stub_request(:post, "#{target}/oauth/authorize").with(
+            :query => {
+              "client_id" => uaa.client_id,
+              "redirect_uri" => redirect_uri,
+              'response_type' => 'token',
+              'state' => state,
+            }
+          ).to_return(
+            :status => 401,
+            :body => '{ "error": "some_error", "error_description": "some description" }'
+          )
 
-      expect { subject }.to raise_error(
-        CFoundry::Denied, "401: Bad credentials")
+          expect { subject }.to raise_error(CFoundry::Denied, "401: Authorization failed")
+        end
+      end
+
+      context 'in an unexpected way' do
+        it 'raises a CFoundry::Denied error' do
+          any_instance_of(CF::UAA::TokenIssuer) do |token_issuer|
+            stub(token_issuer).implicit_grant_with_creds(anything) { raise CF::UAA::BadResponse.new("no_status_code") }
+          end
+          expect { subject }.to raise_error(CFoundry::Denied, "400: Authorization failed")
+        end
+      end
     end
   end
 
@@ -98,8 +108,9 @@ EOF
 
     it 'requests /Users' do
       req = stub_request(:get, "#{target}/Users").to_return(
-        :body => '{ "fake_data": "123" }')
-      expect(subject).to eq({ :fake_data => "123" })
+        :headers => {'Content-Type' => 'application/json'},
+        :body => '{ "resources": [] }')
+      expect(subject).to eq({'resources' => []})
       expect(req).to have_been_requested
     end
   end
@@ -116,24 +127,15 @@ EOF
         :put,
         "#{target}/Users/#{guid}/password"
       ).with(
-        :body => {
-          :password => new,
-          :oldPassword => old
-        },
         :headers => {
-          "Content-Type" => "application/json",
-          "Accept" => "application/json"
+          "Content-Type" => "application/json;charset=utf-8",
+          "Accept" => "application/json;charset=utf-8"
         }
       ).to_return(
         :status => 200,
-        :body => <<EOF
-          {
-            "status": "ok",
-            "message": "password_updated"
-          }
-EOF
+        :headers => {'Content-Type' => 'application/json'},
+        :body => '{ "status": "ok", "message": "password_updated" }'
       )
-
 
       subject
 
@@ -149,10 +151,14 @@ EOF
 
     before do
       @request = stub_request(:post, "#{target}/password/score").with(
-        :body => {:password => password, },
-        :headers => { "Accept" => "application/json" }
+        :body => 'password=password',
+        :headers => {
+          'Accept' => 'application/json;charset=utf-8',
+          'Content-Type' => 'application/x-www-form-urlencoded;charset=utf-8'
+        }
       ).to_return(
         :status => 200,
+        :headers => {'Content-Type' => 'application/json'},
         :body => response
       )
     end
@@ -195,72 +201,6 @@ EOF
     context 'and the score is invalid' do
       let(:response) { MultiJson.encode "score" => 11, "requiredScore" => 5 }
       it { should == :weak }
-    end
-  end
-
-  describe '#request_uri' do
-    subject { uaa.request_uri URI.parse(uaa.target + "/foo"), Net::HTTP::Get }
-
-    context 'when an HTTPNotFound error occurs' do
-      before {
-
-        stub_request(:get, 'https://uaa.example.com/foo').to_return :status => 404,
-          :body => "NOT FOUND"
-      }
-
-      it 'raises the correct error' do
-        expect {subject}.to raise_error CFoundry::NotFound, "404: NOT FOUND"
-      end
-    end
-
-
-    shared_examples "Denied tests" do
-      before {
-        stub_request(:get, 'https://uaa.example.com/foo').to_return :status => error_code,
-          :body => "{\"error_description\":\"Something detailed\"}"
-      }
-
-      it 'raises the correct error' do
-        expect {subject}.to raise_error CFoundry::Denied, "#{error_code}: Something detailed"
-      end
-    end
-
-
-    context 'when an HTTPForbidden error occurs' do
-      let(:error_code) { 403 }
-       include_examples "Denied tests"
-    end
-
-    context 'when an HTTPUnauthorized error occurs' do
-      let(:error_code) { 401 }
-      include_examples "Denied tests"
-    end
-
-    context 'when an HTTPBadRequest error occurs' do
-      let(:error_code) { 400 }
-      include_examples "Denied tests"
-    end
-
-    context "when an HTTPConflict error occurs" do
-      before {
-        stub_request(:get, 'https://uaa.example.com/foo').to_return :status => 409,
-          :body => "{\"message\":\"There was a conflict\"}"
-      }
-
-      it 'raises the correct error' do
-        expect {subject}.to raise_error CFoundry::Denied, "409: There was a conflict"
-      end
-    end
-
-    context "when any other type of error occurs" do
-      before {
-        stub_request(:get, 'https://uaa.example.com/foo').to_return :status => 411,
-          :body => "NOT LONG ENOUGH"
-      }
-
-      it 'raises the correct error' do
-        expect {subject}.to raise_error CFoundry::BadResponse, "411: NOT LONG ENOUGH"
-      end
     end
   end
 end
