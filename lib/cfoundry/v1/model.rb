@@ -143,6 +143,7 @@ module CFoundry::V1
       onto[guid_name] = @guid
 
       self.class.write_locations.each do |what, where|
+        next if self.class.read_only_attributes.include? what
         put(body[what], onto, where) if body.key?(what)
       end
 

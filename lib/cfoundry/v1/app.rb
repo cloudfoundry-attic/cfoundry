@@ -10,8 +10,8 @@ module CFoundry::V1
     attribute :name,      :string,   :guid => true
     attribute :instances, :integer
     attribute :state,     :string
-    attribute :created,   :integer,  :at => [:meta, :created]
-    attribute :version,   :integer,  :at => [:meta, :version]
+    attribute :created,   :integer,  :at => [:meta, :created], :read_only => true
+    attribute :version,   :integer,  :at => [:meta, :version], :read_only => true
     attribute :framework, :string,   :at => [:staging, :model]
     attribute :runtime,   :string,   :at => [:staging, :stack]
     attribute :command,   :string,   :at => [:staging, :command]

@@ -18,6 +18,10 @@ module CFoundry::V1
       @write_locations ||= {}
     end
 
+    def read_only_attributes
+      @read_only_attributes ||= []
+    end
+
     def on_client(&blk)
       ClientMethods.module_eval(&blk)
     end
@@ -87,21 +91,19 @@ module CFoundry::V1
       write_only = opts[:write_only]
       has_default = opts.key?(:default)
 
-      read_locations[name] = Array(opts[:read] || opts[:at] || name)
-      write_locations[name] = Array(opts[:write] || opts[:at] || name)
+      read_locations[name] = Array(opts[:read] || opts[:at] || name) unless write_only
+      write_locations[name] = Array(opts[:write] || opts[:at] || name) unless read_only
+
+      read_only_attributes << name if read_only
 
       self.guid_name = name if is_guid
 
-      unless write_only
-        define_method(name) do
-          return @guid if @guid && is_guid
+      define_method(name) do
+        return @guid if @guid && is_guid
 
-          read = read_manifest
-          read.key?(name) ? read[name] : default
-        end
+        read = read_manifest
+        read.key?(name) ? read[name] : default
       end
-
-      return if read_only
 
       define_method(:"#{name}=") do |val|
         unless has_default && val == default
@@ -115,8 +117,13 @@ module CFoundry::V1
         old = read_manifest[name]
         @changes[name] = [old, val] if old != val
 
-        put(val, @manifest, self.class.write_locations[name])
+        write_to = read_only ? self.class.read_locations : self.class.write_locations
+
+        put(val, @manifest, write_to[name])
       end
+
+      private name if write_only
+      private :"#{name}=" if read_only
     end
   end
 end
