@@ -4,14 +4,23 @@ describe CFoundry::UAAClient do
   let(:target) { "https://uaa.example.com" }
   let(:uaa) { CFoundry::UAAClient.new(target) }
 
+  shared_examples "UAA wrapper" do
+    it "converts UAA errors to CFoundry equivalents" do
+      mock(uaa).wrap_uaa_errors { nil }
+      subject
+    end
+  end
+
   describe '#prompts' do
     subject { uaa.prompts }
+
+    include_examples "UAA wrapper"
 
     # GET (target)/login
     it "receives the prompts from /login" do
       stub_request(:get, "#{target}/login").to_return :status => 200,
-                                                      :headers => {'Content-Type' => 'application/json'},
-                                                      :body => <<EOF
+        :headers => {'Content-Type' => 'application/json'},
+        :body => <<EOF
           {
             "timestamp": "2012-11-08T13:32:18+0000",
             "commit_id": "ebbf817",
@@ -51,6 +60,8 @@ EOF
     before(:each) do
       any_instance_of(CF::UAA::TokenIssuer, :random_state => state)
     end
+
+    include_examples "UAA wrapper"
 
     it 'returns the token on successful authentication' do
       stub_request(
@@ -122,6 +133,8 @@ EOF
 
     subject { uaa.change_password(guid, new, old) }
 
+    include_examples "UAA wrapper"
+
     it 'sends a password change request' do
       req = stub_request(
         :put,
@@ -148,6 +161,8 @@ EOF
     let(:response) { MultiJson.encode({}) }
 
     subject { uaa.password_score(password) }
+
+    include_examples "UAA wrapper"
 
     before do
       @request = stub_request(:post, "#{target}/password/score").with(
@@ -201,6 +216,34 @@ EOF
     context 'and the score is invalid' do
       let(:response) { MultiJson.encode "score" => 11, "requiredScore" => 5 }
       it { should == :weak }
+    end
+  end
+
+  describe "#wrap_uaa_errors" do
+    subject { uaa.send(:wrap_uaa_errors) { raise error } }
+
+    context "when the block raises CF::UAA::BadResponse" do
+      let(:error) { CF::UAA::BadResponse }
+
+      it "raises CFoundry::BadResponse" do
+        expect { subject }.to raise_exception(CFoundry::BadResponse)
+      end
+    end
+
+    context "when the block raises CF::UAA::NotFound" do
+      let(:error) { CF::UAA::NotFound }
+
+      it "raises CFoundry::NotFound" do
+        expect { subject }.to raise_exception(CFoundry::NotFound)
+      end
+    end
+
+    context "when the block raises CF::UAA::InvalidToken" do
+      let(:error) { CF::UAA::InvalidToken }
+
+      it "raises CFoundry::Denied" do
+        expect { subject }.to raise_exception(CFoundry::Denied)
+      end
     end
   end
 end
