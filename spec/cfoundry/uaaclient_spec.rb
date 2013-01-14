@@ -219,6 +219,34 @@ EOF
     end
   end
 
+  describe "#add_user" do
+    let(:email) { 'test@test.com' }
+    let(:password) { 'secret' }
+
+    subject { uaa.add_user(email, password) }
+
+    context 'with valid data' do
+      it "should add a user" do
+        req =
+          stub_request(:post, "https://uaa.example.com/Users").with(
+            :body =>
+              { :userName => email,
+                :emails => [{ :value => email }],
+                :password => password,
+                :name => { :givenName => email, :familyName => email }
+              }
+          ).to_return(
+            :status => 200,
+            :body => '{ "id" : "id" }',
+            :headers => { "Content-Type" => 'application/json' }
+          )
+
+        expect(subject).to eq({"id" => "id"})
+        expect(req).to have_been_requested
+      end
+    end
+  end
+
   describe "#wrap_uaa_errors" do
     subject { uaa.send(:wrap_uaa_errors) { raise error } }
 
