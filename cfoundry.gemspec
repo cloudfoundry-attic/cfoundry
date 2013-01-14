@@ -14,9 +14,9 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "cfoundry"
 
-  s.files         = %w{LICENSE Rakefile} + Dir.glob("lib/**/*")
+  s.files         = %w[LICENSE Rakefile] + Dir.glob("lib/**/*")
   s.test_files    = Dir.glob("spec/**/*")
-  s.require_paths = ["lib"]
+  s.require_paths = %w[lib]
 
   s.add_dependency "multipart-post", "~> 1.1"
   s.add_dependency "multi_json", "~> 1.3"
@@ -27,4 +27,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec", "~> 2.11"
   s.add_development_dependency "webmock", "~> 1.9"
   s.add_development_dependency "rr", "~> 1.0"
+  s.add_development_dependency "auto_tagger"
+  s.add_development_dependency "gem-release"
 end
