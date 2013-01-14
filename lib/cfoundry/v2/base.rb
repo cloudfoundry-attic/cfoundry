@@ -127,7 +127,7 @@ module CFoundry::V2
 
       cls = CFoundry::APIError.error_classes[info[:code]]
 
-      raise (cls || CFoundry::APIError).new(request, response, info[:description],  info[:code])
+      raise (cls || CFoundry::APIError).new(info[:description], info[:code], request, response)
     rescue MultiJson::DecodeError
       super
     end

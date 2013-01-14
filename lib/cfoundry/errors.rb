@@ -3,9 +3,11 @@ require "multi_json"
 
 module CFoundry
   # Base class for CFoundry errors (not from the server).
-  class Error < RuntimeError; end
+  class Error < RuntimeError;
+  end
 
-  class Deprecated < Error; end
+  class Deprecated < Error;
+  end
 
   class Mismatch < Error
     def initialize(expected, got)
@@ -61,10 +63,10 @@ module CFoundry
     attr_reader :error_code, :description, :request, :response
 
     # Create an APIError with a given request and response.
-    def initialize(request, response, description = nil, error_code = nil)
+    def initialize(description = nil, error_code = nil, request = nil, response = nil)
       @response = response
       @request = request
-      @error_code = error_code || response.code
+      @error_code = error_code || (response ? response.code : nil)
       @description = description || parse_description
     end
 
@@ -82,12 +84,13 @@ module CFoundry
     end
 
     private
+
     def parse_description
-      begin
-       parse_json(response.body)[:description]
-      rescue MultiJson::DecodeError
-        response.body
-      end
+      return unless response
+
+      parse_json(response.body)[:description]
+    rescue MultiJson::DecodeError
+      response.body
     end
 
     def parse_json(x)
@@ -99,11 +102,14 @@ module CFoundry
     end
   end
 
-  class NotFound < APIError; end
+  class NotFound < APIError
+  end
 
-  class Denied < APIError; end
+  class Denied < APIError
+  end
 
-  class BadResponse < APIError; end
+  class BadResponse < APIError
+  end
 
 
   def self.define_error(class_name, *codes)

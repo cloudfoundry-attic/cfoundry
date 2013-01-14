@@ -314,13 +314,13 @@ module CFoundry
           accept == :json ? parse_json(response.body) : response.body
 
         when Net::HTTPNotFound
-          raise CFoundry::NotFound.new(request, response)
+          raise CFoundry::NotFound.new(nil, nil, request, response)
 
         when Net::HTTPForbidden
-          raise CFoundry::Denied.new(request, response)
+          raise CFoundry::Denied.new(nil, nil, request, response)
 
         else
-          raise CFoundry::BadResponse.new(request, response)
+          raise CFoundry::BadResponse.new(nil, nil, request, response)
       end
     end
 

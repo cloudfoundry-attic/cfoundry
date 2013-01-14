@@ -16,7 +16,7 @@ describe 'Errors' do
     let(:request) { Net::HTTP::Get.new("http://api.cloudfoundry.com/foo") }
     let(:response) { Net::HTTPNotFound.new("foo", 404, "bar")}
     let(:response_body) { "NOT FOUND" }
-    subject { CFoundry::APIError.new(request, response) }
+    subject { CFoundry::APIError.new(nil, nil, request, response) }
 
     before do
       stub(response).body {response_body}
@@ -35,7 +35,7 @@ describe 'Errors' do
         let(:response_body) { "{\"description\":\"Something went wrong\"}"}
 
         it "sets description to description field in parsed JSON" do
-          CFoundry::APIError.new(request, response).description.should == "Something went wrong"
+          CFoundry::APIError.new(nil, nil, request, response).description.should == "Something went wrong"
         end
       end
 
@@ -45,12 +45,12 @@ describe 'Errors' do
         let(:response_body) { "Some plain text"}
 
         it "sets description to body text" do
-          CFoundry::APIError.new(request, response).description.should == "Some plain text"
+          CFoundry::APIError.new(nil, nil, request, response).description.should == "Some plain text"
         end
       end
 
       it "allows override of description" do
-        CFoundry::APIError.new(request, response, "My description").description.should == "My description"
+        CFoundry::APIError.new("My description", nil, request, response).description.should == "My description"
       end
 
     end
@@ -64,11 +64,11 @@ describe 'Errors' do
     end
 
     it "sets error code to response error code by default" do
-      CFoundry::APIError.new(request, response).error_code.should == 404
+      CFoundry::APIError.new(nil, nil, request, response).error_code.should == 404
     end
 
     it "allows override of error code" do
-      CFoundry::APIError.new(request, response, nil, 303).error_code.should == 303
+      CFoundry::APIError.new(nil, 303, request, response).error_code.should == 303
     end
 
   end
