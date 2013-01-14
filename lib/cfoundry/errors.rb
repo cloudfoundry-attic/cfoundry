@@ -111,6 +111,8 @@ module CFoundry
   class BadResponse < APIError
   end
 
+  class UAAError < APIError
+  end
 
   def self.define_error(class_name, *codes)
     base =
