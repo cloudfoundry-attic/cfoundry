@@ -72,7 +72,7 @@ module CFoundry::V2
       @manifest ||= {}
       @manifest[:entity] ||= {}
 
-      self.class.defaults.merge(@manifest[:entity]).each do |k, v|
+      @manifest[:entity].each do |k, v|
         if v.is_a?(Hash) && v.key?(:metadata)
           # skip; there's a _guid attribute already
         elsif v.is_a?(Array) && !v.empty? && v.all? { |x|
@@ -87,8 +87,6 @@ module CFoundry::V2
               x
             end
           end
-        elsif k.to_s.end_with?("_json") && v.is_a?(String)
-          payload[k] = MultiJson.load(v)
         elsif k.to_s.end_with?("_url")
         else
           payload[k] = v

@@ -67,6 +67,55 @@ describe CFoundry::V2::ModelMagic do
           expect(subject.foo).to eq "foo"
         end
       end
+
+      context 'when the attribute has a custom json key' do
+        let(:mymodel) {
+          fake_model { attribute :foo, :object, :at => :not_foo }
+        }
+
+        subject { myobject.fake }
+
+        it 'retrieves the attribute using the custom key' do
+          stub(client.base).my_fake_model(guid) {
+            { :entity => { :not_foo => "fizz" } }
+          }
+
+          expect(myobject.foo).to eq "fizz"
+        end
+      end
+    end
+
+    describe 'writing' do
+      context 'when the attribute has a custom json key' do
+        let(:mymodel) {
+          fake_model { attribute :foo, :object, :at => :not_foo }
+        }
+
+        subject { myobject }
+
+        it "stores it in the diff under the json key" do
+          mock(client.base).update_my_fake_model(subject.guid, :not_foo => 123)
+          subject.foo = 123
+          subject.update!
+        end
+
+        it "stores it in the manifest under the json key" do
+          subject.foo = 123
+
+          mock(client.base).create_my_fake_model(:not_foo => 123) do
+            { :metadata => { :guid => guid },
+              :entity => { :not_foo => 123 }
+            }
+          end
+
+          subject.create!
+        end
+
+        it "is then readable via the attribute name" do
+          subject.foo = 123
+          expect(subject.foo).to eq 123
+        end
+      end
     end
   end
 

@@ -24,7 +24,7 @@ module CFoundry::V2
     to_one    :framework
     attribute :environment_json, :hash,    :default => {}
     attribute :memory,           :integer, :default => 256
-    attribute :instances,        :integer, :default => 1
+    attribute :total_instances,  :integer, :default => 1, :at => :instances
     attribute :file_descriptors, :integer, :default => 256
     attribute :disk_quota,       :integer, :default => 256
     attribute :state,            :string,  :default => "STOPPED"
@@ -74,9 +74,6 @@ module CFoundry::V2
           self.runtime.name = x
         end
       }
-
-    alias :total_instances :instances
-    alias :total_instances= :instances=
 
     private :environment_json
 

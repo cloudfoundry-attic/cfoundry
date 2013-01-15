@@ -151,6 +151,7 @@ module CFoundry::V2
 
     def attribute(name, type, opts = {})
       attributes[name] = opts
+      json_name = opts[:at] || name
 
       default = opts[:default]
 
@@ -162,8 +163,8 @@ module CFoundry::V2
         return @cache[name] if @cache.key?(name)
 
         @cache[name] =
-          if manifest[:entity].key?(name)
-            manifest[:entity][name]
+          if manifest[:entity].key?(json_name)
+            manifest[:entity][json_name]
           else
             default
           end
@@ -179,11 +180,11 @@ module CFoundry::V2
         @manifest ||= {}
         @manifest[:entity] ||= {}
 
-        old = @manifest[:entity][name]
+        old = @manifest[:entity][json_name]
         @changes[name] = [old, val] if old != val
-        @manifest[:entity][name] = val
+        @manifest[:entity][json_name] = val
 
-        @diff[name] = val
+        @diff[json_name] = val
       end
     end
 
