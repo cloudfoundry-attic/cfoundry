@@ -16,10 +16,10 @@ describe CFoundry::V2::Client do
       stub(uaa).add_user(email, password) { { "id" => "1234" } }
 
       user = fake(:user)
-      stub(client).user("1234") { user }
-      mock(user).create!
-
+      stub(client).user { user }
+      stub(user).create!
       subject
+      expect(user.guid).to eq "1234"
     end
   end
 end

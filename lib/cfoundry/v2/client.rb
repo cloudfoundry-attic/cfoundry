@@ -122,9 +122,10 @@ module CFoundry::V2
 
     def register(email, password)
       uaa_user = @base.uaa.add_user(email, password)
-      user = user(uaa_user["id"])
-      user.create!
-      user
+      cc_user = user
+      cc_user.guid = uaa_user['id']
+      cc_user.create!
+      cc_user
     end
 
     # Clear client token. No requests are made for this.
