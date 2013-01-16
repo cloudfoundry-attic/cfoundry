@@ -5,9 +5,9 @@ require "cfoundry/version"
 Gem::Specification.new do |s|
   s.name        = "cfoundry"
   s.version     = CFoundry::VERSION.dup
-  s.authors     = ["Alex Suraci"]
-  s.email       = ["asuraci@vmware.com"]
-  s.homepage    = "http://cloudfoundry.com/"
+  s.authors     = ["Cloud Foundry Team", "Alex Suraci"]
+  s.email       = ["vcap-dev@googlegroups.com"]
+  s.homepage    = "http://github.com/cloudfoundry/vmc-lib"
   s.summary     = %q{
     High-level library for working with the Cloud Foundry API.
   }
