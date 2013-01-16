@@ -13,7 +13,7 @@ module CFoundry
 
     attr_reader :target
 
-    attr_accessor :trace, :backtrace, :log
+    attr_accessor :trace, :backtrace, :log, :request_id
 
     def initialize(target, token = nil)
       @target = target
@@ -53,44 +53,9 @@ module CFoundry
 
       # keep original options in case there's a redirect to follow
       original_options = options.dup
+      payload = options[:payload]
 
-      accept = options.delete(:accept)
-      content = options.delete(:content)
-      payload = options.delete(:payload)
-      params = options.delete(:params)
-      return_headers = options.delete(:return_headers)
-      return_response = options.delete(:return_response)
-
-      headers = {}
-      headers["Authorization"] = @token if @token
-      headers["Proxy-User"] = @proxy if @proxy
-
-      if accept_type = mimetype(accept)
-        headers["Accept"] = accept_type
-      end
-
-      if content_type = mimetype(content)
-        headers["Content-Type"] = content_type
-      end
-
-      unless payload.is_a?(String)
-        case content
-        when :json
-          payload = MultiJson.dump(payload)
-        when :form
-          payload = encode_params(payload)
-        end
-      end
-
-      if payload.is_a?(String)
-        headers["Content-Length"] = payload.size
-      elsif !payload
-        headers["Content-Length"] = 0
-      end
-
-      headers.merge!(options[:headers]) if options[:headers]
-
-      if params
+      if params = options[:params]
         if uri.query
           uri.query += "&" + encode_params(params)
         else
@@ -98,7 +63,16 @@ module CFoundry
         end
       end
 
-      if payload && payload.is_a?(Hash)
+      unless payload.is_a?(String)
+        case options[:content]
+          when :json
+            payload = MultiJson.dump(payload)
+          when :form
+            payload = encode_params(payload)
+        end
+      end
+
+      if payload.is_a?(Hash)
         multipart = method.const_get(:Multipart)
         request = multipart.new(uri.request_uri, payload)
       else
@@ -106,12 +80,7 @@ module CFoundry
         request.body = payload if payload
       end
 
-      request["Authorization"] = @token if @token
-      request["Proxy-User"] = @proxy if @proxy
-
-      headers.each do |k, v|
-        request[k] = v
-      end
+      add_headers(request, payload, options)
 
       # TODO: test http proxies
       http = Net::HTTP.new(uri.host, uri.port)
@@ -133,9 +102,9 @@ module CFoundry
 
         log_request(time, request, response)
 
-        if return_headers
+        if options[:return_headers]
           sane_headers(response)
-        elsif return_response
+        elsif options[:return_response]
           response
         elsif response.is_a?(Net::HTTPRedirection)
           request_uri(
@@ -143,7 +112,7 @@ module CFoundry
             Net::HTTP::Get,
             original_options)
         else
-          handle_response(response, accept, request)
+          handle_response(response, options[:accept], request)
         end
       end
     rescue ::Timeout::Error => e
@@ -153,6 +122,25 @@ module CFoundry
     end
 
     private
+
+    def add_headers(request, payload, options)
+      headers = {}
+      headers["Content-Length"] = payload.respond_to?(:size) ? payload.size : 0
+      headers["X-Request-Id"] = @request_id if @request_id
+      headers["Authorization"] = @token if @token
+      headers["Proxy-User"] = @proxy if @proxy
+
+      if accept_type = mimetype(options[:accept])
+        headers["Accept"] = accept_type
+      end
+
+      if content_type = mimetype(options[:content])
+        headers["Content-Type"] = content_type
+      end
+
+      headers.merge!(options[:headers]) if options[:headers]
+      headers.each { |key, value| request[key] = value }
+    end
 
     def parse_json(x)
       if x.empty?

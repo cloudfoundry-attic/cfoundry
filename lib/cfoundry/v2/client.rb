@@ -93,8 +93,9 @@ module CFoundry::V2
       if @base.uaa
         @base.uaa.prompts
       else
-        { :username => ["text", "Email"],
-          :password => ["password", "Password"]
+        {
+          :username => %w[text Email],
+          :password => %w[password Password]
         }
       end
     end
@@ -116,7 +117,8 @@ module CFoundry::V2
         else
           @base.create_token(
             { :password => credentials[:password] },
-            credentials[:username])[:token]
+            credentials[:username]
+          )[:token]
         end
     end
 
