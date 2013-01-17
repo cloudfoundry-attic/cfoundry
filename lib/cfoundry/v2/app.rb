@@ -30,6 +30,7 @@ module CFoundry::V2
     attribute :state,            :string,  :default => "STOPPED"
     attribute :command,          :string,  :default => nil
     attribute :console,          :boolean, :default => false
+    attribute :buildpack,        :string,  :default => nil
     to_many   :service_bindings
     to_many   :routes
 
