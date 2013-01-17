@@ -125,7 +125,13 @@ module CFoundry
 
     def add_headers(request, payload, options)
       headers = {}
-      headers["Content-Length"] = payload.respond_to?(:size) ? payload.size : 0
+
+      if payload.is_a?(String)
+        headers["Content-Length"] = payload.size
+      elsif !payload
+        headers["Content-Length"] = 0
+      end
+
       headers["X-Request-Id"] = @request_id if @request_id
       headers["Authorization"] = @token if @token
       headers["Proxy-User"] = @proxy if @proxy

@@ -9,8 +9,8 @@ describe CFoundry::BaseClient do
     let(:method) { Net::HTTP::Get }
     let(:options) { {} }
 
-    def check_request(&block)
-      request_stub = stub_request(:get, url).to_return do |req|
+    def check_request(method = :get, &block)
+      request_stub = stub_request(method, url).to_return do |req|
         block.call(req)
         {}
       end
@@ -43,21 +43,32 @@ describe CFoundry::BaseClient do
 
       context "when a payload is passed" do
         context "when the payload is a string" do
-          let(:options) { {:payload => "some payload"} }
+          let(:options) { { :payload => "some payload"} }
 
-          it 'should always include a content length' do
+          it 'includes a content length matching the payload size' do
             check_request do |req|
               expect(req.headers["Content-Length"]).to eql("some payload".length)
             end
           end
         end
 
-        context "when the payload is a hash" do
-          let(:options) { {:payload => { "key" => "value" }, :content => :json } }
+        context "when the payload is a hash and the content-type is JSON" do
+          let(:options) { { :payload => { "key" => "value" }, :content => :json } }
 
-          it 'should always include a content length' do
+          it 'includes a content length matching the JSON encoded length' do
             check_request do |req|
               expect(req.headers["Content-Length"]).to eql('{"key":"value"}'.length)
+            end
+          end
+        end
+
+        context "when the payload is a hash (i.e. multipart upload)" do
+          let(:method) { Net::HTTP::Put }
+          let(:options) { { :payload => { "key" => "value" } } }
+
+          it 'includes a nonzero content length' do
+            check_request(:put) do |req|
+              expect(req.headers["Content-Length"].to_i).to be > 0
             end
           end
         end
