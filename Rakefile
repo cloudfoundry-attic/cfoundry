@@ -1,5 +1,4 @@
 require "rake"
-require "auto_tagger"
 require "rspec/core/rake_task"
 
 $LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
