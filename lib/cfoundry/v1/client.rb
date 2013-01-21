@@ -14,6 +14,10 @@ module CFoundry::V1
       @base = Base.new(target, token)
     end
 
+    def version
+      1
+    end
+
     # The current target URL of the client.
     def target
       @base.target
@@ -180,14 +184,14 @@ module CFoundry::V1
     #
     # The values in the hash should mirror the prompts given by
     # `login_prompts`.
-    def login(credentials)
+    def login(username, password)
       @base.token =
         if @base.uaa
-          @base.uaa.authorize(credentials)
+          @base.uaa.authorize(username, password)
         else
           @base.create_token(
-            { :password => credentials[:password] },
-            credentials[:username])[:token]
+            { :password => password }, username
+          )[:token]
         end
     end
 

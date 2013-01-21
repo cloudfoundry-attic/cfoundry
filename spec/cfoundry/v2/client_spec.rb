@@ -1,9 +1,7 @@
 require 'spec_helper'
 
 describe CFoundry::V2::Client do
-
-  let(:client) { CFoundry::V2::Client.new("https://api.cloudfoundry.com") }
-
+  let(:client) { CFoundry::V2::Client.new }
   let(:email) { 'test@test.com' }
   let(:password) { 'secret' }
   let(:uaa) { CFoundry::UAAClient.new }
@@ -21,5 +19,9 @@ describe CFoundry::V2::Client do
       subject
       expect(user.guid).to eq "1234"
     end
+  end
+
+  describe "#version" do
+    its(:version) { should eq 2 }
   end
 end
