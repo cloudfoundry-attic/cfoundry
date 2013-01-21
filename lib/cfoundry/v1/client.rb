@@ -184,14 +184,14 @@ module CFoundry::V1
     #
     # The values in the hash should mirror the prompts given by
     # `login_prompts`.
-    def login(username, password)
+    def login(credentials)
       @base.token =
         if @base.uaa
-          @base.uaa.authorize(username, password)
+          @base.uaa.authorize(credentials)
         else
           @base.create_token(
-            { :password => password }, username
-          )[:token]
+            { :password => credentials[:password] },
+            credentials[:username])[:token]
         end
     end
 
