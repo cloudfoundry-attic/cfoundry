@@ -27,6 +27,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec", "~> 2.11"
   s.add_development_dependency "webmock", "~> 1.9"
   s.add_development_dependency "rr", "~> 1.0"
-  s.add_development_dependency "auto_tagger"
   s.add_development_dependency "gem-release"
 end
