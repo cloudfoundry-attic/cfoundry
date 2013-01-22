@@ -1,9 +1,11 @@
+require File.expand_path("../../concerns/login_helpers", __FILE__)
+
 module CFoundry::V1
   # The primary API entrypoint. Wraps a BaseClient to provide nicer return
   # values. Initialize with the target and, optionally, an auth token. These
   # are the only two internal states.
   class Client
-    include ClientMethods
+    include ClientMethods, CFoundry::LoginHelpers
 
     attr_reader :base
 
@@ -175,24 +177,6 @@ module CFoundry::V1
           :password => ["password", "Password"]
         }
       end
-    end
-
-    # Authenticate with the target. Sets the client token.
-    #
-    # Credentials is a hash, typically containing :username and :password
-    # keys.
-    #
-    # The values in the hash should mirror the prompts given by
-    # `login_prompts`.
-    def login(credentials)
-      @base.token =
-        if @base.uaa
-          @base.uaa.authorize(credentials)
-        else
-          @base.create_token(
-            { :password => credentials[:password] },
-            credentials[:username])[:token]
-        end
     end
 
     # Clear client token. No requests are made for this.

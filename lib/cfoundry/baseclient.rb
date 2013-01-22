@@ -3,7 +3,6 @@ require "net/https"
 require "net/http/post/multipart"
 require "multi_json"
 require "fileutils"
-require "base64"
 
 module CFoundry
   class BaseClient # :nodoc:
@@ -21,21 +20,6 @@ module CFoundry
       @trace = false
       @backtrace = false
       @log = false
-    end
-
-    # grab the metadata from a token that looks like:
-    #
-    # bearer (base64 ...)
-    def token_data
-      return {} unless @token
-
-      tok = Base64.decode64(@token.sub(/^bearer\s+/, ""))
-      tok.sub!(/\{.+?\}/, "") # clear algo
-      MultiJson.load(tok[/\{.+?\}/], :symbolize_keys => true)
-
-    # can't expect all tokens to be the proper format
-    rescue MultiJson::DecodeError
-      {}
     end
 
     def request_path(method, path, options = {})

@@ -1,9 +1,11 @@
+require File.expand_path("../../concerns/login_helpers", __FILE__)
+
 module CFoundry::V2
   # The primary API entrypoint. Wraps a BaseClient to provide nicer return
   # values. Initialize with the target and, optionally, an auth token. These
   # are the only two internal states.
   class Client
-    include ClientMethods
+    include ClientMethods, CFoundry::LoginHelpers
 
     # Internal BaseClient instance. Normally won't be touching this.
     attr_reader :base
@@ -80,9 +82,9 @@ module CFoundry::V2
 
     # The currently authenticated user.
     def current_user
-      if guid = @base.token_data[:user_id]
+      if guid = @base.token[:access_token_data][:user_id]
         user = user(guid)
-        user.emails = [{ :value => @base.token_data[:email] }]
+        user.emails = [{ :value => @base.token[:access_token_data][:email] }]
         user
       end
     end
@@ -104,26 +106,10 @@ module CFoundry::V2
       end
     end
 
-    # Authenticate with the target. Sets the client token.
-    #
-    # Credentials is a hash, typically containing :username and :password
-    # keys.
-    #
-    # The values in the hash should mirror the prompts given by
-    # `login_prompts`.
-    def login(credentials)
+    def login(username, password)
       @current_organization = nil
       @current_space = nil
-
-      @base.token =
-        if @base.uaa
-          @base.uaa.authorize(credentials)
-        else
-          @base.create_token(
-            { :password => credentials[:password] },
-            credentials[:username]
-          )[:token]
-        end
+      super
     end
 
     def register(email, password)

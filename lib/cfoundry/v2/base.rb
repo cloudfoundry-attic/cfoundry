@@ -11,9 +11,7 @@ module CFoundry::V2
 
     attr_accessor :target, :token, :proxy, :trace, :backtrace, :log
 
-    def initialize(
-        target = "https://api.cloudfoundry.com",
-        token = nil)
+    def initialize(target = "https://api.cloudfoundry.com", token = nil)
       super
     end
 

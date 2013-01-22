@@ -8,9 +8,6 @@ module CFoundry
     def initialize(target = "https://uaa.cloudfoundry.com", client_id = "vmc")
       @target = target
       @client_id = client_id
-      @token_issuer = CF::UAA::TokenIssuer.new(
-        target, client_id, :symbolize_keys => true)
-
       CF::UAA::Misc.symbolize_keys = true
     end
 
@@ -20,10 +17,10 @@ module CFoundry
       end
     end
 
-    def authorize(credentials)
+    def authorize(username, password)
       wrap_uaa_errors do
         begin
-          @token_issuer.implicit_grant_with_creds(credentials).auth_header
+          token_issuer.owner_password_grant(username, password, "cloud_controller.read").info
         rescue CF::UAA::BadResponse => e
           status_code = e.message[/\d+/] || 400
           raise CFoundry::Denied.new("Authorization failed", status_code)
@@ -73,6 +70,10 @@ module CFoundry
     end
 
     private
+
+    def token_issuer
+      @token_issuer ||= CF::UAA::TokenIssuer.new(target, client_id, nil, :symbolize_keys => true)
+    end
 
     def scim
       CF::UAA::Scim.new(target, token)

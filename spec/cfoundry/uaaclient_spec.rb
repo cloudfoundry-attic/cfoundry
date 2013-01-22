@@ -54,50 +54,23 @@ EOF
     let(:password) { "test" }
     let(:state) { 'somestate' }
     let(:redirect_uri) { 'https://uaa.cloudfoundry.com/redirect/vmc' }
+    let(:auth) { OpenStruct.new(:info => {:refresh_token => "REFRESH_TOKEN", :access_token => Base64.encode64('{"foo": "bar"}'), :token_type => "bearer"}) }
 
-    subject { uaa.authorize(:username => username, :password => password) }
+    subject { uaa.authorize(username, password) }
 
-    before(:each) do
-      any_instance_of(CF::UAA::TokenIssuer, :random_state => state)
-    end
+    before { stub(uaa).token_issuer.stub!.owner_password_grant { auth } }
 
     include_examples "UAA wrapper"
 
     it 'returns the token on successful authentication' do
-      stub_request(
-        :post,
-        "#{target}/oauth/authorize"
-      ).with(
-        :query => {
-          "client_id" => uaa.client_id,
-          "redirect_uri" => redirect_uri,
-          'response_type' => 'token',
-          'state' => state,
-        }
-      ).to_return(
-        :status => 302,
-        :headers => {
-          'Location' => "#{redirect_uri}#access_token=bar&token_type=foo&fizz=buzz&foo=bar&state=#{state}"
-        }
-      )
-
-      expect(subject).to eq "foo bar"
+      stub(uaa).token_issuer.mock!.owner_password_grant(username, password, "cloud_controller.read") { auth }
+      expect(subject).to eq auth.info
     end
 
     context 'when authorization fails' do
       context 'in the expected way' do
         it 'raises a CFoundry::Denied error' do
-          stub_request(:post, "#{target}/oauth/authorize").with(
-            :query => {
-              "client_id" => uaa.client_id,
-              "redirect_uri" => redirect_uri,
-              'response_type' => 'token',
-              'state' => state,
-            }
-          ).to_return(
-            :status => 401,
-            :body => '{ "error": "some_error", "error_description": "some description" }'
-          )
+          stub(uaa).token_issuer.stub!.owner_password_grant { raise CF::UAA::BadResponse.new("401: FooBar") }
 
           expect { subject }.to raise_error(CFoundry::Denied, "401: Authorization failed")
         end
@@ -105,9 +78,7 @@ EOF
 
       context 'in an unexpected way' do
         it 'raises a CFoundry::Denied error' do
-          any_instance_of(CF::UAA::TokenIssuer) do |token_issuer|
-            stub(token_issuer).implicit_grant_with_creds(anything) { raise CF::UAA::BadResponse.new("no_status_code") }
-          end
+          stub(uaa).token_issuer.stub!.owner_password_grant { raise CF::UAA::BadResponse.new("no_status_code") }
           expect { subject }.to raise_error(CFoundry::Denied, "400: Authorization failed")
         end
       end
