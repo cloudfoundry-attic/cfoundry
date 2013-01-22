@@ -2,6 +2,17 @@ require "base64"
 
 module CFoundry
   module LoginHelpers
+    def login_prompts
+      if @base.uaa
+        @base.uaa.prompts
+      else
+        {
+          :username => %w[text Email],
+          :password => %w[password Password]
+        }
+      end
+    end
+
     def login(username, password)
       token_info =
         if @base.uaa

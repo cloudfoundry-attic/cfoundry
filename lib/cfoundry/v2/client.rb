@@ -94,18 +94,6 @@ module CFoundry::V2
       @base.info
     end
 
-    # Login prompts
-    def login_prompts
-      if @base.uaa
-        @base.uaa.prompts
-      else
-        {
-          :username => %w[text Email],
-          :password => %w[password Password]
-        }
-      end
-    end
-
     def login(username, password)
       @current_organization = nil
       @current_space = nil

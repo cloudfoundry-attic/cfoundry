@@ -168,17 +168,6 @@ module CFoundry::V1
       user(email)
     end
 
-    # Login prompts
-    def login_prompts
-      if @base.uaa
-        @base.uaa.prompts
-      else
-        { :username => ["text", "Email"],
-          :password => ["password", "Password"]
-        }
-      end
-    end
-
     # Clear client token. No requests are made for this.
     def logout
       @base.token = nil
