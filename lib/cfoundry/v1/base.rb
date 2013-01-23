@@ -68,8 +68,5 @@ module CFoundry::V1
     rescue EOFError
       retry
     end
-
-    private
-
   end
 end

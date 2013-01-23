@@ -84,18 +84,5 @@ module CFoundry::V2
 
       payload
     end
-
-    private
-
-    def log_line(io, data)
-      io.printf(
-        "[%s]  %0.3fs  %s  %6s -> %d  %s\n",
-        Time.now.strftime("%F %T"),
-        data[:time],
-        data[:response][:headers]["x-vcap-request-id"],
-        data[:request][:method].to_s.upcase,
-        data[:response][:code],
-        data[:request][:url])
-    end
   end
 end
