@@ -19,7 +19,7 @@ module CFoundry
 
     attr_reader :target
 
-    attr_accessor :trace, :backtrace, :log, :request_id, :token, :target
+    attr_accessor :trace, :backtrace, :log, :request_id, :token, :target, :proxy
 
     def initialize(target, token = nil)
       @target = target
