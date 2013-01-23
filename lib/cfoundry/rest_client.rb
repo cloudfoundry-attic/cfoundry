@@ -119,7 +119,13 @@ module CFoundry
         response = http.request(request)
         time = Time.now - before
 
-        print_response(response) if @trace
+        response_hash = {
+          :headers => sane_headers(response),
+          :status => response.code,
+          :body => response.body
+        }
+
+        print_response(response_hash) if @trace
         print_backtrace(caller) if @trace
 
         log_request(time, request, response)
@@ -130,11 +136,6 @@ module CFoundry
             Net::HTTP::Get,
             original_options)
         else
-          response_hash = {
-            :headers => sane_headers(response),
-            :status => response.code,
-            :body => response.body
-          }
           return request_hash, response_hash
         end
       end

@@ -178,5 +178,18 @@ describe CFoundry::RestClient do
         end
       end
     end
+
+    describe 'trace' do
+      before do
+        rest_client.trace = true
+        stub_request(:get, url).to_return(:status => 200, :headers => { "content-type" => "application/json" }, :body => '{"some": "json"}')
+      end
+
+      it "prints the request and the response" do
+        mock(rest_client).print_request({:headers=>{"Content-Length"=>0}, :url=>"https://api.cloudfoundry.com/some-path", :method=>"GET", :body=>nil})
+        mock(rest_client).print_response({ :status => "200", :headers => { "content-type" => "application/json" }, :body => '{"some": "json"}' })
+        subject
+      end
+    end
   end
 end
