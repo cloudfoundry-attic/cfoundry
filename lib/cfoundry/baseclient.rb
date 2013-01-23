@@ -6,130 +6,120 @@ require "fileutils"
 
 module CFoundry
   class BaseClient # :nodoc:
-    include CFoundry::TraceHelpers
+    extend Forwardable
 
-    LOG_LENGTH = 10
+    attr_reader :rest_client
 
-    attr_reader :target
+    def_delegators :rest_client, :target, :target=, :token, :token=, :proxy, :proxy=, :trace, :trace=,
+      :backtrace, :backtrace=, :log, :log=
 
-    attr_accessor :trace, :backtrace, :log, :request_id
-
-    def initialize(target, token = nil)
-      @target = target
-      @token = token
-      @trace = false
-      @backtrace = false
-      @log = false
+    def initialize(target = "https://api.cloudfoundry.com", token = nil)
+      @rest_client = CFoundry::RestClient.new(target, token)
+      self.trace = false
+      self.backtrace = false
+      self.log = false
     end
 
-    def request_path(method, path, options = {})
-      path = url(path) if path.is_a?(Array)
+    # The UAA used for this client.
+    #
+    # `false` if no UAA (legacy)
+    def uaa
+      return @uaa unless @uaa.nil?
 
-      request(method, path, options)
+      endpoint = info[:authorization_endpoint]
+      return @uaa = false unless endpoint
+
+      @uaa = CFoundry::UAAClient.new(endpoint)
+      @uaa.trace = @trace
+      @uaa.token = @token
+      @uaa
     end
 
-    def request(method, path, options = {})
-      request_uri(URI.parse(@target + path), method, options)
+    # Cloud metadata
+    def info
+      get("info", :accept => :json)
     end
 
-    def request_uri(uri, method, options = {})
-      uri = URI.parse(@target + uri.to_s) unless uri.host
+    def get(*args)
+      request("GET", *args)
+    end
 
-      # keep original options in case there's a redirect to follow
-      original_options = options.dup
-      payload = options[:payload]
+    def delete(*args)
+      request("DELETE", *args)
+    end
 
-      if params = options[:params]
-        if uri.query
-          uri.query += "&" + encode_params(params)
-        else
-          uri.query = encode_params(params)
-        end
-      end
+    def post(*args)
+      request("POST", *args)
+    end
 
-      unless payload.is_a?(String)
-        case options[:content]
-          when :json
-            payload = MultiJson.dump(payload)
-          when :form
-            payload = encode_params(payload)
-        end
-      end
-
-      if payload.is_a?(Hash)
-        multipart = method.const_get(:Multipart)
-        request = multipart.new(uri.request_uri, payload)
-      else
-        request = method.new(uri.request_uri)
-        request.body = payload if payload
-      end
-
-      add_headers(request, payload, options)
-
-      # TODO: test http proxies
-      http = Net::HTTP.new(uri.host, uri.port)
-
-      if uri.is_a?(URI::HTTPS)
-        http.use_ssl = true
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      end
-
-      print_request(request) if @trace
-
-      before = Time.now
-      http.start do
-        response = http.request(request)
-        time = Time.now - before
-
-        print_response(response) if @trace
-        print_backtrace(caller) if @trace
-
-        log_request(time, request, response)
-
-        if options[:return_headers]
-          sane_headers(response)
-        elsif options[:return_response]
-          response
-        elsif response.is_a?(Net::HTTPRedirection)
-          request_uri(
-            URI.parse(response["location"]),
-            Net::HTTP::Get,
-            original_options)
-        else
-          handle_response(response, options[:accept], request)
-        end
-      end
-    rescue ::Timeout::Error => e
-      raise Timeout.new(method, uri, e)
-    rescue SocketError, Errno::ECONNREFUSED => e
-      raise TargetRefused, e.message
+    def put(*args)
+      request("PUT", *args)
     end
 
     private
 
-    def add_headers(request, payload, options)
-      headers = {}
+    def request(method, *args)
+      path, options = normalize_arguments(args)
+      response = @rest_client.request(method, path, options)
+      handle_response(response, options)
+    end
 
-      if payload.is_a?(String)
-        headers["Content-Length"] = payload.size
-      elsif !payload
-        headers["Content-Length"] = 0
+    def status_is_successful?(code)
+      (code >= 200) && (code < 300)
+    end
+
+    def handle_response(response, options)
+      if status_is_successful?(response[:status].to_i)
+        handle_successful_response(response, options)
+      else
+        handle_error_response(response, options)
+      end
+    end
+
+    def handle_successful_response(response, options)
+      if options[:accept] == :json
+        parse_json(response[:body])
+      else
+        response[:body]
+      end
+    end
+
+    def handle_error_response(response, options)
+      body_json = parse_json(response[:body])
+      body_code = body_json && body_json[:code]
+      code = body_code || response[:status].to_i
+
+      if body_code
+        error_class = CFoundry::APIError.error_classes[body_code] || CFoundry::APIError
+        raise error_class.new(body_json[:description], body_code, nil, response)
       end
 
-      headers["X-Request-Id"] = @request_id if @request_id
-      headers["Authorization"] = @token if @token
-      headers["Proxy-User"] = @proxy if @proxy
+      case code
+        when 404
+          raise CFoundry::NotFound.new(nil, code, nil, response)
+        when 403
+          raise CFoundry::Denied.new(nil, code, nil, response)
+        else
+          raise CFoundry::BadResponse.new(nil, code, nil, response)
+      end
+    end
 
-      if accept_type = mimetype(options[:accept])
-        headers["Accept"] = accept_type
+    def normalize_arguments(args)
+      if args.last.is_a?(Hash)
+        options = args.pop
+      else
+        options = {}
       end
 
-      if content_type = mimetype(options[:content])
-        headers["Content-Type"] = content_type
-      end
+      [normalize_path(args), options]
+    end
 
-      headers.merge!(options[:headers]) if options[:headers]
-      headers.each { |key, value| request[key] = value }
+    def normalize_path(segments)
+      safe_path = segments.flatten.collect { |x|
+        URI.encode(x.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+      }.join("/")
+
+      "/#{safe_path}"
     end
 
     def parse_json(x)
@@ -138,178 +128,8 @@ module CFoundry
       else
         MultiJson.load(x, :symbolize_keys => true)
       end
-    end
-
-    def mimetype(content)
-      case content
-      when String
-        content
-      when :json
-        "application/json"
-      when :form
-        "application/x-www-form-urlencoded"
-      when nil
-        nil
-      # return request headers (not really Accept)
-      else
-        raise CFoundry::Error, "Unknown mimetype '#{content.inspect}'"
-      end
-    end
-
-    def encode_params(hash, escape = true)
-      hash.keys.map do |k|
-        v = hash[k]
-        v = MultiJson.dump(v) if v.is_a?(Hash)
-        v = URI.escape(v.to_s, /[^#{URI::PATTERN::UNRESERVED}]/) if escape
-        "#{k}=#{v}"
-      end.join("&")
-    end
-
-    def request_with_options(method, path, options = {})
-      options.merge!(path.pop) if path.last.is_a?(Hash)
-
-      request_path(method, url(path), options)
-    end
-
-    def get(*path)
-      request_with_options(Net::HTTP::Get, path)
-    end
-
-    def delete(*path)
-      request_with_options(Net::HTTP::Delete, path)
-    end
-
-    def post(payload, *path)
-      request_with_options(Net::HTTP::Post, path, :payload => payload)
-    end
-
-    def put(payload, *path)
-      request_with_options(Net::HTTP::Put, path, :payload => payload)
-    end
-
-    def url(segments)
-      "/#{safe_path(segments)}"
-    end
-
-    def safe_path(*segments)
-      segments.flatten.collect { |x|
-        URI.encode x.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")
-      }.join("/")
-    end
-
-    def log_data(time, request, response)
-      { :time => time,
-        :request => {
-          :method => request.method,
-          :url => request.path,
-          :headers => sane_headers(request)
-        },
-        :response => {
-          :code => response.code,
-          :headers => sane_headers(response)
-        }
-      }
-    end
-
-    def log_line(io, data)
-      io.printf(
-        "[%s]  %0.3fs  %6s -> %d  %s\n",
-        Time.now.strftime("%F %T"),
-        data[:time],
-        data[:request][:method].to_s.upcase,
-        data[:response][:code],
-        data[:request][:url])
-    end
-
-    def log_request(time, request, response)
-      return unless @log
-
-      data = log_data(time, request, response)
-
-      case @log
-      when IO
-        log_line(@log, data)
-        return
-      when String
-        if File.exists?(@log)
-          log = File.readlines(@log).last(LOG_LENGTH - 1)
-        elsif !File.exists?(File.dirname(@log))
-          FileUtils.mkdir_p(File.dirname(@log))
-        end
-
-        File.open(@log, "w") do |io|
-          log.each { |l| io.print l } if log
-          log_line(io, data)
-        end
-
-        return
-      end
-
-      if @log.respond_to?(:call)
-        @log.call(data)
-        return
-      end
-
-      if @log.respond_to?(:<<)
-        @log << data
-        return
-      end
-    end
-
-    def print_request(request)
-      $stderr.puts ">>>"
-      $stderr.puts request_trace(request)
-    end
-
-    def print_response(response)
-      $stderr.puts response_trace(response)
-      $stderr.puts "<<<"
-    end
-
-    def print_backtrace(locs)
-      return unless @backtrace
-
-      interesting_locs = locs.drop_while { |loc|
-        loc =~ /\/(cfoundry\/|restclient\/|net\/http)/
-      }
-
-      $stderr.puts "--- backtrace:"
-
-      $stderr.puts "... (boring)" unless locs == interesting_locs
-
-      trimmed_locs = interesting_locs[0..5]
-
-      trimmed_locs.each do |loc|
-        $stderr.puts "=== #{loc}"
-      end
-
-      $stderr.puts "... (trimmed)" unless trimmed_locs == interesting_locs
-    end
-
-    def handle_response(response, accept, request)
-      case response
-        when Net::HTTPSuccess, Net::HTTPRedirection
-          accept == :json ? parse_json(response.body) : response.body
-
-        when Net::HTTPNotFound
-          raise CFoundry::NotFound.new(nil, nil, request, response)
-
-        when Net::HTTPForbidden
-          raise CFoundry::Denied.new(nil, nil, request, response)
-
-        else
-          raise CFoundry::BadResponse.new(nil, nil, request, response)
-      end
-    end
-
-    def sane_headers(obj)
-      hds = {}
-
-      obj.each_header do |k, v|
-        hds[k] = v
-      end
-
-      hds
+    rescue MultiJson::DecodeError
+      nil
     end
   end
 end

@@ -1,4 +1,5 @@
 require "cfoundry/baseclient"
+require "cfoundry/rest_client"
 
 require "cfoundry/v1/app"
 require "cfoundry/v1/framework"

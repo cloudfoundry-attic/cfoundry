@@ -4,23 +4,20 @@ describe 'Errors' do
   describe CFoundry::Timeout do
     let(:parent) { Timeout::Error.new }
 
-    subject { CFoundry::Timeout.new(Net::HTTP::Post, '/blah', parent) }
+    subject { CFoundry::Timeout.new("POST", '/blah', parent) }
 
     its(:to_s) { should eq "POST /blah timed out" }
-    its(:method) { should eq Net::HTTP::Post }
+    its(:method) { should eq "POST" }
     its(:uri) { should eq '/blah' }
     its(:parent) { should eq parent }
   end
 
   describe CFoundry::APIError do
-    let(:request) { Net::HTTP::Get.new("http://api.cloudfoundry.com/foo") }
-    let(:response) { Net::HTTPNotFound.new("foo", 404, "bar")}
+    let(:request) { { :method => "GET", :url => "http://api.cloudfoundry.com/foo" } }
     let(:response_body) { "NOT FOUND" }
-    subject { CFoundry::APIError.new(nil, nil, request, response) }
+    let(:response) { { :status => 404, :headers => {}, :body => response_body } }
 
-    before do
-      stub(response).body {response_body}
-    end
+    subject { CFoundry::APIError.new(nil, nil, request, response) }
 
     its(:to_s) { should eq "404: NOT FOUND" }
 

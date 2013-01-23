@@ -9,34 +9,6 @@ module CFoundry::V2
   class Base < CFoundry::BaseClient
     include BaseClientMethods
 
-    attr_accessor :target, :token, :proxy, :trace, :backtrace, :log
-
-    def initialize(target = "https://api.cloudfoundry.com", token = nil)
-      super
-    end
-
-
-    # The UAA used for this client.
-    #
-    # `false` if no UAA (legacy)
-    def uaa
-      return @uaa unless @uaa.nil?
-
-      endpoint = info[:authorization_endpoint]
-      return @uaa = false unless endpoint
-
-      @uaa = CFoundry::UAAClient.new(endpoint)
-      @uaa.trace = @trace
-      @uaa.token = @token
-      @uaa
-    end
-
-
-    # Cloud metadata
-    def info
-      get("info", :accept => :json)
-    end
-
     def resource_match(fingerprints)
       put(fingerprints, "v2", "resource_match",
           :content => :json, :accept => :json)
@@ -102,12 +74,11 @@ module CFoundry::V2
       get("v2", "apps", guid, "stats", :accept => :json)
     end
 
-
     def all_pages(paginated)
       payload = paginated[:resources]
 
       while next_page = paginated[:next_url]
-        paginated = request_path(Net::HTTP::Get, next_page, :accept => :json)
+        paginated = get(next_page, :accept => :json)
         payload += paginated[:resources]
       end
 
@@ -115,20 +86,6 @@ module CFoundry::V2
     end
 
     private
-
-    def handle_response(response, accept, request)
-      # this is a copy paste of v1
-      return super if response.is_a?(Net::HTTPSuccess) || response.is_a?(Net::HTTPRedirection)
-
-      info = parse_json(response.body)
-      return super unless info[:code]
-
-      cls = CFoundry::APIError.error_classes[info[:code]]
-
-      raise (cls || CFoundry::APIError).new(info[:description], info[:code], request, response)
-    rescue MultiJson::DecodeError
-      super
-    end
 
     def log_line(io, data)
       io.printf(

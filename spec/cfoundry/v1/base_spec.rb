@@ -3,9 +3,9 @@ require "spec_helper"
 describe CFoundry::V1::Base do
   let(:base) { CFoundry::V1::Base.new("https://api.cloudfoundry.com") }
 
-  describe '#request_uri' do
+  describe '#get' do
     let(:options) { {} }
-    subject { base.request_uri URI.parse(base.target + "/foo"), Net::HTTP::Get, options }
+    subject { base.get("foo", options) }
 
     context 'when successful' do
       context 'and the accept type is JSON' do

@@ -46,7 +46,7 @@ module CFoundry
     end
 
     def to_s
-      "#{method::METHOD} #{uri} timed out"
+      "#{method} #{uri} timed out"
     end
   end
 
@@ -66,7 +66,7 @@ module CFoundry
     def initialize(description = nil, error_code = nil, request = nil, response = nil)
       @response = response
       @request = request
-      @error_code = error_code || (response ? response.code : nil)
+      @error_code = error_code || (response ? response[:status] : nil)
       @description = description || parse_description
     end
 
@@ -88,9 +88,9 @@ module CFoundry
     def parse_description
       return unless response
 
-      parse_json(response.body)[:description]
+      parse_json(response[:body])[:description]
     rescue MultiJson::DecodeError
-      response.body
+      response[:body]
     end
 
     def parse_json(x)

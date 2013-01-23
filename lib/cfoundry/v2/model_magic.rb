@@ -118,8 +118,7 @@ module CFoundry::V2
         define_method(:"#{singular}_from") do |path, *args|
           send(
             :"make_#{singular}",
-            @base.request_path(
-              Net::HTTP::Get,
+            @base.get(
               path,
               :accept => :json,
               :params => ModelMagic.params_from(args)))
@@ -127,8 +126,7 @@ module CFoundry::V2
 
         define_method(:"#{plural}_from") do |path, *args|
           objs = @base.all_pages(
-            @base.request_path(
-              Net::HTTP::Get,
+            @base.get(
               path,
               :accept => :json,
               :params => ModelMagic.params_from(args)))
@@ -315,10 +313,7 @@ module CFoundry::V2
           cache << x unless cache.include?(x)
         end
 
-        @client.base.request_path(
-          Net::HTTP::Put,
-          ["v2", plural_object_name, @guid, plural, x.guid],
-          :accept => :json)
+        @client.base.put("v2", plural_object_name, @guid, plural, x.guid, :accept => :json)
       end
 
       define_method(:"remove_#{singular}") do |x|
@@ -330,10 +325,7 @@ module CFoundry::V2
           cache.delete(x)
         end
 
-        @client.base.request_path(
-          Net::HTTP::Delete,
-          ["v2", plural_object_name, @guid, plural, x.guid],
-          :accept => :json)
+        @client.base.delete("v2", plural_object_name, @guid, plural, x.guid, :accept => :json)
       end
 
       define_method(:"#{plural}=") do |xs|
@@ -368,10 +360,7 @@ module CFoundry::V2
 
     def has_summary(actions = {})
       define_method(:summary) do
-        @client.base.request_path(
-          Net::HTTP::Get,
-          ["v2", plural_object_name, @guid, "summary"],
-          :accept => :json)
+        @client.base.get("v2", plural_object_name, @guid, "summary", :accept => :json)
       end
 
       define_method(:summarize!) do |*args|

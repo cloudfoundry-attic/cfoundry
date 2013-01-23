@@ -1,12 +1,13 @@
 require 'spec_helper'
 
-describe CFoundry::BaseClient do
+describe CFoundry::RestClient do
   let(:token) { nil }
-  let(:base) { CFoundry::BaseClient.new("https://api.cloudfoundry.com", token) }
+  let(:rest_client) { CFoundry::RestClient.new("https://api.cloudfoundry.com", token) }
 
-  describe '#request_uri' do
-    let(:url) { base.target + "/foo" }
-    let(:method) { Net::HTTP::Get }
+  describe '#request' do
+    let(:path) { "some-path" }
+    let(:url) { rest_client.target + path }
+    let(:method) { "GET" }
     let(:options) { {} }
 
     def check_request(method = :get, &block)
@@ -18,7 +19,7 @@ describe CFoundry::BaseClient do
       expect(request_stub).to have_been_requested
     end
 
-    subject { base.request_uri(URI.parse(url), method, options) }
+    subject { rest_client.request(method, path, options) }
 
     describe 'headers' do
       %w[Authorization Proxy-User X-Request-Id Content-Type].each do |header_name|
@@ -63,7 +64,7 @@ describe CFoundry::BaseClient do
         end
 
         context "when the payload is a hash (i.e. multipart upload)" do
-          let(:method) { Net::HTTP::Put }
+          let(:method) { "PUT" }
           let(:options) { { :payload => { "key" => "value" } } }
 
           it 'includes a nonzero content length' do
@@ -85,7 +86,7 @@ describe CFoundry::BaseClient do
       end
 
       context 'and the request_id is set' do
-        before { base.request_id = "SomeRequestId" }
+        before { rest_client.request_id = "SomeRequestId" }
 
         it 'should include X-Request-Id in the header' do
           check_request do |req|
@@ -95,7 +96,7 @@ describe CFoundry::BaseClient do
       end
 
       context 'and the proxy is set' do
-        before { base.instance_variable_set(:@proxy, "some proxy") }
+        before { rest_client.instance_variable_set(:@proxy, "some proxy") }
 
         it 'should include X-Request-Id in the header' do
           check_request do |req|
@@ -140,36 +141,21 @@ describe CFoundry::BaseClient do
     end
 
     describe 'errors' do
-      context 'when a timeout exception occurs' do
-        before { stub_request(:get, url).to_raise(::Timeout::Error) }
+    end
 
-        it 'raises the correct error' do
-          expect { subject }.to raise_error CFoundry::Timeout, "GET https://api.cloudfoundry.com/foo timed out"
-        end
-      end
+    describe "the response" do
+      it "returns a hash of :headers, :status, :body" do
+        stub_request(:get, url).to_return({
+          :status => 201,
+          :headers => { "Content-Type" => "application/json"},
+          :body => '{ "foo": 1 }'
+        })
 
-      context 'when an HTTPNotFound error occurs' do
-        before { stub_request(:get, url).to_return(:status => 404, :body => "NOT FOUND") }
-
-        it 'raises the correct error' do
-          expect {subject}.to raise_error CFoundry::NotFound, "404: NOT FOUND"
-        end
-      end
-
-      context 'when an HTTPForbidden error occurs' do
-        before { stub_request(:get, url).to_return(:status => 403, :body => "NONE SHALL PASS") }
-
-        it 'raises the correct error' do
-          expect { subject }.to raise_error CFoundry::Denied, "403: NONE SHALL PASS"
-        end
-      end
-
-      context "when any other type of error occurs" do
-        before { stub_request(:get, url).to_return(:status => 411, :body => "NOT LONG ENOUGH") }
-
-        it 'raises the correct error' do
-          expect { subject }.to raise_error CFoundry::BadResponse, "411: NOT LONG ENOUGH"
-        end
+        expect(subject).to eq({
+          :status => "201",
+          :headers => { "content-type" => "application/json"},
+          :body => '{ "foo": 1 }'
+        })
       end
     end
   end

@@ -49,21 +49,21 @@ describe CFoundry::V2::Client do
     its(:version) { should eq 2 }
   end
 
-  describe "login and login prompts" do
-    include_examples "client login"
+  describe "#login_prompts" do
+    include_examples "client login prompts"
   end
 
   describe "#login" do
-    subject { client.login(email, password) }
+    include_examples "client login" do
+      it 'sets the current organization to nil' do
+        client.current_organization = "org"
+        expect { subject }.to change { client.current_organization }.from("org").to(nil)
+      end
 
-    it 'sets the current organization to nil' do
-      client.current_organization = "org"
-      expect { subject }.to change { client.current_organization }.from("org").to(nil)
-    end
-
-    it 'sets the current space to nil' do
-      client.current_space = "space"
-      expect { subject }.to change { client.current_space }.from("space").to(nil)
+      it 'sets the current space to nil' do
+        client.current_space = "space"
+        expect { subject }.to change { client.current_space }.from("space").to(nil)
+      end
     end
   end
 end

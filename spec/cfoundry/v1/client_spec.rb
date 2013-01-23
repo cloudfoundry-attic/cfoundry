@@ -10,4 +10,8 @@ describe CFoundry::V1::Client do
   describe "#login" do
     include_examples "client login"
   end
+
+  describe "#login_prompts" do
+    include_examples "client login prompts"
+  end
 end
