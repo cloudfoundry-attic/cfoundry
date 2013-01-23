@@ -60,19 +60,19 @@ module CFoundry
 
     def request(method, *args)
       path, options = normalize_arguments(args)
-      response = @rest_client.request(method, path, options)
-      handle_response(response, options)
+      request, response = @rest_client.request(method, path, options)
+      handle_response(response, options, request)
     end
 
     def status_is_successful?(code)
       (code >= 200) && (code < 300)
     end
 
-    def handle_response(response, options)
+    def handle_response(response, options, request)
       if status_is_successful?(response[:status].to_i)
         handle_successful_response(response, options)
       else
-        handle_error_response(response, options)
+        handle_error_response(response, request)
       end
     end
 
@@ -84,23 +84,23 @@ module CFoundry
       end
     end
 
-    def handle_error_response(response, options)
+    def handle_error_response(response, request)
       body_json = parse_json(response[:body])
       body_code = body_json && body_json[:code]
       code = body_code || response[:status].to_i
 
       if body_code
         error_class = CFoundry::APIError.error_classes[body_code] || CFoundry::APIError
-        raise error_class.new(body_json[:description], body_code, nil, response)
+        raise error_class.new(body_json[:description], body_code, request, response)
       end
 
       case code
         when 404
-          raise CFoundry::NotFound.new(nil, code, nil, response)
+          raise CFoundry::NotFound.new(nil, code, request, response)
         when 403
-          raise CFoundry::Denied.new(nil, code, nil, response)
+          raise CFoundry::Denied.new(nil, code, request, response)
         else
-          raise CFoundry::BadResponse.new(nil, code, nil, response)
+          raise CFoundry::BadResponse.new(nil, code, request, response)
       end
     end
 
@@ -114,12 +114,10 @@ module CFoundry
       [normalize_path(args), options]
     end
 
-    def normalize_path(segments)
-      safe_path = segments.flatten.collect { |x|
-        URI.encode(x.to_s, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
-      }.join("/")
+    URI_ENCODING_PATTERN = Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")
 
-      "/#{safe_path}"
+    def normalize_path(segments)
+      segments.flatten.collect { |x| URI.encode(x.to_s, URI_ENCODING_PATTERN) }.join("/")
     end
 
     def parse_json(x)

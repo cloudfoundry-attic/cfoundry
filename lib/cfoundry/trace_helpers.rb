@@ -32,7 +32,6 @@ module CFoundry
     private
 
     def header_trace(headers)
-      return unless headers
       headers.sort.map do |key, value|
         "  #{key} : #{value}"
       end

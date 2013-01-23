@@ -11,7 +11,7 @@ describe CFoundry::V2::Base do
     let(:url) { target + "/" + path }
     let(:args) { [path, options] }
 
-    shared_examples "handling responses" do
+    shared_examples "handling responses" do |verb|
       context 'when successful' do
         context 'and the accept type is JSON' do
           let(:options) { {:accept => :json} }
@@ -96,6 +96,26 @@ describe CFoundry::V2::Base do
             expect { subject }.to raise_error CFoundry::BadResponse, "411: NOT LONG ENOUGH"
           end
         end
+
+        it 'includes the request and response hashes when it raises errors' do
+          stub_request(:any, url).to_return(:status => 411, :body => "NOT LONG ENOUGH")
+
+          begin
+            subject
+          rescue CFoundry::BadResponse => e
+            expect(e.response).to eq({
+              :status => "411",
+              :headers => {},
+              :body => "NOT LONG ENOUGH"
+            })
+            expect(e.request).to eq({
+              :headers => { "Content-Length" => 0 },
+              :method => verb,
+              :body => nil,
+              :url => "https://api.cloudfoundry.com/some-path"
+            })
+          end
+        end
       end
     end
 
@@ -107,7 +127,7 @@ describe CFoundry::V2::Base do
           let(:args) { segments }
 
           it "makes a request with the correct url and options" do
-            mock(rest_client).request(verb, "/first-segment/next-segment", {}) { response }
+            mock(rest_client).request(verb, "first-segment/next-segment", {}) { [request, response] }
             subject
           end
         end
@@ -116,7 +136,7 @@ describe CFoundry::V2::Base do
           let(:args) { segments + [options] }
 
           it "makes a request with the correct url and options" do
-            mock(rest_client).request(verb, "/first-segment/next-segment", options) { response }
+            mock(rest_client).request(verb, "first-segment/next-segment", options) { [request, response] }
             subject
           end
         end
@@ -127,7 +147,7 @@ describe CFoundry::V2::Base do
           let(:args) { ["first-segment"] }
 
           it "makes a request with the correct url and options" do
-            mock(rest_client).request(verb, "/first-segment", {}) { response }
+            mock(rest_client).request(verb, "first-segment", {}) { [request, response] }
             subject
           end
         end
@@ -136,7 +156,7 @@ describe CFoundry::V2::Base do
           let(:args) { ["first-segment", options] }
 
           it "makes a request with the correct url and options" do
-            mock(rest_client).request(verb, "/first-segment", options) { response }
+            mock(rest_client).request(verb, "first-segment", options) { [request, response] }
             subject
           end
         end
@@ -144,16 +164,24 @@ describe CFoundry::V2::Base do
     end
 
     let(:response) { { :status => "201", :headers => { "some-header-key" => "some-header-value" }, :body => "some-body" } }
+    let(:request) do
+      {
+        :method => "GET",
+        :url => "http://api.cloudfoundry.com/some-path",
+        :headers => { "some-header-key" => "some-header-value" },
+        :body => "some-body"
+      }
+    end
 
     describe "#get" do
       subject { base.get(*args) }
 
       it "makes a GET request" do
-        mock(rest_client).request("GET", "/some-path", options) { response }
+        mock(rest_client).request("GET", "some-path", options) { [request, response] }
         subject
       end
 
-      include_examples "handling responses"
+      include_examples "handling responses", "GET"
       include_examples "normalizing arguments", "GET"
     end
 
@@ -161,11 +189,11 @@ describe CFoundry::V2::Base do
       subject { base.post(*args) }
 
       it "makes a POST request" do
-        mock(rest_client).request("POST", "/some-path", options) { response }
+        mock(rest_client).request("POST", "some-path", options) { [request, response] }
         subject
       end
 
-      include_examples "handling responses"
+      include_examples "handling responses", "POST"
       include_examples "normalizing arguments", "POST"
     end
 
@@ -173,11 +201,11 @@ describe CFoundry::V2::Base do
       subject { base.put(*args) }
 
       it "makes a PUT request" do
-        mock(rest_client).request("PUT", "/some-path", options) { response }
+        mock(rest_client).request("PUT", "some-path", options) { [request, response] }
         subject
       end
 
-      include_examples "handling responses"
+      include_examples "handling responses", "PUT"
       include_examples "normalizing arguments", "PUT"
     end
 
@@ -185,11 +213,11 @@ describe CFoundry::V2::Base do
       subject { base.delete(*args) }
 
       it "makes a DELETE request" do
-        mock(rest_client).request("DELETE", "/some-path", options) { response }
+        mock(rest_client).request("DELETE", "some-path", options) { [request, response] }
         subject
       end
 
-      include_examples "handling responses"
+      include_examples "handling responses", "DELETE"
       include_examples "normalizing arguments", "DELETE"
     end
   end

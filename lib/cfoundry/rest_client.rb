@@ -30,7 +30,7 @@ module CFoundry
     end
 
     def request(method, path, options = {})
-      request_uri(method, @target + path, options)
+      request_uri(method, [@target, path].join('/'), options)
     end
 
     def generate_headers(payload, options)
@@ -95,14 +95,14 @@ module CFoundry
 
       headers = generate_headers(payload, options)
 
-      if @trace
-        print_request({
-          :path => uri.path,
-          :method => method,
-          :headers => headers,
-          :body => payload
-        })
-      end
+      request_hash = {
+        :url => uri.to_s,
+        :method => method,
+        :headers => headers,
+        :body => payload
+      }
+
+      print_request(request_hash) if @trace
 
       add_headers(request, headers)
 
@@ -130,11 +130,12 @@ module CFoundry
             Net::HTTP::Get,
             original_options)
         else
-          {
+          response_hash = {
             :headers => sane_headers(response),
             :status => response.code,
             :body => response.body
           }
+          return request_hash, response_hash
         end
       end
     rescue ::Timeout::Error => e

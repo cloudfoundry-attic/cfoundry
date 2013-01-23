@@ -6,7 +6,7 @@ describe CFoundry::RestClient do
 
   describe '#request' do
     let(:path) { "some-path" }
-    let(:url) { rest_client.target + path }
+    let(:url) { "https://api.cloudfoundry.com/some-path" }
     let(:method) { "GET" }
     let(:options) { {} }
 
@@ -143,19 +143,39 @@ describe CFoundry::RestClient do
     describe 'errors' do
     end
 
-    describe "the response" do
-      it "returns a hash of :headers, :status, :body" do
+    describe "the return value" do
+      before do
         stub_request(:get, url).to_return({
           :status => 201,
           :headers => { "Content-Type" => "application/json"},
           :body => '{ "foo": 1 }'
         })
+      end
 
-        expect(subject).to eq({
-          :status => "201",
-          :headers => { "content-type" => "application/json"},
-          :body => '{ "foo": 1 }'
-        })
+      it "returns a request hash and a response hash" do
+        expect(subject).to be_an(Array)
+        expect(subject.length).to eq(2)
+      end
+
+      describe "the returned request hash" do
+        it "returns a hash of :headers, :url, :body and :method" do
+          expect(subject[0]).to eq({
+            :url => url,
+            :method => "GET",
+            :headers => { "Content-Length" => 0 },
+            :body => nil
+          })
+        end
+      end
+
+      describe "the returned response hash" do
+        it "returns a hash of :headers, :status, :body" do
+          expect(subject[1]).to eq({
+            :status => "201",
+            :headers => { "content-type" => "application/json"},
+            :body => '{ "foo": 1 }'
+          })
+        end
       end
     end
   end

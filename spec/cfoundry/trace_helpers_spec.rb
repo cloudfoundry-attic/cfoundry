@@ -9,7 +9,7 @@ describe CFoundry::TraceHelpers do
       :headers => { "bb-foo" => "bar", "accept" => "*/*" }
     }
   end
-  let(:response) { { :status => 404, :body => "not found" } }
+  let(:response) { { :status => 404, :body => "not found", :headers => {} } }
 
   shared_examples "request_trace tests" do
     it { should include request_trace }
