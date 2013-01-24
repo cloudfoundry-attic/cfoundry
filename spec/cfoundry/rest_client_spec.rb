@@ -180,6 +180,26 @@ describe CFoundry::RestClient do
       end
     end
 
+    describe "when the path starts with a slash" do
+      let(:path) { "/some-path/some-segment" }
+
+      it "doesn't add a double slash" do
+        stub = stub_request(:get, "https://api.cloudfoundry.com/some-path/some-segment")
+        subject
+        expect(stub).to have_been_requested
+      end
+    end
+
+    describe "when the path does not start with a slash" do
+      let(:path) { "some-path/some-segment" }
+
+      it "doesn't add a double slash" do
+        stub = stub_request(:get, "https://api.cloudfoundry.com/some-path/some-segment")
+        subject
+        expect(stub).to have_been_requested
+      end
+    end
+
     describe 'trace' do
       before do
         rest_client.trace = true

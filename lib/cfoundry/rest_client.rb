@@ -31,7 +31,7 @@ module CFoundry
     end
 
     def request(method, path, options = {})
-      request_uri(method, [@target, path].join('/'), options)
+      request_uri(method, construct_url(path), options)
     end
 
     def generate_headers(payload, options)
@@ -141,6 +141,11 @@ module CFoundry
       raise Timeout.new(method, uri, e)
     rescue SocketError, Errno::ECONNREFUSED => e
       raise TargetRefused, e.message
+    end
+
+    def construct_url(path)
+      path = "/#{path}" unless path[0] == ?\/
+      target + path
     end
 
     def get_method_class(method_string)
