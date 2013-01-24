@@ -27,16 +27,16 @@ describe CFoundry::V2::Client do
     before { client.token = token }
 
     context "when there is no access_token_data" do
-      let(:token) { {:access_token => "FOOBAR", :access_token_data => {}} }
+      let(:token) { CFoundry::AuthToken.new("bearer some-access-token", "some-refresh-token") }
       it { should eq nil }
     end
 
     context "when there is access_token_data" do
       let(:token) do
-        {
-          :access_token => "FOOBAR",
-          :access_token_data => { :user_id => "123", :email => "guy@example.com" }
-        }
+        CFoundry::AuthToken.new("bearer some-access-token", "some-refresh-token", {
+          :user_id => "123",
+          :email => "guy@example.com"
+        })
       end
 
       it { should be_a CFoundry::V2::User }

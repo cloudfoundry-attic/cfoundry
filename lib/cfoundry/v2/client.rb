@@ -82,9 +82,10 @@ module CFoundry::V2
 
     # The currently authenticated user.
     def current_user
-      if guid = @base.token[:access_token_data][:user_id]
+      token_data = @base.token.token_data
+      if guid = token_data[:user_id]
         user = user(guid)
-        user.emails = [{ :value => @base.token[:access_token_data][:email] }]
+        user.emails = [{ :value => token_data[:email] }]
         user
       end
     end
