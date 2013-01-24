@@ -20,7 +20,8 @@ module CFoundry
     def authorize(username, password)
       wrap_uaa_errors do
         begin
-          token_issuer.owner_password_grant(username, password, "cloud_controller.read").info
+          creds = { :username => username, :password => password }
+          token_issuer.implicit_grant_with_creds(creds, "cloud_controller.read")
         rescue CF::UAA::BadResponse => e
           status_code = e.message[/\d+/] || 400
           raise CFoundry::Denied.new("Authorization failed", status_code)

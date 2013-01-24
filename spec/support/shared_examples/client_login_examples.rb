@@ -37,62 +37,49 @@ shared_examples_for 'client login prompts' do
 end
 
 shared_examples_for 'client login' do
-  let(:data) { {:foo => "bar"} }
-  let(:token) { Base64.encode64(MultiJson.encode(:ignore => "hash") + MultiJson.encode(data) + "NONSENSE") }
-  let(:uaa) { CFoundry::UAAClient.new }
   let(:email) { 'test@test.com' }
   let(:password) { 'secret' }
+  let(:uaa) { CFoundry::UAAClient.new }
+  let(:access_token) { "some-access-token" }
+  let(:token_info) { CF::UAA::TokenInfo.new({ :access_token => access_token, :token_type => "bearer" }) }
 
   before do
     stub(client.base).uaa { uaa }
-    stub(uaa).authorize(email, password) { { :access_token => token } }
+    stub(uaa).authorize(email, password) { token_info }
   end
 
   subject { client.login(email, password) }
 
   context 'when there is a UAA endpoint' do
-    it 'returns a hash of data from the UAA endpoint' do
-      expect(subject).to eq(:access_token => token, :access_token_data => data)
+    it 'returns a UAA token' do
+      expect(subject).to be_a(CFoundry::AuthToken)
+      expect(subject.auth_header).to eq("bearer #{access_token}")
     end
 
     it 'saves the data as the token' do
       subject
-      expect(client.token).to eq(:access_token => token, :access_token_data => data)
+      expect(client.token).to be_a(CFoundry::AuthToken)
+      expect(client.token.auth_header).to eq("bearer #{access_token}")
     end
   end
 
   context 'when there is no UAA endpoint (a legacy system)' do
     let(:uaa) { nil }
+    let(:token_header) { "bearer some-base64" }
 
     before do
-      stub(client.base).create_token { {:token => token} }
+      stub(client.base).create_token { {:token => token_header} }
     end
 
     it 'returns the token from the legacy `tokens` endpoint on cloud controller' do
-      expect(subject).to eq(:access_token => token, :access_token_data => data)
+      expect(subject).to be_a(CFoundry::AuthToken)
+      expect(subject.auth_header).to eq(token_header)
     end
 
     it 'saves the data as the token' do
       subject
-      expect(client.token).to eq(:access_token => token, :access_token_data => data)
-    end
-  end
-
-  context 'when there is non UAA endpoint with no data encoded in the access token' do
-    before do
-      stub(client.base).uaa { nil }
-      stub(client.base).create_token { {:token => token} }
-    end
-
-    let(:token) { "NONSENSE" }
-
-    it 'returns the token from the legacy `tokens` endpoint on cloud controller' do
-      expect(subject).to eq(:access_token => token, :access_token_data => {})
-    end
-
-    it 'saves the data as the token' do
-      subject
-      expect(client.token).to eq(:access_token => token, :access_token_data => {})
+      expect(client.base.token).to be_a(CFoundry::AuthToken)
+      expect(client.base.token.auth_header).to eq(token_header)
     end
   end
 end

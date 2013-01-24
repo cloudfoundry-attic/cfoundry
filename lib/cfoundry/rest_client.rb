@@ -43,7 +43,7 @@ module CFoundry
       end
 
       headers["X-Request-Id"] = @request_id if @request_id
-      headers["Authorization"] = @token if @token
+      headers["Authorization"] = @token.auth_header if @token
       headers["Proxy-User"] = @proxy if @proxy
 
       if accept_type = mimetype(options[:accept])

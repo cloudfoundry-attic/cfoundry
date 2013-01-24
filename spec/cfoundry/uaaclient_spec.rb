@@ -52,25 +52,26 @@ EOF
   describe '#authorize' do
     let(:username) { "foo@bar.com" }
     let(:password) { "test" }
+    let(:creds) { {:username => username, :password => password} }
     let(:state) { 'somestate' }
     let(:redirect_uri) { 'https://uaa.cloudfoundry.com/redirect/vmc' }
-    let(:auth) { OpenStruct.new(:info => {:refresh_token => "REFRESH_TOKEN", :access_token => Base64.encode64('{"foo": "bar"}'), :token_type => "bearer"}) }
+    let(:auth) { Object.new }
 
     subject { uaa.authorize(username, password) }
 
-    before { stub(uaa).token_issuer.stub!.owner_password_grant { auth } }
+    before { stub(uaa).token_issuer.stub!.implicit_grant_with_creds { auth } }
 
     include_examples "UAA wrapper"
 
     it 'returns the token on successful authentication' do
-      stub(uaa).token_issuer.mock!.owner_password_grant(username, password, "cloud_controller.read") { auth }
-      expect(subject).to eq auth.info
+      stub(uaa).token_issuer.mock!.implicit_grant_with_creds(creds, "cloud_controller.read") { auth }
+      expect(subject).to eq auth
     end
 
     context 'when authorization fails' do
       context 'in the expected way' do
         it 'raises a CFoundry::Denied error' do
-          stub(uaa).token_issuer.stub!.owner_password_grant { raise CF::UAA::BadResponse.new("401: FooBar") }
+          stub(uaa).token_issuer.stub!.implicit_grant_with_creds { raise CF::UAA::BadResponse.new("401: FooBar") }
 
           expect { subject }.to raise_error(CFoundry::Denied, "401: Authorization failed")
         end
@@ -78,7 +79,7 @@ EOF
 
       context 'in an unexpected way' do
         it 'raises a CFoundry::Denied error' do
-          stub(uaa).token_issuer.stub!.owner_password_grant { raise CF::UAA::BadResponse.new("no_status_code") }
+          stub(uaa).token_issuer.stub!.implicit_grant_with_creds { raise CF::UAA::BadResponse.new("no_status_code") }
           expect { subject }.to raise_error(CFoundry::Denied, "400: Authorization failed")
         end
       end

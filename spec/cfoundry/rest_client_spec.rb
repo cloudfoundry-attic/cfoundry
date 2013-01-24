@@ -76,11 +76,12 @@ describe CFoundry::RestClient do
       end
 
       context 'and the token is set' do
-        let(:token) { "SomeToken" }
+        let(:token_header) { "bearer something" }
+        let(:token) { CFoundry::AuthToken.from_cc_token(token_header) }
 
         it 'should include Authorization in the header' do
           check_request do |req|
-            expect(req.headers["Authorization"]).to eq token
+            expect(req.headers["Authorization"]).to eq(token_header)
           end
         end
       end
