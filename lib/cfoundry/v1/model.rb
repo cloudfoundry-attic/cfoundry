@@ -117,6 +117,13 @@ module CFoundry::V1
         read[name] = val if found
       end
 
+      self.class.write_locations.each do |name, where|
+        next if self.class.read_only_attributes.include? name
+
+        found, val = find_path(manifest, where)
+        read[name] = val if found
+      end
+
       read[guid_name] = @guid
 
       read
@@ -140,9 +147,9 @@ module CFoundry::V1
     def write_manifest(body = read_manifest, onto = {})
       onto[guid_name] = @guid if guid_name
 
-      self.class.write_locations.each do |what, where|
-        next if self.class.read_only_attributes.include? what
-        put(body[what], onto, where) if body.key?(what)
+      self.class.write_locations.each do |name, where|
+        next if self.class.read_only_attributes.include? name
+        put(body[name], onto, where) if body.key?(name)
       end
 
       onto
