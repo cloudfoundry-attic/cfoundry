@@ -63,7 +63,7 @@ module CFoundry::V2
         end
 
         define_method(:"create_#{singular}") do |payload|
-          post(payload, "v2", plural, :content => :json, :accept => :json)
+          post("v2", plural, :content => :json, :accept => :json, :payload => payload)
         end
 
         define_method(:"delete_#{singular}") do |guid|
@@ -72,7 +72,7 @@ module CFoundry::V2
         end
 
         define_method(:"update_#{singular}") do |guid, payload|
-          put(payload, "v2", plural, guid, :content => :json, :accept => :json)
+          put("v2", plural, guid, :content => :json, :accept => :json, :payload => payload)
         end
 
         define_method(plural) do |*args|

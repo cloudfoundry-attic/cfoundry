@@ -20,12 +20,11 @@ module CFoundry::V1
     # Users
     def create_user(payload)
       # no JSON response
-      post(payload, "users", :content => :json)
+      post("users", :content => :json, :payload => payload)
     end
 
     def create_token(payload, email)
-      post(payload, "users", email, "tokens",
-           :content => :json, :accept => :json)
+      post("users", email, "tokens", :content => :json, :accept => :json, :payload => payload)
     end
 
     # Applications
@@ -47,7 +46,7 @@ module CFoundry::V1
     end
 
     def resource_match(fingerprints)
-      post(fingerprints, "resources", :content => :json, :accept => :json)
+      post("resources", :content => :json, :accept => :json, :payload => fingerprints)
     end
 
     def upload_app(name, zipfile, resources = [])
@@ -64,7 +63,7 @@ module CFoundry::V1
             "application/zip")
       }
 
-      post(payload, "apps", name, "application")
+      post("apps", name, "application", :payload => payload)
     rescue EOFError
       retry
     end

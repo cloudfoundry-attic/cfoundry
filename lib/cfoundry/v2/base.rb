@@ -10,8 +10,7 @@ module CFoundry::V2
     include BaseClientMethods
 
     def resource_match(fingerprints)
-      put(fingerprints, "v2", "resource_match",
-          :content => :json, :accept => :json)
+      put("v2", "resource_match", :content => :json, :accept => :json, :payload => fingerprints)
     end
 
     def upload_app(guid, zipfile, resources = [])
@@ -27,7 +26,7 @@ module CFoundry::V2
             "application/zip")
       }
 
-      put(payload, "v2", "apps", guid, "bits")
+      put("v2", "apps", guid, "bits", :payload => payload)
     rescue EOFError
       retry
     end

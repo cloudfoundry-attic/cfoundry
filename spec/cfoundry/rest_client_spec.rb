@@ -191,5 +191,27 @@ describe CFoundry::RestClient do
         subject
       end
     end
+
+    describe "following redirects" do
+      before do
+        stub_request(:post, "https://api.cloudfoundry.com/apps").to_return(
+          :status => 301,
+          :headers => { "location" => "https://api.cloudfoundry.com/apps/some-guid" }
+        )
+        stub_request(:get, "https://api.cloudfoundry.com/apps/some-guid").to_return(
+          :status => 200,
+          :body => '{"some": "json"}'
+        )
+      end
+
+      it "follows redirects correctly, returning the response to the 2nd redirect" do
+        request, response = rest_client.request("POST", "apps")
+        expect(response).to eql(
+          :status => "200",
+          :headers => {},
+          :body => '{"some": "json"}'
+        )
+      end
+    end
   end
 end

@@ -221,4 +221,28 @@ describe CFoundry::V2::Base do
       include_examples "normalizing arguments", "DELETE"
     end
   end
+
+  describe "#resource_match" do
+    let(:fingerprints) { "some-fingerprints" }
+
+    it "makes a PUT request to the resource_match endpoint with the correct payload" do
+      stub = stub_request(:put, "https://api.cloudfoundry.com/v2/resource_match").
+        with(:body => fingerprints).
+        to_return(:body => "{}")
+      base.resource_match(fingerprints)
+      expect(stub).to have_been_requested
+    end
+  end
+
+  describe "#upload_app" do
+    let(:guid) { "some-guid" }
+    let(:bits) { "some-bits" }
+    let(:fake_zipfile) { File.new("#{SPEC_ROOT}/fixtures/empty_file") }
+
+    it "makes a PUT request to the app bits endpoint with the correct payload" do
+      stub = stub_request(:put, "https://api.cloudfoundry.com/v2/apps/#{guid}/bits").to_return(:body => "{}")
+      base.upload_app(guid, fake_zipfile)
+      expect(stub).to have_been_requested
+    end
+  end
 end
