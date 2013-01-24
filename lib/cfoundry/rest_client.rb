@@ -15,6 +15,7 @@ module CFoundry
       "PUT" => Net::HTTP::Put,
       "POST" => Net::HTTP::Post,
       "DELETE" => Net::HTTP::Delete,
+      "HEAD" => Net::HTTP::Head,
     }
 
     attr_reader :target

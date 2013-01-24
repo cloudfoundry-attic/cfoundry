@@ -56,13 +56,13 @@ module CFoundry
       request("PUT", *args)
     end
 
-    private
-
     def request(method, *args)
       path, options = normalize_arguments(args)
       request, response = @rest_client.request(method, path, options)
       handle_response(response, options, request)
     end
+
+    private
 
     def status_is_successful?(code)
       (code >= 200) && (code < 300)
