@@ -245,4 +245,27 @@ describe CFoundry::V2::Base do
       expect(stub).to have_been_requested
     end
   end
+
+  describe "#stream_file" do
+    let(:app_guid) { "1234" }
+    let(:instance_guid) { "3456" }
+    let(:api_url) { "https://api.cloudfoundry.com/v2/apps/#{app_guid}/instances/#{instance_guid}/files/some/path/segments" }
+    let(:file_url) { "http://api.cloudfoundry.com/static/path/to/some/file" }
+
+    it "follows the redirect returned by the files endpoint" do
+      stub_request(:get, api_url).to_return(
+        :status => 301,
+        :headers => { "location" => file_url },
+        :body =>  ""
+      )
+      stub_request(:get, file_url + "&tail").to_return(
+        :status => 200,
+        :body => "some body chunks"
+      )
+
+      base.stream_file(app_guid, instance_guid, "some", "path", "segments") do |body|
+        expect(body).to eql("some body chunks")
+      end
+    end
+  end
 end

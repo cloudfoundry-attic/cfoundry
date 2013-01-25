@@ -131,7 +131,7 @@ module CFoundry
 
         log_request(time, request, response)
 
-        if response.is_a?(Net::HTTPRedirection)
+        if response.is_a?(Net::HTTPRedirection) && options[:follow_redirects]
           request_uri("GET", response["location"], original_options)
         else
           return request_hash, response_hash

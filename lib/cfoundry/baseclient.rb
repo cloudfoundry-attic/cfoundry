@@ -64,7 +64,7 @@ module CFoundry
     private
 
     def status_is_successful?(code)
-      (code >= 200) && (code < 300)
+      (code >= 200) && (code < 400)
     end
 
     def handle_response(response, options, request)
@@ -76,7 +76,9 @@ module CFoundry
     end
 
     def handle_successful_response(response, options)
-      if options[:accept] == :json
+      if options[:return_response]
+        response
+      elsif options[:accept] == :json
         parse_json(response[:body])
       else
         response[:body]
