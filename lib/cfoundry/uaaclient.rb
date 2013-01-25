@@ -77,7 +77,8 @@ module CFoundry
     end
 
     def scim
-      CF::UAA::Scim.new(target, token)
+      auth_header = token && token.auth_header
+      CF::UAA::Scim.new(target, auth_header)
     end
 
     def wrap_uaa_errors

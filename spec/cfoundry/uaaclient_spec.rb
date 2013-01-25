@@ -3,6 +3,11 @@ require "spec_helper"
 describe CFoundry::UAAClient do
   let(:target) { "https://uaa.example.com" }
   let(:uaa) { CFoundry::UAAClient.new(target) }
+  let(:auth_header) { "bearer access-token" }
+
+  before do
+    uaa.token = CFoundry::AuthToken.new(auth_header)
+  end
 
   shared_examples "UAA wrapper" do
     it "converts UAA errors to CFoundry equivalents" do
@@ -90,11 +95,25 @@ EOF
     subject { uaa.users }
 
     it 'requests /Users' do
-      req = stub_request(:get, "#{target}/Users").to_return(
+      stub_request(:get, "#{target}/Users").with(
+        :headers => { "authorization" => auth_header }
+      ).to_return(
         :headers => {'Content-Type' => 'application/json'},
-        :body => '{ "resources": [] }')
+        :body => '{ "resources": [] }'
+      )
       expect(subject).to eq({'resources' => []})
-      expect(req).to have_been_requested
+    end
+
+    context "when there is no token" do
+      before { uaa.token = nil }
+
+      it "doesn't blow up" do
+        stub_request(:get, "#{target}/Users").to_return(
+          :headers => {'Content-Type' => 'application/json'},
+          :body => '{ "resources": [] }'
+        )
+        expect(subject).to eq({'resources' => []})
+      end
     end
   end
 
@@ -108,13 +127,11 @@ EOF
     include_examples "UAA wrapper"
 
     it 'sends a password change request' do
-      req = stub_request(
-        :put,
-        "#{target}/Users/#{guid}/password"
-      ).with(
+      req = stub_request(:put, "#{target}/Users/#{guid}/password").with(
         :headers => {
           "Content-Type" => "application/json;charset=utf-8",
-          "Accept" => "application/json;charset=utf-8"
+          "Accept" => "application/json;charset=utf-8",
+          "Authorization" => auth_header
         }
       ).to_return(
         :status => 200,
@@ -137,22 +154,17 @@ EOF
     include_examples "UAA wrapper"
 
     before do
-      @request = stub_request(:post, "#{target}/password/score").with(
+      stub_request(:post, "#{target}/password/score").with(
         :body => 'password=password',
         :headers => {
           'Accept' => 'application/json;charset=utf-8',
-          'Content-Type' => 'application/x-www-form-urlencoded;charset=utf-8'
+          'Content-Type' => 'application/x-www-form-urlencoded;charset=utf-8',
         }
       ).to_return(
         :status => 200,
         :headers => {'Content-Type' => 'application/json'},
         :body => response
       )
-    end
-
-    it 'sends a password change request' do
-      subject
-      expect(@request).to have_been_requested
     end
 
     context 'when the score is 0 and the required is 0' do
