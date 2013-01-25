@@ -24,15 +24,13 @@ module CFoundry
     #
     # `false` if no UAA (legacy)
     def uaa
-      return @uaa unless @uaa.nil?
-
-      endpoint = info[:authorization_endpoint]
-      return @uaa = false unless endpoint
-
-      @uaa = CFoundry::UAAClient.new(endpoint)
-      @uaa.trace = @trace
-      @uaa.token = @token
-      @uaa
+      @uaa ||= begin
+        endpoint = info[:authorization_endpoint]
+        uaa = CFoundry::UAAClient.new(endpoint)
+        uaa.trace = @trace
+        uaa.token = @token
+        uaa
+      end
     end
 
     # Cloud metadata

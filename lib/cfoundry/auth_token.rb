@@ -9,10 +9,6 @@ module CFoundry
         )
       end
 
-      def from_cc_token(token_string)
-        new(token_string)
-      end
-
       def from_hash(hash)
         new(hash[:token], hash[:refresh_token])
       end

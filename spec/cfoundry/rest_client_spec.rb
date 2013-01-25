@@ -77,7 +77,7 @@ describe CFoundry::RestClient do
 
       context 'and the token is set' do
         let(:token_header) { "bearer something" }
-        let(:token) { CFoundry::AuthToken.from_cc_token(token_header) }
+        let(:token) { CFoundry::AuthToken.new(token_header) }
 
         it 'should include Authorization in the header' do
           check_request do |req|

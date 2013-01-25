@@ -48,24 +48,6 @@ describe CFoundry::AuthToken do
     end
   end
 
-  describe ".from_cc_token" do
-    let(:auth_token) { "bearer some-bytes" }
-
-    subject { CFoundry::AuthToken.from_cc_token(auth_token) }
-
-    describe "#auth_header" do
-      its(:auth_header) { should eq(auth_token) }
-    end
-
-    describe "#to_hash" do
-      its(:to_hash) { should eq({:token => auth_token, :refresh_token => nil})}
-    end
-
-    describe "#token_data" do
-      its(:token_data) { should eq({}) }
-    end
-  end
-
   describe ".from_hash(hash)" do
     let(:hash) do
       {
