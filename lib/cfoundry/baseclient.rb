@@ -20,9 +20,6 @@ module CFoundry
       self.log = false
     end
 
-    # The UAA used for this client.
-    #
-    # `false` if no UAA (legacy)
     def uaa
       @uaa ||= begin
         endpoint = info[:authorization_endpoint]
