@@ -58,8 +58,12 @@ module CFoundry
 
     def request(method, *args)
       path, options = normalize_arguments(args)
-      request, response = @rest_client.request(method, path, options)
+      request, response = request_raw(method, path, options)
       handle_response(response, options, request)
+    end
+
+    def request_raw(method, path, options)
+      @rest_client.request(method, path, options)
     end
 
     private
