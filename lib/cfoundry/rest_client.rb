@@ -18,6 +18,10 @@ module CFoundry
       "HEAD" => Net::HTTP::Head,
     }
 
+    DEFAULT_OPTIONS = {
+      :follow_redirects => true
+    }
+
     attr_reader :target
 
     attr_accessor :trace, :backtrace, :log, :request_id, :token, :target, :proxy
@@ -31,7 +35,7 @@ module CFoundry
     end
 
     def request(method, path, options = {})
-      request_uri(method, construct_url(path), options)
+      request_uri(method, construct_url(path), DEFAULT_OPTIONS.merge(options))
     end
 
     def generate_headers(payload, options)
