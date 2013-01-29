@@ -114,6 +114,9 @@ module CFoundry
       # TODO: test http proxies
       http = Net::HTTP.new(uri.host, uri.port)
 
+      # TODO remove this when staging returns streaming responses
+      http.read_timeout = 300
+
       if uri.is_a?(URI::HTTPS)
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
