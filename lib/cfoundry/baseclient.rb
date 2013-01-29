@@ -10,7 +10,8 @@ module CFoundry
 
     attr_reader :rest_client
 
-    def_delegators :rest_client, :target, :target=, :token, :token=, :proxy, :proxy=, :trace, :trace=,
+    def_delegators :rest_client, :target, :target=, :token,
+      :token=, :proxy, :proxy=, :trace, :trace=,
       :backtrace, :backtrace=, :log, :log=
 
     def initialize(target = "https://api.cloudfoundry.com", token = nil)
@@ -118,7 +119,13 @@ module CFoundry
     URI_ENCODING_PATTERN = Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")
 
     def normalize_path(segments)
-      segments.flatten.collect { |x| URI.encode(x.to_s, URI_ENCODING_PATTERN) }.join("/")
+      if segments.size == 1 && segments.first =~ /^\//
+        segments.first
+      else
+        segments.flatten.collect { |x|
+          URI.encode(x.to_s, URI_ENCODING_PATTERN)
+        }.join("/")
+      end
     end
 
     def parse_json(x)
