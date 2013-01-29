@@ -69,7 +69,7 @@ EOF
     include_examples "UAA wrapper"
 
     it 'returns the token on successful authentication' do
-      stub(uaa).token_issuer.mock!.implicit_grant_with_creds(creds, "cloud_controller.read") { auth }
+      stub(uaa).token_issuer.mock!.implicit_grant_with_creds(creds) { auth }
       expect(subject).to eq auth
     end
 
