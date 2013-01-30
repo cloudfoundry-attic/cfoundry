@@ -45,7 +45,7 @@ module CFoundry::V2
 
         Net::HTTP.start(uri.host, uri.port) do |http|
           req = Net::HTTP::Get.new(uri.request_uri)
-          req["Authorization"] = @token
+          req["Authorization"] = token.auth_header if token
 
           http.request(req) do |response|
             response.read_body { |chunk| yield chunk }

@@ -252,18 +252,29 @@ describe CFoundry::V2::Base do
     let(:api_url) { "https://api.cloudfoundry.com/v2/apps/#{app_guid}/instances/#{instance_guid}/files/some/path/segments" }
     let(:file_url) { "http://api.cloudfoundry.com/static/path/to/some/file" }
 
+    before do
+      stub(base).token { CFoundry::AuthToken.new("bearer foo") }
+    end
+
     it "follows the redirect returned by the files endpoint" do
       stub_request(:get, api_url).to_return(
         :status => 301,
         :headers => { "location" => file_url },
         :body =>  ""
       )
-      stub_request(:get, file_url + "&tail").to_return(
-        :status => 200,
-        :body => "some body chunks"
-      )
+
+      request =
+        stub_request(
+          :get, file_url + "&tail"
+        ).with(
+          :headers => { "Accept" => "*/*", "Authorization" => "bearer foo" }
+        ).to_return(
+          :status => 200,
+          :body => "some body chunks"
+        )
 
       base.stream_file(app_guid, instance_guid, "some", "path", "segments") do |body|
+        expect(request).to have_been_made
         expect(body).to eql("some body chunks")
       end
     end
