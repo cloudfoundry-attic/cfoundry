@@ -3,6 +3,7 @@ require "net/https"
 require "net/http/post/multipart"
 require "multi_json"
 require "fileutils"
+require "forwardable"
 
 module CFoundry
   class BaseClient # :nodoc:
