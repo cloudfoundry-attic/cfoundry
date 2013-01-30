@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe CFoundry::BaseClient do
-  describe "#request" do
-    subject { CFoundry::BaseClient.new }
+  subject { CFoundry::BaseClient.new }
 
+  describe "#request" do
     before do
       stub(subject).handle_response(anything, anything, anything)
     end
@@ -28,6 +28,48 @@ describe CFoundry::BaseClient do
           mock(subject).request_raw("GET", "%2Ffoo/bar%2Fbaz", {})
           subject.request("GET", "/foo", "bar/baz")
         end
+      end
+    end
+  end
+
+  describe "UAAClient" do
+    before do
+      stub(subject).info { { :authorization_endpoint => "http://uaa.example.com" } }
+    end
+
+    describe "#uaa" do
+      it "creates a UAAClient on the first call" do
+        expect(subject.uaa).to be_a CFoundry::UAAClient
+      end
+
+      it "returns the same object on later calls" do
+        uaa = subject.uaa
+        expect(subject.uaa).to eq uaa
+      end
+
+      it "has the same AuthToken as BaseClient" do
+        token = CFoundry::AuthToken.new(nil)
+        stub(subject).token { token }
+        expect(subject.uaa.token).to eq token
+      end
+    end
+
+    describe "#token=" do
+      it "propagates the change to #uaa" do
+        subject.uaa
+        expect(subject.uaa.token).to eq subject.token
+        subject.token = CFoundry::AuthToken.new(nil)
+        expect(subject.uaa.token).to eq subject.token
+      end
+    end
+
+    describe "#trace=" do
+      it "propagates the change to #uaa" do
+        subject.uaa
+        subject.trace = true
+        expect(subject.uaa.trace).to eq true
+        subject.trace = false
+        expect(subject.uaa.trace).to eq false
       end
     end
   end

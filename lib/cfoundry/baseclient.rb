@@ -12,8 +12,8 @@ module CFoundry
     attr_reader :rest_client
 
     def_delegators :rest_client, :target, :target=, :token,
-      :token=, :proxy, :proxy=, :trace, :trace=,
-      :backtrace, :backtrace=, :log, :log=
+      :proxy, :proxy=, :trace, :backtrace, :backtrace=,
+      :log, :log=
 
     def initialize(target = "https://api.cloudfoundry.com", token = nil)
       @rest_client = CFoundry::RestClient.new(target, token)
@@ -26,10 +26,20 @@ module CFoundry
       @uaa ||= begin
         endpoint = info[:authorization_endpoint]
         uaa = CFoundry::UAAClient.new(endpoint)
-        uaa.trace = @trace
-        uaa.token = @token
+        uaa.trace = trace
+        uaa.token = token
         uaa
       end
+    end
+
+    def token=(token)
+      @rest_client.token = token
+      @uaa.token = token if @uaa
+    end
+
+    def trace=(trace)
+      @rest_client.trace = trace
+      @uaa.trace = trace if @uaa
     end
 
     # Cloud metadata
