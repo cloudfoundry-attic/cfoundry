@@ -266,4 +266,28 @@ EOF
       end
     end
   end
+
+  describe "#token_issuer" do
+    it "has logging level 0 if #trace is true" do
+      uaa.trace = true
+      expect(uaa.send(:token_issuer).logger.level).to eq 0
+    end
+
+    it "has logging level 1 if #trace is false" do
+      uaa.trace = false
+      expect(uaa.send(:token_issuer).logger.level).to eq 1
+    end
+  end
+
+  describe "#scim" do
+    it "has logging level 0 if #trace is true" do
+      uaa.trace = true
+      expect(uaa.send(:scim).logger.level).to eq 0
+    end
+
+    it "has logging level 1 if #trace is false" do
+      uaa.trace = false
+      expect(uaa.send(:scim).logger.level).to eq 1
+    end
+  end
 end
