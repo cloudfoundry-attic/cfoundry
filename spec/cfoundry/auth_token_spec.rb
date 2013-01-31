@@ -1,3 +1,4 @@
+require "base64"
 require "spec_helper"
 
 describe CFoundry::AuthToken do
@@ -49,9 +50,12 @@ describe CFoundry::AuthToken do
   end
 
   describe ".from_hash(hash)" do
+    let(:token_data) { '{"baz":"buzz"}' }
+    let(:token) { Base64.encode64("{\"foo\":1}#{token_data}") }
+
     let(:hash) do
       {
-        :token => "bearer some-bytes",
+        :token => "bearer #{token}",
         :refresh_token => "some-refresh-token"
       }
     end
@@ -59,7 +63,7 @@ describe CFoundry::AuthToken do
     subject { CFoundry::AuthToken.from_hash(hash) }
 
     describe "#auth_header" do
-      its(:auth_header) { should eq("bearer some-bytes") }
+      its(:auth_header) { should eq("bearer #{token}") }
     end
 
     describe "#to_hash" do
@@ -67,7 +71,7 @@ describe CFoundry::AuthToken do
     end
 
     describe "#token_data" do
-      its(:token_data) { should eq({}) }
+      its(:token_data) { should eq({ :baz => "buzz" }) }
     end
   end
 end
