@@ -1,5 +1,9 @@
 [![Build Status](https://travis-ci.org/cloudfoundry/vmc-lib.png)](https://travis-ci.org/cloudfoundry/vmc-lib)
 
+# cfoundry gem
+
+cfoundry is a ruby gem that provides a REST client for the Cloud Foundry REST API, which is implemented by both the [cloud controller](https://github.com/cloudfoundry/cloud_controller) and the [next generation cloud controller](https://github.com/cloudfoundry/cloud_controller_ng). cfoundry is able to speak either the v1 or the v2 version of the Cloud Foundry Api.
+
 ## File a Bug
 
 To file a bug against Cloud Foundry Open Source and its components, sign up and use our bug tracking system: [http://cloudfoundry.atlassian.net](http://cloudfoundry.atlassian.net)
