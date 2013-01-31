@@ -25,7 +25,6 @@ module CFoundry::V2
     attribute :environment_json, :hash,    :default => {}
     attribute :memory,           :integer, :default => 256
     attribute :total_instances,  :integer, :default => 1, :at => :instances
-    attribute :file_descriptors, :integer, :default => 256
     attribute :disk_quota,       :integer, :default => 256
     attribute :state,            :string,  :default => "STOPPED"
     attribute :command,          :string,  :default => nil
