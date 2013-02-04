@@ -33,6 +33,10 @@ module CFoundry
     end
 
     def token=(token)
+      if token.is_a?(String)
+        token = CFoundry::AuthToken.new(token)
+      end
+
       @rest_client.token = token
       @uaa.token = token if @uaa
     end

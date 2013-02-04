@@ -23,7 +23,7 @@ describe CFoundry::V2::Client do
   end
 
   describe "#current_user" do
-    subject {client.current_user }
+    subject { client.current_user }
     before { client.token = token }
 
     context "when there is no access_token_data" do
@@ -32,11 +32,10 @@ describe CFoundry::V2::Client do
     end
 
     context "when there is access_token_data" do
+      let(:token_data) { { :user_id => "123", :email => "guy@example.com" } }
+      let(:auth_header) { Base64.encode64("{}#{MultiJson.encode(token_data)}") }
       let(:token) do
-        CFoundry::AuthToken.new("bearer some-access-token", "some-refresh-token", {
-          :user_id => "123",
-          :email => "guy@example.com"
-        })
+        CFoundry::AuthToken.new("bearer #{auth_header}", "some-refresh-token")
       end
 
       it { should be_a CFoundry::V2::User }
