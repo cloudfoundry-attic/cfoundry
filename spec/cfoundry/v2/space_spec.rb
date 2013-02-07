@@ -1,3 +1,5 @@
+require "spec_helper"
+
 describe CFoundry::V2::Space do
   let(:client) { fake_client }
 

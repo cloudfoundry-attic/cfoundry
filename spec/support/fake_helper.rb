@@ -79,7 +79,7 @@ module CFoundry::V2
     end
 
     def fake_attributes(attributes)
-      fakes = default_fakes.merge(attributes)
+      fakes = default_fakes
 
       # default relationships to other fake objects
       self.class.to_one_relations.each do |name, opts|
@@ -94,6 +94,17 @@ module CFoundry::V2
             @client.send(opts[:as] || name).fake
           end
       end
+
+      # make sure that the attributes provided are set after the defaults
+      #
+      # we have to do this for cases like environment_json vs. env,
+      # where one would clobber the other
+      attributes.each do |k, _|
+        fakes.delete k
+      end
+
+      fakes = fakes.to_a
+      fakes += attributes.to_a
 
       fakes
     end

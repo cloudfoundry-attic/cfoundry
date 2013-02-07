@@ -104,13 +104,13 @@ module CFoundry::V2
     end
 
     def env
-      @env ||= CFoundry::ChattyHash.new(
+      CFoundry::ChattyHash.new(
         method(:env=),
-        environment_json)
+        stringify(environment_json))
     end
 
     def env=(x)
-      self.environment_json = x.to_hash
+      self.environment_json = stringify(x.to_hash)
     end
 
     def debug_mode # TODO v2
@@ -294,6 +294,18 @@ module CFoundry::V2
 
     def stream_file(*path, &blk)
       Instance.new(self, "0", @client).stream_file(*path, &blk)
+    end
+
+    private
+
+    def stringify(hash)
+      new = {}
+
+      hash.each do |k, v|
+        new[k.to_s] = v.to_s
+      end
+
+      new
     end
 
     class Instance
