@@ -7,6 +7,7 @@ describe CFoundry::UAAClient do
 
   before do
     uaa.token = CFoundry::AuthToken.new(auth_header)
+    CF::UAA::Util.default_logger.level = 1
   end
 
   shared_examples "UAA wrapper" do
@@ -64,19 +65,19 @@ EOF
 
     subject { uaa.authorize(username, password) }
 
-    before { stub(uaa).token_issuer.stub!.implicit_grant_with_creds { auth } }
+    before { stub(uaa).token_issuer.stub!.owner_password_grant { auth } }
 
     include_examples "UAA wrapper"
 
     it 'returns the token on successful authentication' do
-      stub(uaa).token_issuer.mock!.implicit_grant_with_creds(creds) { auth }
+      stub(uaa).token_issuer.mock!.owner_password_grant(username, password) { auth }
       expect(subject).to eq auth
     end
 
     context 'when authorization fails' do
       context 'in the expected way' do
         it 'raises a CFoundry::Denied error' do
-          stub(uaa).token_issuer.stub!.implicit_grant_with_creds { raise CF::UAA::BadResponse.new("401: FooBar") }
+          stub(uaa).token_issuer.stub!.owner_password_grant { raise CF::UAA::BadResponse.new("401: FooBar") }
 
           expect { subject }.to raise_error(CFoundry::Denied, "401: Authorization failed")
         end
@@ -84,7 +85,7 @@ EOF
 
       context 'in an unexpected way' do
         it 'raises a CFoundry::Denied error' do
-          stub(uaa).token_issuer.stub!.implicit_grant_with_creds { raise CF::UAA::BadResponse.new("no_status_code") }
+          stub(uaa).token_issuer.stub!.owner_password_grant { raise CF::UAA::BadResponse.new("no_status_code") }
           expect { subject }.to raise_error(CFoundry::Denied, "400: Authorization failed")
         end
       end
@@ -288,6 +289,21 @@ EOF
     it "has logging level 1 if #trace is false" do
       uaa.trace = false
       expect(uaa.send(:scim).logger.level).to eq 1
+    end
+  end
+
+  describe "#refresh_token!" do
+    it "uses the refresh token to get a new access token" do
+      mock(uaa.send(:token_issuer)).refresh_token_grant(uaa.token.refresh_token) do
+        CF::UAA::TokenInfo.new(
+          :token_type => "bearer",
+          :access_token => "refreshed-token",
+          :refresh_token => "some-refresh-token")
+      end
+
+      uaa.refresh_token!
+      expect(uaa.token.auth_header).to eq "bearer refreshed-token"
+      expect(uaa.token.refresh_token).to eq "some-refresh-token"
     end
   end
 end

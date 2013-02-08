@@ -68,6 +68,11 @@ module CFoundry
     end
 
     def request(method, *args)
+      if needs_token_refresh?
+        token.auth_header = nil
+        refresh_token!
+      end
+
       path, options = normalize_arguments(args)
       request, response = request_raw(method, path, options)
       handle_response(response, options, request)
@@ -77,7 +82,16 @@ module CFoundry
       @rest_client.request(method, path, options)
     end
 
+    def refresh_token!
+      self.token = uaa.refresh_token!
+    end
+
     private
+
+    def needs_token_refresh?
+      token && token.auth_header && token.refresh_token && \
+        token.expires_soon?
+    end
 
     def status_is_successful?(code)
       (code >= 200) && (code < 400)

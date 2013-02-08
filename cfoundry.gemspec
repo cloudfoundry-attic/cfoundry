@@ -28,4 +28,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "webmock", "~> 1.9"
   s.add_development_dependency "rr", "~> 1.0"
   s.add_development_dependency "gem-release"
+  s.add_development_dependency "timecop"
 end

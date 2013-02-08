@@ -2,7 +2,7 @@ require "cfoundry/baseclient"
 require 'uaa'
 
 module CFoundry
-  class UAAClient < BaseClient
+  class UAAClient
     attr_accessor :target, :client_id, :token, :trace
 
     def initialize(target = "https://uaa.cloudfoundry.com", client_id = "vmc")
@@ -20,8 +20,7 @@ module CFoundry
     def authorize(username, password)
       wrap_uaa_errors do
         begin
-          creds = { :username => username, :password => password }
-          token_issuer.implicit_grant_with_creds(creds)
+          token_issuer.owner_password_grant(username, password)
         rescue CF::UAA::BadResponse => e
           status_code = e.message[/\d+/] || 400
           raise CFoundry::Denied.new("Authorization failed", status_code)
@@ -67,6 +66,13 @@ module CFoundry
             :name => {:givenName => email, :familyName => email}
           }
         )
+      end
+    end
+
+    def refresh_token!
+      wrap_uaa_errors do
+        token_info = token_issuer.refresh_token_grant(token.refresh_token)
+        self.token = AuthToken.from_uaa_token_info(token_info)
       end
     end
 

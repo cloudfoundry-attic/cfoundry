@@ -30,6 +30,77 @@ describe CFoundry::BaseClient do
         end
       end
     end
+
+    context "when there is a token with an auth_header" do
+      let(:refresh_token) { nil }
+      let(:token) { CFoundry::AuthToken.new("bearer something", refresh_token) }
+
+      before do
+        stub(subject).request_raw
+        subject.token = token
+        stub(token).expires_soon? { expires_soon? }
+      end
+
+      context "and the token is about to expire" do
+        let(:uaa) { Object.new }
+        let(:expires_soon?) { true }
+
+        context "and there is a refresh token" do
+          let(:refresh_token) { "some-refresh-token" }
+
+          it "sets the token's auth header to nil to prevent recursion" do
+            stub(subject).refresh_token!
+            subject.request("GET", "foo")
+          end
+
+          it "refreshes the access token" do
+            mock(subject).refresh_token!
+            subject.request("GET", "foo")
+          end
+        end
+
+        context "and there is NOT a refresh token" do
+          let(:refresh_token) { nil }
+
+          it "moves along" do
+            mock(subject).request_raw(anything, anything, anything)
+            dont_allow(subject).refresh_token!
+            subject.request("GET", "foo")
+          end
+        end
+      end
+
+      context "and the token is NOT about to expire" do
+        let(:expires_soon?) { nil }
+
+        it "moves along" do
+          mock(subject).request_raw(anything, anything, anything)
+          dont_allow(subject).refresh_token!
+          subject.request("GET", "foo")
+        end
+      end
+    end
+
+    describe "#refresh_token!" do
+      let(:uaa) { stub }
+      let(:access_token) { Base64.encode64(%Q|{"algo": "h1234"}{"a":"b"}random-bytes|) }
+      let(:refresh_token) { "xyz" }
+      let(:new_access_token) { Base64.encode64(%Q|{"algo": "h1234"}{"a":"x"}random-bytes|) }
+      let(:auth_token) { CFoundry::AuthToken.new("bearer #{access_token}", refresh_token) }
+
+      before { stub(subject).uaa { uaa } }
+
+      it "refreshes the token with UAA client and assigns it" do
+        mock(uaa).refresh_token! {
+          CFoundry::AuthToken.new("bearer #{new_access_token}", auth_token.refresh_token)
+        }
+
+        subject.refresh_token!
+
+        expect(subject.token.auth_header).to eq "bearer #{new_access_token}"
+      end
+    end
+
   end
 
   describe "UAAClient" do

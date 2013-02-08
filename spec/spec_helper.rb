@@ -4,6 +4,7 @@ require "rspec"
 require "cfoundry"
 require "webmock/rspec"
 require "ostruct"
+require "timecop"
 
 Dir[File.expand_path('../{support,fakes}/**/*.rb', __FILE__)].each do |file|
   require file

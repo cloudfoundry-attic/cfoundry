@@ -46,6 +46,14 @@ describe CFoundry::AuthToken do
         let(:access_token) { Base64.encode64('{"algo": "h1234"}{"user_id", "a6", "email": "a@b.com"}random-bytes') }
         its(:token_data) { should eq({}) }
       end
+
+      context "when the auth header is nil" do
+        before do
+          subject.auth_header = nil
+        end
+
+        its(:token_data) { should eq({}) }
+      end
     end
   end
 
@@ -72,6 +80,46 @@ describe CFoundry::AuthToken do
 
     describe "#token_data" do
       its(:token_data) { should eq({ :baz => "buzz" }) }
+    end
+  end
+
+  describe "#auth_header=" do
+    let(:access_token) { Base64.encode64('{"algo": "h1234"}{"user_id": "a6", "email": "a@b.com"}random-bytes') }
+    let(:other_access_token) { Base64.encode64('{"algo": "h1234"}{"user_id": "b6", "email": "a@b.com"}random-bytes') }
+
+    subject { CFoundry::AuthToken.new("bearer #{access_token}") }
+
+    it "invalidates @token_data" do
+      subject.token_data
+      expect {
+        subject.auth_header = "bearer #{other_access_token}"
+      }.to change { subject.token_data[:user_id] }.from("a6").to("b6")
+    end
+  end
+
+  describe "#expires_soon?" do
+    let(:access_token) { Base64.encode64(%Q|{"algo": "h1234"}{"exp":#{expiration.to_i}}random-bytes|) }
+
+    subject { CFoundry::AuthToken.new("bearer #{access_token}") }
+
+    context "when the token expires in less than 1 minute" do
+      let(:expiration) { Time.now + 59 }
+
+      it "returns true" do
+        Timecop.freeze do
+          expect(subject.expires_soon?).to be_true
+        end
+      end
+    end
+
+    context "when the token expires in greater than or equal to 1 minute" do
+      let(:expiration) { Time.now + 60 }
+
+      it "returns false" do
+        Timecop.freeze do
+          expect(subject.expires_soon?).to be_false
+        end
+      end
     end
   end
 end
