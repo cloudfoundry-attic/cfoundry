@@ -24,6 +24,8 @@ module CFoundry
         rescue CF::UAA::BadResponse => e
           status_code = e.message[/\d+/] || 400
           raise CFoundry::Denied.new("Authorization failed", status_code)
+        rescue CF::UAA::TargetError
+          token_issuer.implicit_grant_with_creds(:username => username, :password => password)
         end
       end
     end

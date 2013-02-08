@@ -62,31 +62,42 @@ EOF
     let(:state) { 'somestate' }
     let(:redirect_uri) { 'https://uaa.cloudfoundry.com/redirect/vmc' }
     let(:auth) { Object.new }
+    let(:issuer) { Object.new }
 
     subject { uaa.authorize(username, password) }
 
-    before { stub(uaa).token_issuer.stub!.owner_password_grant { auth } }
+    before do
+      stub(issuer).owner_password_grant { auth }
+      stub(uaa).token_issuer { issuer }
+    end
 
     include_examples "UAA wrapper"
 
     it 'returns the token on successful authentication' do
-      stub(uaa).token_issuer.mock!.owner_password_grant(username, password) { auth }
+      mock(issuer).owner_password_grant(username, password) { auth }
       expect(subject).to eq auth
     end
 
     context 'when authorization fails' do
       context 'in the expected way' do
         it 'raises a CFoundry::Denied error' do
-          stub(uaa).token_issuer.stub!.owner_password_grant { raise CF::UAA::BadResponse.new("401: FooBar") }
-
+          mock(issuer).owner_password_grant(anything, anything) { raise CF::UAA::BadResponse.new("401: FooBar") }
           expect { subject }.to raise_error(CFoundry::Denied, "401: Authorization failed")
         end
       end
 
       context 'in an unexpected way' do
         it 'raises a CFoundry::Denied error' do
-          stub(uaa).token_issuer.stub!.owner_password_grant { raise CF::UAA::BadResponse.new("no_status_code") }
+          mock(issuer).owner_password_grant(anything, anything) { raise CF::UAA::BadResponse.new("no_status_code") }
           expect { subject }.to raise_error(CFoundry::Denied, "400: Authorization failed")
+        end
+      end
+
+      context "with a CF::UAA::TargetError" do
+        it "retries with implicit grant" do
+          stub(issuer).owner_password_grant { raise CF::UAA::TargetError.new("useless info") }
+          mock(issuer).implicit_grant_with_creds(:username => username, :password => password)
+          expect { subject }.to_not raise_error
         end
       end
     end
