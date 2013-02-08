@@ -36,29 +36,3 @@ namespace :deploy do
     sh "git push origin latest-release"
   end
 end
-
-namespace :release do
-  DEPENDENTS = %w[
-    vmc/vmc.gemspec
-    vmc-plugins/admin/admin-vmc-plugin.gemspec
-    vmc-plugins/console/console-vmc-plugin.gemspec
-    vmc-plugins/manifests/manifests-vmc-plugin.gemspec
-    vmc-plugins/mcf/mcf-vmc-plugin.gemspec
-    vmc-plugins/tunnel/tunnel-vmc-plugin.gemspec
-  ].freeze
-
-  def bump_dependent(file, dep, ver)
-    puts "Bumping #{dep} to #{ver} in #{file}"
-
-    old = File.read(file)
-    new = old.sub(/(\.add.+#{dep}\D+)[^'"]+(.+)/, "\\1#{ver}\\2")
-
-    File.open(file, "w") { |io| io.print new }
-  end
-
-  task :bump_dependents do
-    DEPENDENTS.each do |dep|
-      bump_dependent(File.expand_path("../../#{dep}", __FILE__), "cfoundry", CFoundry::VERSION)
-    end
-  end
-end
