@@ -200,6 +200,24 @@ describe CFoundry::RestClient do
       end
     end
 
+    describe "when the path is a full url" do
+      let(:path) { "http://example.com" }
+
+      it "requests the given url" do
+        stub = stub_request(:get, "http://example.com")
+        subject
+        expect(stub).to have_been_requested
+      end
+    end
+
+    describe "when the path is malformed" do
+      let(:path) { "#%&*$(#%&$%)" }
+
+      it "blows up" do
+        expect { subject }.to raise_error(URI::InvalidURIError)
+      end
+    end
+
     describe 'trace' do
       before do
         rest_client.trace = true

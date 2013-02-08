@@ -151,6 +151,9 @@ module CFoundry
     end
 
     def construct_url(path)
+      uri = URI.parse(path)
+      return path if uri.scheme
+
       path = "/#{path}" unless path[0] == ?\/
       target + path
     end
