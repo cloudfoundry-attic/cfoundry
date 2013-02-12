@@ -82,14 +82,14 @@ module CFoundry
 
     def token_issuer
       @token_issuer ||= CF::UAA::TokenIssuer.new(target, client_id, nil, :symbolize_keys => true)
-      @token_issuer.logger.level = @trace ? 0 : 1
+      @token_issuer.logger.level = @trace ? Logger::Severity::TRACE : 1
       @token_issuer
     end
 
     def scim
       auth_header = token && token.auth_header
       scim = CF::UAA::Scim.new(target, auth_header)
-      scim.logger.level = @trace ? 0 : 1
+      scim.logger.level = @trace ? Logger::Severity::TRACE : 1
       scim
     end
 
