@@ -28,14 +28,15 @@ describe CFoundry::UploadHelpers do
     end
 
     before do
+      FileUtils.rm_rf tmpdir
+
       stub(Dir).tmpdir do
         FileUtils.mkdir_p tmpdir
         tmpdir
       end
+
       stub(base).upload_app.with_any_args
     end
-
-    after { FileUtils.rm_rf tmpdir }
 
     subject { fake_model.upload(path, check_resources) }
 
@@ -123,6 +124,50 @@ describe CFoundry::UploadHelpers do
       it 'passes `false` to #upload_app' do
         mock(base).upload_app(guid, false, [])
         subject
+      end
+    end
+
+    context 'when all files match existing resources' do
+      context 'and there are directories' do
+        let(:path) { "#{SPEC_ROOT}/fixtures/apps/with_nested_directories" }
+
+        it 'prunes them before zipping' do
+          stub(fake_model).make_fingerprints(anything) do
+            [[], CFoundry::UploadHelpers::RESOURCE_CHECK_LIMIT + 1]
+          end
+
+          stub(base).resource_match(anything) do
+            %w{ xyz foo/bar/baz/fizz }.map do |path|
+              { :fn => "#{tmpdir}/.vmc_#{guid}_files/#{path}" }
+            end
+          end
+
+          mock(base).upload_app(anything, false, anything)
+
+          fake_model.upload(path)
+        end
+      end
+    end
+
+    context "when only dotfiles don't match existing resources" do
+      let(:path) { "#{SPEC_ROOT}/fixtures/apps/with_dotfiles" }
+
+      it 'does not prune them' do
+        stub(fake_model).make_fingerprints(anything) do
+          [[], CFoundry::UploadHelpers::RESOURCE_CHECK_LIMIT + 1]
+        end
+
+        stub(base).resource_match(anything) do
+          %w{ xyz }.map do |path|
+            { :fn => "#{tmpdir}/.vmc_#{guid}_files/#{path}" }
+          end
+        end
+
+        mock(base).upload_app(anything, anything, anything) do |_, zip, _|
+          expect(zip).to be_a(String)
+        end
+
+        fake_model.upload(path)
       end
     end
   end

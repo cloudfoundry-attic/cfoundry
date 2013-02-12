@@ -135,7 +135,31 @@ module CFoundry
         resource[:fn].sub!("#{path}/", "")
       end
 
+      prune_empty_directories(path)
+
       resources
+    end
+
+    # OK, HERES THE PLAN...
+    #
+    # 1. Get all the directories in the entire file tree.
+    # 2. Sort them by the length of their absolute path.
+    # 3. Go through the list, longest paths first, and remove
+    #    the directories that are empty.
+    #
+    # This ensures that directories containing empty directories
+    # are also pruned.
+    def prune_empty_directories(path)
+      all_files = Dir["#{path}/**/{*,.*}"]
+      all_files.reject! { |fn| fn =~ /\/\.+$/ }
+
+      directories = all_files.select { |x| File.directory?(x) }
+      directories.sort! { |a, b| b.size <=> a.size }
+
+      directories.each do |directory|
+        entries = Dir.entries(directory) - %w{. ..}
+        FileUtils.rmdir(directory) if entries.empty?
+      end
     end
 
     def make_fingerprints(path)

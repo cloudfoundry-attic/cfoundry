@@ -13,10 +13,12 @@ module CFoundry::V2
       put("v2", "resource_match", :content => :json, :accept => :json, :payload => fingerprints)
     end
 
-    def upload_app(guid, zipfile, resources = [])
-      payload = {
-        :resources => MultiJson.dump(resources),
-        :application =>
+    def upload_app(guid, zipfile = nil, resources = [])
+      payload = {}
+      payload[:resources] = MultiJson.dump(resources)
+
+      if zipfile
+        payload[:application] =
           UploadIO.new(
             if zipfile.is_a? File
               zipfile
@@ -24,7 +26,7 @@ module CFoundry::V2
               File.new(zipfile, "rb")
             end,
             "application/zip")
-      }
+      end
 
       put("v2", "apps", guid, "bits", :payload => payload)
     rescue EOFError

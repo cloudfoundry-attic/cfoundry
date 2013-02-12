@@ -49,7 +49,7 @@ module CFoundry::V1
       post("resources", :content => :json, :accept => :json, :payload => fingerprints)
     end
 
-    def upload_app(name, zipfile, resources = [])
+    def upload_app(name, zipfile = nil, resources = [])
       payload = {
         :_method => "put",
         :resources => MultiJson.dump(resources),

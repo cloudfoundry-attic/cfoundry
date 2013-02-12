@@ -244,6 +244,23 @@ describe CFoundry::V2::Base do
       base.upload_app(guid, fake_zipfile)
       expect(stub).to have_been_requested
     end
+
+    context "when there is no file to upload" do
+      it "does not include 'application' in the request hash" do
+        stub =
+          stub_request(
+            :put,
+            "https://api.cloudfoundry.com/v2/apps/#{guid}/bits"
+          ).with { |request|
+            request.body =~ /name="resources"/ &&
+              request.body !~ /name="application"/
+          }.to_return(
+            :body => "{}"
+          )
+        base.upload_app(guid)
+        expect(stub).to have_been_requested
+      end
+    end
   end
 
   describe "#stream_file" do
