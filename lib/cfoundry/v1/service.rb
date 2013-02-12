@@ -1,15 +1,18 @@
 module CFoundry::V1
   class Service
-    attr_accessor :label, :version, :description, :type, :provider, :state
+    attr_accessor :label, :version, :description, :type, :provider, :state, :plans, :default_plan
 
     def initialize(label, version = nil, description = nil,
-                   type = nil, provider = "core", state = nil)
+                   type = nil, provider = "core", state = nil,
+                   plans = [], default_plan = nil)
       @label = label
       @description = description
       @version = version
       @type = type
       @provider = provider
       @state = state
+      @plans = plans
+      @default_plan = default_plan
     end
 
     def eql?(other)

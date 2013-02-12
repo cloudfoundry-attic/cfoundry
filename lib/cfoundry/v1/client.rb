@@ -106,7 +106,8 @@ module CFoundry::V1
 
                 services <<
                   Service.new(vendor.to_s, ver.to_s, meta[:description],
-                              type.to_s, provider.to_s, state && state.first)
+                              type.to_s, provider.to_s, state && state.first,
+                              meta[:plans], meta[:default_plan])
               end
             end
           end
