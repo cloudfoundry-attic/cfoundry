@@ -34,4 +34,16 @@ describe CFoundry::V2::App do
       end
     end
   end
+
+  describe "#summarize!" do
+    let(:app) { fake :app }
+
+    it "assigns :instances as #total_instances" do
+      stub(app).summary { { :instances => 4 } }
+
+      app.summarize!
+
+      expect(app.total_instances).to eq(4)
+    end
+  end
 end

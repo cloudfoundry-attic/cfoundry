@@ -43,6 +43,10 @@ module CFoundry::V2
         self.cache[:running_instances] = x
       },
 
+      :instances => proc { |x|
+        self.total_instances = x
+      },
+
       # TODO: remove these when cc consistently returns nested hashes
       :framework_guid => proc { |x|
         if f = self.cache[:framework]
