@@ -107,7 +107,7 @@ module CFoundry::V1
                 services <<
                   Service.new(vendor.to_s, ver.to_s, meta[:description],
                               type.to_s, provider.to_s, state && state.first,
-                              meta[:plans], meta[:default_plan])
+                              generate_plans(meta))
               end
             end
           end
@@ -115,6 +115,17 @@ module CFoundry::V1
       end
 
       services
+    end
+
+    def generate_plans(meta)
+      names = meta[:plans]
+      descriptions = meta[:plan_descriptions]
+      default_name = meta[:default_plan]
+      names.map { |name|
+        description = descriptions[name] if descriptions
+        is_default = name == default_name || names.length == 1
+        ServicePlan.new(name, description, is_default)
+      }
     end
 
     # Retrieve available runtimes.
