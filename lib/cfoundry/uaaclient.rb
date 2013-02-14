@@ -71,10 +71,14 @@ module CFoundry
       end
     end
 
-    def refresh_token!
+    def try_to_refresh_token!
       wrap_uaa_errors do
-        token_info = token_issuer.refresh_token_grant(token.refresh_token)
-        self.token = AuthToken.from_uaa_token_info(token_info)
+        begin
+          token_info = token_issuer.refresh_token_grant(token.refresh_token)
+          self.token = AuthToken.from_uaa_token_info(token_info)
+        rescue CF::UAA::TargetError
+          self.token
+        end
       end
     end
 

@@ -91,7 +91,7 @@ describe CFoundry::BaseClient do
       before { stub(subject).uaa { uaa } }
 
       it "refreshes the token with UAA client and assigns it" do
-        mock(uaa).refresh_token! {
+        mock(uaa).try_to_refresh_token! {
           CFoundry::AuthToken.new("bearer #{new_access_token}", auth_token.refresh_token)
         }
 

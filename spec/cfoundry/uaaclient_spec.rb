@@ -303,7 +303,7 @@ EOF
     end
   end
 
-  describe "#refresh_token!" do
+  describe "#try_to_refresh_token!" do
     it "uses the refresh token to get a new access token" do
       mock(uaa.send(:token_issuer)).refresh_token_grant(uaa.token.refresh_token) do
         CF::UAA::TokenInfo.new(
@@ -312,9 +312,21 @@ EOF
           :refresh_token => "some-refresh-token")
       end
 
-      uaa.refresh_token!
+      uaa.try_to_refresh_token!
       expect(uaa.token.auth_header).to eq "bearer refreshed-token"
       expect(uaa.token.refresh_token).to eq "some-refresh-token"
+    end
+
+    context "when the refresh token has expired" do
+      it "returns the current token" do
+        stub(uaa.send(:token_issuer)).refresh_token_grant do
+          raise CF::UAA::TargetError.new
+        end
+
+        expect {
+          uaa.try_to_refresh_token!
+        }.to_not change { uaa.token }
+      end
     end
   end
 end

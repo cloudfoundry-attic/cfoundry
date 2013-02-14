@@ -83,7 +83,7 @@ module CFoundry
     end
 
     def refresh_token!
-      self.token = uaa.refresh_token!
+      self.token = uaa.try_to_refresh_token!
     end
 
     private
