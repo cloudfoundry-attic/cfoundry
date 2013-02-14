@@ -102,7 +102,7 @@ module CFoundry
     rescue CF::UAA::InvalidToken
       raise CFoundry::Denied
     rescue CF::UAA::TargetError => e
-      raise CFoundry::UAAError.new(e.info["error_description"], e.info["error"])
+      raise CFoundry::UAAError.new(e.info[:error_description], e.info[:error])
     end
   end
 end

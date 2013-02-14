@@ -271,7 +271,7 @@ EOF
     end
 
     context "when the block raises CF::UAA::TargetError" do
-      let(:error) { CF::UAA::TargetError.new({ "error" => "foo", "error_description" => "bar" }) }
+      let(:error) { CF::UAA::TargetError.new({ :error => "foo", :error_description => "bar" }) }
 
       it "raises CFoundry::UAAError" do
         expect { subject }.to raise_exception(CFoundry::UAAError, "foo: bar")
