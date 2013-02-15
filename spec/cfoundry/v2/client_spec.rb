@@ -26,6 +26,11 @@ describe CFoundry::V2::Client do
     subject { client.current_user }
     before { client.token = token }
 
+    context "when there is no token" do
+      let(:token) { nil }
+      it { should eq nil }
+    end
+
     context "when there is no access_token_data" do
       let(:token) { CFoundry::AuthToken.new("bearer some-access-token", "some-refresh-token") }
       it { should eq nil }

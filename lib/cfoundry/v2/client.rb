@@ -82,6 +82,8 @@ module CFoundry::V2
 
     # The currently authenticated user.
     def current_user
+      return unless token
+
       token_data = @base.token.token_data
       if guid = token_data[:user_id]
         user = user(guid)
