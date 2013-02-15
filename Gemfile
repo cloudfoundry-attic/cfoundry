@@ -7,4 +7,5 @@ group :development do
   gem "gem-release"
   gem "rake"
   gem "timecop"
+  gem "pry"
 end
