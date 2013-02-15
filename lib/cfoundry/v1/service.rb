@@ -1,18 +1,17 @@
 module CFoundry::V1
   class Service
-    attr_accessor :label, :version, :description, :type, :provider, :state, :plans, :default_plan
+    attr_accessor :label, :version, :description, :type, :provider, :state, :service_plans
 
     def initialize(label, version = nil, description = nil,
                    type = nil, provider = "core", state = nil,
-                   plans = [], default_plan = nil)
+                   service_plans = [])
       @label = label
       @description = description
       @version = version
       @type = type
       @provider = provider
       @state = state
-      @plans = plans
-      @default_plan = default_plan
+      @service_plans = service_plans
     end
 
     def eql?(other)
@@ -31,5 +30,10 @@ module CFoundry::V1
     def current?
       @state == :current
     end
+
+    def default_service_plan
+      service_plans.find(&:default?)
+    end
+
   end
 end
