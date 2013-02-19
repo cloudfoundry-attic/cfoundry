@@ -24,12 +24,19 @@ module CFoundry
 
     def uaa
       @uaa ||= begin
-        endpoint = info[:authorization_endpoint]
-        uaa = CFoundry::UAAClient.new(endpoint)
-        uaa.trace = trace
-        uaa.token = token
-        uaa
+        if(endpoint = info[:authorization_endpoint])
+          uaa = CFoundry::UAAClient.new(endpoint)
+          uaa.trace = trace
+          uaa.token = token
+          uaa
+        else
+          nil
+        end
       end
+    end
+
+    def password_score(password)
+      uaa ? uaa.password_score(password) : :unknown
     end
 
     def token=(token)
