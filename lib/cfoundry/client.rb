@@ -42,9 +42,5 @@ module CFoundry
         CFoundry::V1::Client.new(*args)
       end
     end
-
-    def info
-      get("info", :accept => :json)
-    end
   end
 end

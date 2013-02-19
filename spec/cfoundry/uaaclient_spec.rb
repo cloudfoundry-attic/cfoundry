@@ -184,7 +184,7 @@ EOF
       it { should == :good }
     end
 
-    context 'when the score is less than the required core' do
+    context 'when the score is less than the required score' do
       let(:response) { MultiJson.encode "score" => 1, "requiredScore" => 5 }
       it { should == :weak }
     end
