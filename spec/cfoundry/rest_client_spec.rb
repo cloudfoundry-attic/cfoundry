@@ -161,7 +161,7 @@ describe CFoundry::RestClient do
       end
 
       context "when the target URI is invalid" do
-        let(:target) { "http://--foo-bar" }
+        let(:target) { "@#*#^! rubby" }
 
         it "raises CFoundry::InvalidTarget" do
           expect { subject }.to raise_error(CFoundry::InvalidTarget)
