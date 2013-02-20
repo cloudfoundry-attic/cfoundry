@@ -68,6 +68,10 @@ module CFoundry
     def request_uri(method, uri, options = {})
       uri = URI.parse(uri)
 
+      unless uri.is_a?(URI::HTTP)
+        raise InvalidTarget.new(@target)
+      end
+
       # keep original options in case there's a redirect to follow
       original_options = options.dup
       payload = options[:payload]
@@ -148,6 +152,8 @@ module CFoundry
       raise Timeout.new(method, uri, e)
     rescue SocketError, Errno::ECONNREFUSED => e
       raise TargetRefused, e.message
+    rescue URI::InvalidURIError
+      raise InvalidTarget.new(@target)
     end
 
     def construct_url(path)

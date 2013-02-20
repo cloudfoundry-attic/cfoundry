@@ -12,6 +12,14 @@ describe 'Errors' do
     its(:parent) { should eq parent }
   end
 
+  describe CFoundry::InvalidTarget do
+    let(:target) { "http://--foo-bar" }
+    subject { CFoundry::InvalidTarget.new(target) }
+
+    its(:to_s) { should eq "Invalid target URI: #{target}"}
+    its(:target) { should eq target }
+  end
+
   describe CFoundry::APIError do
     let(:request) { { :method => "GET", :url => "http://api.cloudfoundry.com/foo", :headers => {} } }
     let(:response_body) { "NOT FOUND" }

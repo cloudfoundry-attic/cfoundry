@@ -3,10 +3,10 @@ require "multi_json"
 
 module CFoundry
   # Base class for CFoundry errors (not from the server).
-  class Error < RuntimeError;
+  class Error < RuntimeError
   end
 
-  class Deprecated < Error;
+  class Deprecated < Error
   end
 
   class Mismatch < Error
@@ -17,6 +17,18 @@ module CFoundry
 
     def to_s
       "Invalid value type; expected #{@expected.inspect}, got #{@got.inspect}"
+    end
+  end
+
+  class InvalidTarget < Error
+    attr_reader :target
+
+    def initialize(target)
+      @target = target
+    end
+
+    def to_s
+      "Invalid target URI: #{@target}"
     end
   end
 

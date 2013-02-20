@@ -2,11 +2,12 @@ require 'spec_helper'
 
 describe CFoundry::RestClient do
   let(:token) { nil }
-  let(:rest_client) { CFoundry::RestClient.new("https://api.cloudfoundry.com", token) }
+  let(:target) { "https://api.cloudfoundry.com" }
+  let(:rest_client) { CFoundry::RestClient.new(target, token) }
 
   describe '#request' do
     let(:path) { "some-path" }
-    let(:url) { "https://api.cloudfoundry.com/some-path" }
+    let(:url) { "#{target}/#{path}" }
     let(:method) { "GET" }
     let(:options) { {} }
 
@@ -142,6 +143,30 @@ describe CFoundry::RestClient do
     end
 
     describe 'errors' do
+      context "when the target refuses the connection" do
+        let(:target) { "http://localhost:2358974958" }
+
+        it "raises CFoundry::TargetRefused" do
+          stub_request(:get, url).to_raise(Errno::ECONNREFUSED)
+          expect { subject }.to raise_error(CFoundry::TargetRefused)
+        end
+      end
+
+      context "when the target is not a HTTP(S) URI" do
+        let(:target) { "ftp://foo-bar.com" }
+
+        it "raises CFoundry::InvalidTarget" do
+          expect { subject }.to raise_error(CFoundry::InvalidTarget)
+        end
+      end
+
+      context "when the target URI is invalid" do
+        let(:target) { "http://--foo-bar" }
+
+        it "raises CFoundry::InvalidTarget" do
+          expect { subject }.to raise_error(CFoundry::InvalidTarget)
+        end
+      end
     end
 
     describe "the return value" do
