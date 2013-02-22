@@ -189,15 +189,27 @@ module CFoundry::V2
     end
 
     # Start the application.
-    def start!
+    def start!(async = false, &blk)
       self.state = "STARTED"
-      update!
+      update!(async, &blk)
     end
 
     # Restart the application.
-    def restart!
+    def restart!(async = false, &blk)
       stop!
-      start!
+      start!(async, &blk)
+    end
+
+    def update!(async = false)
+      response = @client.base.update_app(@guid, @diff, async)
+
+      yield response[:headers]["x-app-staging-log"] if block_given?
+
+      @manifest = @client.base.send(:parse_json, response[:body])
+
+      @diff.clear
+
+      true
     end
 
     # Determine application health.

@@ -70,6 +70,14 @@ module CFoundry::V2
       get("v2", "apps", guid, "stats", :accept => :json)
     end
 
+    def update_app(guid, diff, async = false)
+      put("v2", "apps", guid,
+          :content => :json,
+          :payload => diff,
+          :return_response => true,
+          :params => { :stage_async => !!async })
+    end
+
     def all_pages(paginated)
       payload = paginated[:resources]
 
