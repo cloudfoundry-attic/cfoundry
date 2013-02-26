@@ -130,5 +130,9 @@ module CFoundry::V2
         self
       end
     end
+
+    def stream_url(url, &blk)
+      @base.stream_url(url, &blk)
+    end
   end
 end

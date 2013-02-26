@@ -93,6 +93,30 @@ module CFoundry
       self.token = uaa.try_to_refresh_token!
     end
 
+    def stream_url(url, &blk)
+      uri = URI.parse(url)
+
+      Net::HTTP.start(uri.host, uri.port) do |http|
+        http.read_timeout = 5
+
+        req = Net::HTTP::Get.new(uri.request_uri)
+        req["Authorization"] = token.auth_header if token
+
+        http.request(req) do |response|
+          case response
+          when Net::HTTPOK
+            response.read_body(&blk)
+          when Net::HTTPNotFound
+            raise CFoundry::NotFound.new(response.body, 404)
+          when Net::HTTPForbidden
+            raise CFoundry::Denied.new(response.body, 403)
+          else
+            raise CFoundry::BadResponse.new(response.body, response.code)
+          end
+        end
+      end
+    end
+
     private
 
     def needs_token_refresh?

@@ -1,8 +1,6 @@
 require 'spec_helper'
 
 describe CFoundry::BaseClient do
-  subject { CFoundry::BaseClient.new }
-
   describe "#request" do
     before do
       stub(subject).handle_response(anything, anything, anything)
@@ -180,6 +178,48 @@ describe CFoundry::BaseClient do
       it "returns :unknown" do
         expect(subject.password_score('password')).to eq(:unknown)
       end
+    end
+  end
+
+  describe "#stream_url" do
+    it "handles a chunked response by yielding chunks as they come in" do
+      stub_request(:get, "http://example.com/something").to_return(
+        :headers => { "Transfer-Encoding" => "chunked" },
+        :body => "result")
+
+      chunks = []
+      subject.stream_url("http://example.com/something") do |chunk|
+        chunks << chunk
+      end
+
+      expect(chunks).to eq(["result"])
+    end
+
+    it "raises NotFound if response is 404" do
+      stub_request(:get, "http://example.com/something").to_return(
+        :status => 404, :body => "result")
+
+      expect {
+        subject.stream_url("http://example.com/something")
+      }.to raise_error(CFoundry::NotFound, /result/)
+    end
+
+    it "raises NotFound if response is 403" do
+      stub_request(:get, "http://example.com/something").to_return(
+        :status => 403, :body => "result")
+
+      expect {
+        subject.stream_url("http://example.com/something")
+      }.to raise_error(CFoundry::Denied, /result/)
+    end
+
+    it "raises BadRespones if response is unexpected" do
+      stub_request(:get, "http://example.com/something").to_return(
+        :status => 344, :body => "result")
+
+      expect {
+        subject.stream_url("http://example.com/something")
+      }.to raise_error(CFoundry::BadResponse, /result/)
     end
   end
 end
