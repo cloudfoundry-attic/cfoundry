@@ -116,15 +116,19 @@ module CFoundry::V1
     end
 
     # Start the application.
-    def start!
+    def start!(async = false)
       self.state = "STARTED"
       update!
     end
 
     # Restart the application.
-    def restart!
+    def restart!(async = false)
       stop!
       start!
+    end
+
+    def update!(async = false)
+      super()
     end
 
     # Determine application health.
