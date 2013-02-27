@@ -14,7 +14,8 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "cfoundry"
 
-  s.files         = %w[LICENSE Rakefile] + Dir.glob("lib/**/*")
+  s.files         = %w[LICENSE Rakefile] + Dir.glob("lib/**/*") + \
+                      Dir.glob("vendor/errors/**/*")
   s.test_files    = Dir.glob("spec/**/*")
   s.require_paths = %w[lib]
 

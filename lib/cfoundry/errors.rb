@@ -126,7 +126,7 @@ module CFoundry
   class UAAError < APIError
   end
 
-  def self.define_error(class_name, *codes)
+  def self.define_error(class_name, code)
     base =
       case class_name
       when /NotFound$/
@@ -135,142 +135,25 @@ module CFoundry
         APIError
       end
 
-    klass = Class.new(base)
+    klass =
+      if const_defined?(class_name)
+        const_get(class_name)
+      else
+        Class.new(base)
+      end
 
-    codes.each do |code|
-      APIError.error_classes[code] = klass
+    APIError.error_classes[code] = klass
+
+    unless const_defined?(class_name)
+      const_set(class_name, klass)
     end
-
-    const_set(class_name, klass)
   end
 
+  VENDOR_DIR = File.expand_path("../../../vendor", __FILE__)
 
-  [
-    ["InvalidAuthToken",     100],
-
-    ["QuotaDeclined",        1000],
-    ["MessageParseError",    1001],
-    ["InvalidRelation",      1002],
-
-    ["UserInvalid",          20001],
-    ["UaaIdTaken",           20002],
-    ["UserNotFound",         20003, 201],
-
-    ["OrganizationInvalid",   30001],
-    ["OrganizationNameTaken", 30002],
-    ["OrganizationNotFound",  30003],
-
-    ["SpaceInvalid",       40001],
-    ["SpaceNameTaken",     40002],
-    ["SpaceUserNotInOrg",  40003],
-    ["SpaceNotFound",      40004],
-
-    ["ServiceAuthTokenInvalid",    50001],
-    ["ServiceAuthTokenLabelTaken", 50002],
-    ["ServiceAuthTokenNotFound",   50003],
-
-    ["ServiceInstanceNameInvalid", 60001],
-    ["ServiceInstanceNameTaken",   60002],
-    ["ServiceInstanceServiceBindingWrongSpace", 60003],
-    ["ServiceInstanceInvalid",     60003],
-    ["ServiceInstanceNotFound",    60004],
-
-    ["RuntimeInvalid",   70001],
-    ["RuntimeNameTaken", 70002],
-    ["RuntimeNotFound",  70003],
-
-    ["FrameworkInvalid",   80001],
-    ["FrameworkNameTaken", 80002],
-    ["FrameworkNotFound",  80003],
-
-    ["ServiceBindingInvalid",            90001],
-    ["ServiceBindingDifferentSpaces",    90002],
-    ["ServiceBindingAppServiceTaken",    90003],
-    ["ServiceBindingNotFound",           90004],
-
-    ["AppInvalid",   100001, 300],
-    ["AppNameTaken", 100002],
-    ["AppNotFound",  100004, 301],
-
-    ["ServicePlanInvalid",   110001],
-    ["ServicePlanNameTaken", 110002],
-    ["ServicePlanNotFound",  110003],
-
-    ["ServiceInvalid",    120001],
-    ["ServiceLabelTaken", 120002],
-    ["ServiceNotFound",   120003, 500],
-
-    ["DomainInvalid",   130001],
-    ["DomainNotFound",  130002],
-    ["DomainNameTaken", 130003],
-
-    ["LegacyApiWithoutDefaultSpace", 140001],
-
-    ["AppPackageInvalid",  150001],
-    ["AppPackageNotFound", 150002],
-
-    ["AppBitsUploadInvalid", 160001],
-
-    ["StagingError", 170001],
-
-    ["SnapshotNotFound",      180001],
-    ["ServiceGatewayError",   180002, 503],
-    ["ServiceNotImplemented", 180003],
-    ["SDSNotAvailable",       180004],
-
-    ["FileError",  190001],
-
-    ["StatsError", 200001],
-
-    ["RouteInvalid",   210001],
-    ["RouteNotFound",  210002],
-    ["RouteHostTaken", 210003],
-
-    ["InstancesError", 220001],
-
-    ["BillingEventQueryInvalid", 230001],
-
-    # V1 Errors
-    ["BadRequest",    100],
-    ["DatabaseError", 101],
-    ["LockingError",  102],
-    ["SystemError",   111],
-
-    ["Forbidden",     200],
-    ["HttpsRequired", 202],
-
-    ["AppNoResources",      302],
-    ["AppFileNotFound",     303],
-    ["AppInstanceNotFound", 304],
-    ["AppStopped",          305],
-    ["AppFileError",        306],
-    ["AppInvalidRuntime",   307],
-    ["AppInvalidFramework", 308],
-    ["AppDebugDisallowed",  309],
-    ["AppStagingError",     310],
-
-    ["ResourcesUnknownPackageType", 400],
-    ["ResourcesMissingResource",    401],
-    ["ResourcesPackagingFailed",    402],
-
-    ["BindingNotFound",        501],
-    ["TokenNotFound",          502],
-    ["AccountTooManyServices", 504],
-    ["ExtensionNotImpl",       505],
-    ["UnsupportedVersion",     506],
-    ["SdsError",               507],
-    ["SdsNotFound",            508],
-
-    ["AccountNotEnoughMemory", 600],
-    ["AccountAppsTooMany",     601],
-    ["AccountAppTooManyUris",  602],
-
-    ["UriInvalid",      700],
-    ["UriAlreadyTaken", 701],
-    ["UriNotAllowed",   702],
-    ["StagingTimedOut", 800],
-    ["StagingFailed",   801]
-  ].each do |args|
-    define_error(*args)
+  %w{errors/v1.yml errors/v2.yml}.each do |errors|
+    YAML.load_file("#{VENDOR_DIR}/#{errors}").each do |code, meta|
+      define_error(meta["name"], code)
+    end
   end
 end
