@@ -1,0 +1,124 @@
+{
+  "total_results": 1,
+  "total_pages": 1,
+  "prev_url": null,
+  "next_url": null,
+  "resources": [
+    {
+      "metadata": {
+        "guid": "service-id-1",
+        "url": "/v2/services/service-id-1"
+      },
+      "entity": {
+        "label": "postgresql",
+        "provider": "core",
+        "version": "9.1",
+        "url": "service-url",
+        "info_url": "service-info-url",
+        "description": "service1-description",
+        "service_plans_url": "/v2/services/service-id-1/service_plans",
+        "service_plans": [
+          {
+            "metadata": {
+              "guid": "paid-postgresql-id-1",
+              "url": "/v2/service_plans/paid-postgresql-id-1"
+            },
+            "entity": {
+              "name": "300",
+              "description": "2TB, 1.7GB Memory, 100 Connections, CPU? (Dedicated)",
+              "service_guid": "service-id-1",
+              "service_url": "/v2/services/service-id-1",
+              "service_instances_url": "/v2/service_plans/paid-postgresql-id-1/service_instances"
+            }
+          },
+          {
+            "metadata": {
+              "guid": "development-postgresql-id-1",
+              "url": "/v2/service_plans/development-postgresql-id-1"
+            },
+            "entity": {
+              "name": "100",
+              "description": "Free Postgres...",
+              "service_guid": "service-id-1",
+              "service_url": "/v2/services/service-id-1",
+              "service_instances_url": "/v2/service_plans/development-postgresql-id-1/service_instances"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "guid": "service-id-2",
+        "url": "/v2/services/service-id-2"
+      },
+      "entity": {
+        "label": "mongodb",
+        "provider": "core",
+        "version": "1.8",
+        "url": "service2-url",
+        "info_url": "service2-info-url",
+        "description": "service2-description",
+        "service_plans_url": "/v2/services/service-id-2/service_plans",
+        "service_plans": [
+          {
+            "metadata": {
+              "guid": "development-mongodb-id-1",
+              "url": "/v2/service_plans/development-mongodb-id-1"
+            },
+            "entity": {
+              "name": "100",
+              "description": "service-plan-description",
+              "service_guid": "service-id-1",
+              "service_url": "/v2/services/service-id-1",
+              "service_instances_url": "/v2/service_plans/development-mongodb-id-1/service_instances"
+            }
+          },
+          {
+            "metadata": {
+              "guid": "paid-mongodb-id-1",
+              "url": "/v2/service_plans/paid-mongodb-id-1"
+            },
+            "entity": {
+              "name": "200",
+              "description": "20GB, 1GB Memory, 10 Connections, CPU? (Shared)",
+              "service_guid": "service-id-2",
+              "service_url": "/v2/services/service-id-2",
+              "service_instances_url": "/v2/service_plans/paid-mongodb-id-1/service_instances"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "guid": "service-id-3",
+        "url": "/v2/services/service-id-3"
+      },
+      "entity": {
+        "label": "mongolab-mongodb",
+        "provider": "mongolab",
+        "version": "1.0",
+        "url": "service3-url",
+        "info_url": "service3-info-url",
+        "description": "service3-description",
+        "service_plans_url": "/v2/services/service-id-3/service_plans",
+        "service_plans": [
+          {
+            "metadata": {
+              "guid": "paid-mongolab-mongodb-id-1",
+              "url": "/v2/service_plans/paid-mongolab-mongodb-id-1"
+            },
+            "entity": {
+              "name": "200",
+              "description": "20GB, 1GB Memory, 10 Connections, CPU? (Shared)",
+              "service_guid": "service-id-3",
+              "service_url": "/v2/services/service-id-3",
+              "service_instances_url": "/v2/service_plans/paid-mongolab-mongodb-id-1/service_instances"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

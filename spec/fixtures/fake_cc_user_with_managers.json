@@ -1,0 +1,85 @@
+{
+  "metadata":{
+    "guid":"user-id-1",
+    "url":"/v2/users/user-id-1",
+    "created_at":"2012-08-13 12:48:41 -0700",
+    "updated_at":"2012-08-13 12:55:10 -0700"
+  },
+  "entity":{
+    "organizations":[
+      {
+        "metadata":{
+          "guid":"organization-id-1",
+          "url":"/v2/organizations/organization-id-1"
+        },
+        "entity":{
+          "name":"organization-name-1",
+          "spaces":[{
+            "metadata":{
+              "guid":"space-id-1",
+              "url":"/v2/users/space-id-1"
+            },
+            "entity":{
+              "name":"space-name-1"
+            }
+          }],
+          "managers":[{
+            "metadata":{
+              "guid":"user-id-1",
+              "url":"/v2/users/user-id-1"
+            },
+            "entity":{}
+          }]
+        }
+      },
+      {
+        "metadata":{
+          "guid":"organization-two-managers-id-1",
+          "url":"/v2/organizations/organization-two-managers-id-1"
+        },
+        "entity":{
+          "name":"organization-two-managers-name-1",
+          "managers":[{
+            "metadata":{
+              "guid":"user-id-1",
+              "url":"/v2/users/user-id-1"
+            },
+            "entity":{}
+          }, {
+            "metadata":{
+              "guid":"other-user-id-1",
+              "url":"/v2/users/other-user-id-1",
+              "created_at":"2012-10-24 12:14:54 -0700",
+              "updated_at":"2012-10-24 12:16:11 -0700"
+            },
+            "entity":{}
+          }]
+        }
+      },
+      {
+        "metadata":{
+          "guid":"organization-other-managers-id-1",
+          "url":"/v2/organizations/organization-other-managers-id-1"
+        },
+        "entity":{
+          "name":"organization-other-managers-name-1",
+          "managers":[{
+            "metadata":{
+              "guid":"other-user-id-1",
+              "url":"/v2/users/other-user-id-1"
+            },
+            "entity":{}
+          }]
+        }
+      }
+    ],
+
+    "managed_organizations":[],
+    "billing_managed_organizations":[],
+    "audited_organizations":[],
+
+    "spaces":[],
+    "managed_spaces":[],
+    "audited_spaces":[]
+  }
+}

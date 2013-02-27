@@ -9,3 +9,7 @@ group :development do
   gem "timecop"
   gem "pry"
 end
+
+group :test do
+  gem "activesupport"
+end

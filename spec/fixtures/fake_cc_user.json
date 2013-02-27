@@ -1,0 +1,112 @@
+{
+  "metadata": {
+    "guid": "user-id-1",
+    "url": "/v2/users/user-id-1",
+    "created_at": "2012-08-13 12:48:41 -0700",
+    "updated_at": "2012-08-13 12:55:10 -0700"
+  },
+  "entity": {
+    "organizations": [{
+      "metadata": {
+        "guid": "organization-id-1",
+        "url": "/v2/organizations/organization-id-1"
+      },
+      "entity": {
+        "name": "organization-name-1",
+        "spaces": [
+          {
+            "metadata": {
+              "guid": "space-id-1",
+              "url": "/v2/spaces/space-id-1"
+            },
+            "entity": {
+              "name": "space-name-1"
+            }
+          },
+          {
+            "metadata": {
+              "guid": "space-id-2",
+              "url": "/v2/spaces/space-id-2"
+            },
+            "entity": {
+              "name": "space-name-2"
+            }
+          },
+          {
+            "metadata": {
+              "guid": "space-id-3",
+              "url": "/v2/spaces/space-id-3"
+            },
+            "entity": {
+              "name": "space-name-3"
+            }
+          }
+        ],
+        "managers": [{
+          "metadata": {
+            "guid": "user-id-1",
+            "url": "/v2/users/user-id-1"
+          },
+          "entity": {}
+        }]
+      }
+    },
+    {
+      "metadata": {
+        "guid": "organization-id-2",
+        "url": "/v2/organizations/organization-id-2"
+      },
+      "entity": {
+        "name": "organization-name-2",
+        "spaces": [
+          {
+            "metadata": {
+              "guid": "space2-id-1",
+              "url": "/v2/spaces/space2-id-1"
+            },
+            "entity": {
+              "name": "space2-name-1"
+            }
+          },
+          {
+            "metadata": {
+              "guid": "space2-id-2",
+              "url": "/v2/spaces/space2-id-2"
+            },
+            "entity": {
+              "name": "space2-name-2"
+            }
+          },
+          {
+            "metadata": {
+              "guid": "space2-id-3",
+              "url": "/v2/spaces/space2-id-3"
+            },
+            "entity": {
+              "name": "space2-name-3"
+            }
+          }
+        ],
+        "managers": [{
+          "metadata": {
+            "guid": "user-id-1",
+            "url": "/v2/users/user-id-1"
+          },
+          "entity": {}
+        }]
+      }
+    }],
+
+    "managed_organizations": [],
+    "billing_managed_organizations": [{
+      "metadata": {
+        "guid": "created-organization-id-1"
+      }
+    }],
+    "audited_organizations": [],
+
+    "spaces": [],
+    "managed_spaces": [],
+    "audited_spaces": []
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "guid": "organization-id-1",
+  "name": "organization-name-1",
+  "spaces": [{
+    "guid": "space-id-1",
+    "name": "space-name-1",
+    "service_count": 1,
+    "app_count": 2,
+    "mem_dev_total": 64,
+    "mem_prod_total": 128
+  }, {
+    "guid": "space-id-2",
+    "name": "space-name-2",
+    "service_count": 2,
+    "app_count": 3,
+    "mem_dev_total": 2048,
+    "mem_prod_total": 4096
+  }]
+}

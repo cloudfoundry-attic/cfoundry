@@ -1,0 +1,37 @@
+{
+  "total_results": 3,
+  "total_pages": 1,
+  "prev_url": null,
+  "next_url": null,
+  "resources": [
+    {
+      "metadata": {
+        "guid": "organization-id-1",
+        "url": "/v2/organizations/organization-id-1"
+      },
+      "entity": {
+        "name": "organization-name-1",
+        "spaces": [{
+          "metadata": {
+            "guid": "space-id-1",
+            "url": "/v2/users/space-id-1"
+          },
+          "entity": {
+            "name": "space-name-1"
+          }
+        }],
+        "managers": [{
+          "metadata": {
+            "guid": "user-id-1",
+            "url": "/v2/users/user-id-1"
+          },
+          "entity": {
+            "admin": false,
+            "active": false,
+            "default_space_guid": "space-id-1"
+          }
+        }]
+      }
+    }
+  ]
+}

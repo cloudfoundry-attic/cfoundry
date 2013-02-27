@@ -1,0 +1,57 @@
+{
+  "guid":"application-id-1",
+  "name":"application-name-1",
+  "state":"STARTED",
+  "memory":128,
+  "instances":1,
+  "routes":[
+    { "guid": "route-id",
+      "host": "host",
+      "domain": { "guid": "domain-id", "name": "app-domain.com", "owning_organization_guid": "organization-id"}
+    },
+    { "guid": "route-id-2",
+      "host": null,
+      "domain": { "guid": "domain-id", "name": "app-domain.com", "owning_organization_guid": "organization-id"}
+    },
+    { "guid": "route-id-3",
+      "host": "host-3",
+      "domain": { "guid": "domain-id-3", "name": "vcap.me", "owning_organization_guid": null}
+    }
+  ],
+  "framework":{
+    "guid":"framework-id-1",
+    "name":"Ruby on Rails",
+    "description":"Ruby on Rails 3.2"
+  },
+  "runtime":{
+    "guid":"runtime-id-1",
+    "name":"Ruby",
+    "description":"Ruby 1.9"
+  },
+  "running_instances":0,
+  "services":[{
+    "guid":"service-id-1",
+    "name":"service-name-1",
+    "service_plan": {
+      "guid":"service-plan-id-1",
+      "name":"300",
+      "service":{
+        "guid":"paid-postgresql-id-1",
+        "provider":"core",
+        "label":"postgresql",
+        "version":"9.0"
+      }
+    }
+  }],
+  "space_guid":"space-id-1",
+  "framework_guid":"framework-id-1",
+  "runtime_guid":"runtime-id-1",
+  "environment_json":{},
+  "file_descriptors":256,
+  "disk_quota":256,
+  "available_domains":[
+    {"guid":"domain-id", "name":"app-domain.com", "owning_organization_guid":"organization-id"},
+    {"guid":"domain-id-2", "name":"app-domain-2.com", "owning_organization_guid":"organization-id"},
+    {"guid":"domain-id-3", "name":"vcap.me", "owning_organization_guid":null}
+  ]
+}

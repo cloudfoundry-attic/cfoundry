@@ -1,0 +1,86 @@
+{
+  "guid":"space-id-1",
+  "name":"space-name-1",
+  "apps":[
+    {
+      "guid":"application-id-1",
+      "name":"application-name-1",
+      "routes":[
+        { "guid": "aa14f148-3d82-4db3-982e-fe0fd00582f4", "host": "app", "domain": { "name": "cloudfoundry.com"}}
+      ],
+      "urls":[
+        "app.cloudfoundry.com"
+      ],
+      "state":"STARTED",
+      "memory":128,
+      "instances":1,
+      "running_instances":1,
+      "service_count":1,
+      "framework_name":"framework-name-1",
+      "runtime_name":"runtime-name-1",
+      "space_guid":"space-id-1",
+      "framework_guid":"framework-id-1",
+      "runtime_guid":"runtime-id-1",
+      "environment_json":{},
+      "file_descriptors":256,
+      "disk_quota":256
+    },
+    {
+      "guid":"application-id-2",
+      "name":"application-name-2",
+      "routes":[
+        { "guid": "a14c5666-5354-49a7-8da8-2c29eaaaac18", "host": "app2-1", "domain": { "name": "cloudfoundry.com"}},
+        { "guid": "7c183670-2e4b-4dd1-b2b5-d7ada5d470fb", "host": "app2-2", "domain": { "name": "cloudfoundry.com"}}
+      ],
+      "urls":[
+        "app2-1.cloudfoundry.com",
+        "app2-2.cloudfoundry.com"
+      ],
+      "state":"STOPPED",
+      "memory":256,
+      "instances":2,
+      "running_instances":0,
+      "service_count":2,
+      "framework_name":"framework-name-2",
+      "runtime_name":"runtime-name-2",
+      "space_guid":"space-id-1",
+      "framework_guid":"framework-id-2",
+      "runtime_guid":"runtime-id-2",
+      "environment_json":{},
+      "file_descriptors":256,
+      "disk_quota":256
+    }
+  ],
+  "services":[
+    {
+      "guid":"service-id-1",
+      "name":"service-name-1",
+      "bound_app_count":1,
+      "service_plan": {
+        "guid":"service-plan-id-1",
+        "name":"300",
+        "service":{
+          "guid":"paid-postgresql-id-1",
+          "provider":"core",
+          "label":"postgresql",
+          "version":"9.0"
+        }
+      }
+    },
+    {
+      "guid":"service-id-2",
+      "name":"service-name-2",
+      "bound_app_count":2,
+      "service_plan": {
+        "guid":"service-plan-id-2",
+        "name":"100",
+        "service":{
+          "guid":"development-mongolab-mongodb-id-1",
+          "provider":"mongolab",
+          "label":"mongolab-mongodb",
+          "version":"1.0"
+        }
+      }
+    }
+  ]
+}

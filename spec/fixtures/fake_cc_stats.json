@@ -1,0 +1,29 @@
+{
+  "instance-id-1": {
+    "state": "DOWN",
+    "since": 1346959370
+  },
+  "instance-the-second": {
+    "state": "RUNNING",
+    "since": 1346959370,
+    "stats": {
+      "uptime": 604800.0000,
+      "port": 49249,
+      "fds_quota": 256,
+      "mem_quota": 134217728,
+      "uris": [
+        "tiny-java.p01.rbconsvcs.com"
+      ],
+      "name": "tiny-java",
+      "cores": 4,
+      "usage": {
+        "disk": 6373376,
+        "mem": 67039232,
+        "time": "2012-09-06 22:29:28 +0000",
+        "cpu": 0.5
+      },
+      "disk_quota": 268435456,
+      "host": "172.20.182.198"
+    }
+  }
+}
