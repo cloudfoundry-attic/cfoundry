@@ -122,7 +122,7 @@ module CFoundry::V1
       descriptions = meta[:plan_descriptions]
       default_name = meta[:default_plan]
       names.map { |name|
-        description = descriptions[name] if descriptions
+        description = descriptions[name.to_sym] if descriptions
         is_default = name == default_name || names.length == 1
         ServicePlan.new(name, description, is_default)
       }
