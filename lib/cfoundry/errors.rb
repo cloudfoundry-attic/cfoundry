@@ -1,5 +1,6 @@
 require "net/https"
 require "multi_json"
+require "yaml"
 
 module CFoundry
   # Base class for CFoundry errors (not from the server).
