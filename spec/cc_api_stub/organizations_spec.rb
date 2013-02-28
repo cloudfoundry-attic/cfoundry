@@ -1,17 +1,17 @@
 require 'spec_helper'
+require 'net/http'
+require 'uri'
 
 describe CcApiStub::Organizations do
   let(:client) { CFoundry::V2::Client.new }
 
-  describe '.succeed_to_create' do
-    it 'stubs creation of an organization' do
-      CcApiStub::Organizations.succeed_to_create
+  describe ".succeed_to_create" do
+    let(:url) { "http://example.com/v2/organizations/" }
+    subject { CcApiStub::Organizations.succeed_to_create }
 
-      org = client.organization
-      org.create!.should be_true
-      org.guid.should == 'created-organization-id-1'
-    end
+    it_behaves_like "a stubbed post request"
   end
+
 
   describe '.summary_fixture' do
     it 'returns the fake org' do
@@ -20,41 +20,37 @@ describe CcApiStub::Organizations do
   end
 
   describe '.fail_to_find' do
-    it 'fails to find the org' do
-      guid = 'organization-id-1'
-      CcApiStub::Organizations.fail_to_find(guid)
-      client.organization(guid).exists?.should be_false
-    end
+    let(:url) { "http://example.com/v2/organizations/9234" }
+    subject { CcApiStub::Organizations.fail_to_find(9234) }
+
+    it_behaves_like "a stubbed get request", :code => 404
   end
 
   describe '.succeed_to_load_summary' do
-    it 'stubs loading the organization summary' do
-      CcApiStub::Organizations.succeed_to_load_summary
+    let(:url) { "http://example.com/v2/organizations/9234/summary" }
+    subject { CcApiStub::Organizations.succeed_to_load_summary }
 
-      org = client.organization('organization-id-1')
-      org.summarize!
-      org.spaces[0].should be_a(CFoundry::V2::Space)
+    it_behaves_like "a stubbed get request"
+
+    context "when passed a no_spaces option" do
+      subject { CcApiStub::Organizations.succeed_to_load_summary(:no_spaces => true) }
+
+      it_behaves_like "a stubbed get request", :including_json => { "spaces" => [] }
     end
   end
 
   describe '.succeed_to_search' do
-    it 'stubs searching' do
-      org_name = 'yoda'
-      CcApiStub::Organizations.succeed_to_search(org_name)
+    let(:url) { "http://example.com/v2/organizations?inline-relations-depth=1&q=name:orgname" }
+    subject { CcApiStub::Organizations.succeed_to_search("orgname") }
 
-      org = client.organization_by_name(org_name)
-      org.guid.should == 'organization-id-1'
-    end
+    it_behaves_like "a stubbed get request"
   end
 
   describe '.succeed_to_search_none' do
-    it 'stubs searching' do
-      org_name = 'yoda'
-      CcApiStub::Organizations.succeed_to_search_none
+    let(:url) { "http://example.com/v2/organizations?inline-relations-depth=1&q=name:orgname" }
+    subject { CcApiStub::Organizations.succeed_to_search_none }
 
-      org = client.organization_by_name(org_name)
-      org.should be_nil
-    end
+    it_behaves_like "a stubbed get request"
   end
 
   describe '.domains_fixture' do
@@ -72,11 +68,10 @@ describe CcApiStub::Organizations do
   end
 
   describe '.succeed_to_load_domains' do
-    it 'stubs domain loading' do
-      CcApiStub::Organizations.succeed_to_load_domains
-      org = client.organization('organization-id-1')
-      org.domains[0].should be_a(CFoundry::V2::Domain)
-    end
+    let(:url) { "http://example.com/v2/organizations/3434/domains?inline-relations-depth=1" }
+    subject { CcApiStub::Organizations.succeed_to_load_domains }
+
+    it_behaves_like "a stubbed get request"
   end
 
   describe '.users_fixture' do
@@ -94,10 +89,9 @@ describe CcApiStub::Organizations do
   end
 
   describe '.succeed_to_load_users' do
-    it 'stubs users loading' do
-      CcApiStub::Organizations.succeed_to_load_users
-      org = client.organization('organization-id-1')
-      org.users[0].should be_a(CFoundry::V2::User)
-    end
+    let(:url) { "http://example.com/v2/organizations/2342/users?inline-relations-depth=1" }
+    subject { CcApiStub::Organizations.succeed_to_load_users }
+
+    it_behaves_like "a stubbed get request"
   end
 end

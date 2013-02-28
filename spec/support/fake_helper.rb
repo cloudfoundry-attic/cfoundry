@@ -39,6 +39,7 @@ module Fake
   def fake(attributes = {})
     fake_attributes(attributes).each do |k, v|
       send(:"#{k}=", v)
+      setup_reverse_relationship(v)
     end
 
     self
@@ -112,6 +113,28 @@ module CFoundry::V2
     def default_fakes
       self.class.defaults.merge(
         :guid => random_string("fake-#{object_name}-guid"))
+    end
+
+    def setup_reverse_relationship(v)
+      if v.is_a?(Array)
+        v.each do |x|
+          setup_reverse_relationship(x)
+        end
+
+        return
+      end
+
+      return unless v.is_a?(Model)
+
+      relation, type = find_reverse_relationship(v)
+
+      v.client = @client
+
+      if type == :one
+        v.send(:"#{relation}=", self)
+      elsif type == :many
+        v.send(:"#{relation}=", v.send(relation) + [self])
+      end
     end
 
     def find_reverse_relationship(v)
@@ -198,4 +221,16 @@ module CFoundry::V2
     end
   end
 
+  Model.objects.each_value do |klass|
+    klass.to_many_relations.each do |plural, _|
+      Fake.define_many_association(klass, plural)
+    end
+
+    FakeClient.class_eval do
+      plural = klass.plural_object_name
+
+      attr_writer plural
+      Fake.define_many_association(self, plural)
+    end
+  end
 end
