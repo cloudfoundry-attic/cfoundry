@@ -118,9 +118,7 @@ module CFoundry::V2
       self.environment_json = stringify(x.to_hash)
     end
 
-    def debug_mode # TODO v2
-      nil
-    end
+    alias :debug_mode :debug
 
     def uris
       return @cache[:uris] if @cache[:uris]
