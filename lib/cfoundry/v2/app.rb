@@ -30,6 +30,7 @@ module CFoundry::V2
     attribute :command,          :string,  :default => nil
     attribute :console,          :boolean, :default => false
     attribute :buildpack,        :string,  :default => nil
+    attribute :debug,            :string,  :default => nil
     to_many   :service_bindings
     to_many   :routes
 
