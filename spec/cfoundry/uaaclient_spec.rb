@@ -243,6 +243,30 @@ EOF
     end
   end
 
+  describe "#delete_user" do
+    let(:guid) { "123" }
+    let!(:req) {
+      stub_request(
+        :delete,
+        "https://uaa.example.com/Users/123"
+      ).to_return(:status => 200, :body => '{ "foo": "bar" }')
+    }
+
+    subject { uaa }
+
+    it "wraps uaa errors" do
+      mock(uaa).wrap_uaa_errors
+      subject.delete_user(guid)
+    end
+
+    context 'with valid data' do
+      it "should add a user" do
+        subject.delete_user(guid)
+        expect(req).to have_been_requested
+      end
+    end
+  end
+
   describe "#wrap_uaa_errors" do
     subject { uaa.send(:wrap_uaa_errors) { raise error } }
 

@@ -71,6 +71,12 @@ module CFoundry
       end
     end
 
+    def delete_user(guid)
+      wrap_uaa_errors do
+        scim.delete(:user, guid)
+      end
+    end
+
     def try_to_refresh_token!
       wrap_uaa_errors do
         begin
