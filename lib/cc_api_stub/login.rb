@@ -5,7 +5,7 @@ module CcApiStub
         WebMock::API.stub_request(:get, "#{domain}/info").
           to_return(
             :status => 200,
-            :body => "{\"authorization_endpoint\":\"https://uaa.localhost\"}"
+            :body => "{\"token_endpoint\":\"https://uaa.localhost\"}"
           )
       end
 
