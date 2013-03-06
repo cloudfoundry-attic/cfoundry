@@ -24,7 +24,11 @@ module CFoundry
 
     def uaa
       @uaa ||= begin
-        if (endpoint = info[:token_endpoint])
+        endpoint =
+          info[:token_endpoint] || \
+            info[:authorization_endpoint]
+
+        if endpoint
           uaa = CFoundry::UAAClient.new(endpoint)
           uaa.trace = trace
           uaa.token = token

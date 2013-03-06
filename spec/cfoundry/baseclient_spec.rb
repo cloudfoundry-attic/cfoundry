@@ -103,8 +103,10 @@ describe CFoundry::BaseClient do
 
   describe "UAAClient" do
     context "with a valid uaa endpoint" do
+      let(:info) { { :token_endpoint => "http://uaa.example.com" } }
+
       before do
-        stub(subject).info { { :token_endpoint => "http://uaa.example.com" } }
+        stub(subject).info { info }
       end
 
       describe "#uaa" do
@@ -121,6 +123,15 @@ describe CFoundry::BaseClient do
           token = CFoundry::AuthToken.new(nil)
           stub(subject).token { token }
           expect(subject.uaa.token).to eq token
+        end
+
+        context "with the endpoint as 'authorization_endpoint'" do
+          let(:info) { { :authorization_endpoint => "foo" } }
+
+          it "uses it to create the UAAClient" do
+            expect(subject.uaa).to be_a CFoundry::UAAClient
+            expect(subject.uaa.target).to eq "foo"
+          end
         end
       end
 
