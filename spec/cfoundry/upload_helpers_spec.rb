@@ -95,12 +95,14 @@ describe CFoundry::UploadHelpers do
       subject
     end
 
-    it 'does not include files and directories specified in the vmcignore (including glob patterns)' do
+    it 'does not include files and directories specified in the vmcignore' do
       mock_zip do |src, _|
         files = relative_glob(src)
-        expect(files).not_to include "ignored_dir"
-        expect(files).not_to include "ignored_file.txt"
-        expect(files).not_to include "non_ignored_dir/ignored_file.txt" # glob pattern **/ignored_file.txt
+        expect(files).to match_array(%w[
+          .hidden_file .vmcignore non_ignored_dir ambiguous_ignored
+          non_ignored_dir/file_in_non_ignored_dir.txt non_ignored_file.txt
+          non_ignored_dir/toplevel_ignored.txt
+        ])
       end
       subject
     end
@@ -168,6 +170,24 @@ describe CFoundry::UploadHelpers do
         end
 
         fake_model.upload(path)
+      end
+    end
+
+    context "when there is a symlink pointing outside of the root" do
+      let(:path) { "#{SPEC_ROOT}/fixtures/apps/with_external_symlink" }
+
+      it "blows up" do
+        expect {
+          fake_model.upload(path)
+        }.to raise_error(CFoundry::Error, /contains links.*that point outside/)
+      end
+
+      context "and it is vmcignored" do
+        let(:path) { "#{SPEC_ROOT}/fixtures/apps/with_ignored_external_symlink" }
+
+        it "ignores it" do
+          expect { fake_model.upload(path) }.to_not raise_error
+        end
       end
     end
   end

@@ -59,46 +59,26 @@ module CFoundry
       elsif war_file = Dir.glob("#{path}/*.war").first
         CFoundry::Zip.unpack(war_file, to)
       else
-        check_unreachable_links(path)
-
         FileUtils.mkdir(to)
-
-        files = Dir.glob("#{path}/{*,.[^\.]*}")
 
         exclude = UPLOAD_EXCLUDE
         if File.exists?("#{path}/.vmcignore")
           exclude += File.read("#{path}/.vmcignore").split(/\n+/)
         end
 
-        # prevent initial copying if we can, remove sub-files later
-        files.reject! do |f|
-          exclude.any? do |e|
-            File.fnmatch(f.sub(path + "/", ""), e)
-          end
-        end
+        files = files_to_consider(path, exclude)
 
-        FileUtils.cp_r(files, to)
+        check_unreachable_links(files, path)
+
+        copy_tree(files, path, to)
 
         find_sockets(to).each do |s|
           File.delete s
         end
-
-        # remove ignored globs more thoroughly
-        #
-        # note that the above file list only includes toplevel
-        # files/directories for cp_r, so this is where sub-files/etc. are
-        # removed
-        exclude.each do |e|
-          Dir.glob("#{to}/#{e}").each do |f|
-            FileUtils.rm_rf(f)
-          end
-        end
       end
     end
 
-    def check_unreachable_links(path)
-      files = Dir.glob("#{path}/**/*", File::FNM_DOTMATCH)
-
+    def check_unreachable_links(files, path)
       # only used for friendlier error message
       pwd = Pathname.pwd
 
@@ -118,9 +98,60 @@ module CFoundry
       end
     end
 
+    # TODO: handle negation
+    def files_to_consider(path, exclusions)
+      entries = all_files(path)
+
+      to_exclude = exclusions.dup
+      until to_exclude.empty?
+        exclude = to_exclude.shift
+
+        entries.reject! do |entry|
+          is_dir = File.directory?(entry)
+          excluded = excluded?(entry, path, exclude)
+
+          if is_dir && excluded
+            # if a directory was excluded, exclude its contents
+            to_exclude.unshift(entry.sub(path + "/", "/") + "/**")
+          end
+
+          excluded
+        end
+      end
+
+      entries
+    end
+
+    def excluded?(file, path, exclusions)
+      exclusions.any? do |exc|
+        negated = false
+
+        name = file.sub("#{path}/", "/")
+        flags = File::FNM_DOTMATCH
+
+        pattern = exc
+
+        # when pattern ends with /, match only directories
+        if pattern.end_with?("/") && File.directory?(file)
+          name = "#{name}/"
+        end
+
+        case pattern
+        # when pattern contains /, do a pathname match
+        when /\/./
+          flags |= File::FNM_PATHNAME
+
+        # otherwise, match any file path
+        else
+          pattern = "**/#{pattern}"
+        end
+
+        File.fnmatch(pattern, name, flags)
+      end
+    end
+
     def find_sockets(path)
-      files = Dir.glob("#{path}/**/*", File::FNM_DOTMATCH)
-      files && files.select { |f| File.socket? f }
+      all_files(path).select { |f| File.socket? f }
     end
 
     def determine_resources(path)
@@ -150,14 +181,13 @@ module CFoundry
     # This ensures that directories containing empty directories
     # are also pruned.
     def prune_empty_directories(path)
-      all_files = Dir["#{path}/**/{*,.*}"]
-      all_files.reject! { |fn| fn =~ /\/\.+$/ }
+      all_files = all_files(path)
 
       directories = all_files.select { |x| File.directory?(x) }
       directories.sort! { |a, b| b.size <=> a.size }
 
       directories.each do |directory|
-        entries = Dir.entries(directory) - %w{. ..}
+        entries = all_files(directory)
         FileUtils.rmdir(directory) if entries.empty?
       end
     end
@@ -166,7 +196,7 @@ module CFoundry
       fingerprints = []
       total_size = 0
 
-      Dir.glob("#{path}/**/*", File::FNM_DOTMATCH) do |filename|
+      all_files(path).each do |filename|
         next if File.directory?(filename)
 
         size = File.size(filename)
@@ -181,6 +211,26 @@ module CFoundry
       end
 
       [fingerprints, total_size]
+    end
+
+    def all_files(path)
+      Dir.glob("#{path}/**/*", File::FNM_DOTMATCH).reject! do |fn|
+        fn =~ /\.$/
+      end
+    end
+
+    def copy_tree(files, path, to)
+      files.each do |file|
+        dest = file.sub("#{path}/", "#{to}/")
+
+        if File.directory?(file)
+          FileUtils.mkdir_p(dest)
+        else
+          destdir = File.dirname(dest)
+          FileUtils.mkdir_p(destdir)
+          FileUtils.cp(file, dest)
+        end
+      end
     end
   end
 end

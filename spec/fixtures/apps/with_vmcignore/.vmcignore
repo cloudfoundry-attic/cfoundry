@@ -1,3 +1,4 @@
 ignored_file.txt
 ignored_dir
-**/ignored_file.txt
+/toplevel_ignored.txt
+ambiguous_ignored/
