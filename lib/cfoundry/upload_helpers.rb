@@ -108,7 +108,7 @@ module CFoundry
 
         entries.reject! do |entry|
           is_dir = File.directory?(entry)
-          excluded = excluded?(entry, path, exclude)
+          excluded = excluded?(entry, path, [exclude])
 
           if is_dir && excluded
             # if a directory was excluded, exclude its contents
