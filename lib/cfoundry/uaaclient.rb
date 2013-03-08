@@ -44,7 +44,7 @@ module CFoundry
 
     def password_score(password)
       wrap_uaa_errors do
-        response = CF::UAA::Misc.password_strength(target, password)
+        response = CF::UAA::Misc.password_strength(uaa_url, password)
 
         required_score = response[:requiredScore] || 0
         case (response[:score] || 0)
@@ -98,9 +98,13 @@ module CFoundry
 
     def scim
       auth_header = token && token.auth_header
-      scim = CF::UAA::Scim.new(target, auth_header)
+      scim = CF::UAA::Scim.new(uaa_url, auth_header)
       scim.logger.level = @trace ? Logger::Severity::TRACE : 1
       scim
+    end
+
+    def uaa_url
+      @uaa_url ||= CF::UAA::Misc.discover_uaa(target)
     end
 
     def wrap_uaa_errors
