@@ -108,7 +108,7 @@ module CFoundry
 
         entries.reject! do |entry|
           is_dir = File.directory?(entry)
-          excluded = excluded?(entry, path, [exclude])
+          excluded = glob_matches?(entry, path, exclude)
 
           if is_dir && excluded
             # if a directory was excluded, exclude its contents
@@ -122,32 +122,26 @@ module CFoundry
       entries
     end
 
-    def excluded?(file, path, exclusions)
-      exclusions.any? do |exc|
-        negated = false
+    def glob_matches?(file, path, pattern)
+      name = file.sub("#{path}/", "/")
+      flags = File::FNM_DOTMATCH
 
-        name = file.sub("#{path}/", "/")
-        flags = File::FNM_DOTMATCH
-
-        pattern = exc
-
-        # when pattern ends with /, match only directories
-        if pattern.end_with?("/") && File.directory?(file)
-          name = "#{name}/"
-        end
-
-        case pattern
-        # when pattern contains /, do a pathname match
-        when /\/./
-          flags |= File::FNM_PATHNAME
-
-        # otherwise, match any file path
-        else
-          pattern = "**/#{pattern}"
-        end
-
-        File.fnmatch(pattern, name, flags)
+      # when pattern ends with /, match only directories
+      if pattern.end_with?("/") && File.directory?(file)
+        name = "#{name}/"
       end
+
+      case pattern
+      # when pattern contains /, do a pathname match
+      when /\/./
+        flags |= File::FNM_PATHNAME
+
+      # otherwise, match any file path
+      else
+        pattern = "**/#{pattern}"
+      end
+
+      File.fnmatch(pattern, name, flags)
     end
 
     def find_sockets(path)
