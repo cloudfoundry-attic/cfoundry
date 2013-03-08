@@ -29,8 +29,12 @@ module CcApiStub
           to_return(response(400, error_attributes))
       end
 
-      def load_fixtures(fixtures_name, options = {})
-        path = File.join(File.dirname(__FILE__), "..", "..", "spec/fixtures/#{fixtures_name.to_s}.json")
+      def load_fixtures(fixture_name_or_path, options = {})
+        path = if options.delete(:use_local_fixture)
+          fixture_name_or_path
+        else
+          File.join(File.dirname(__FILE__), "..", "..", "spec/fixtures/#{fixture_name_or_path.to_s}.json")
+        end
         JSON.parse(File.read(path)).tap do |fixture|
           fixture["entity"].merge!(options.stringify_keys) if options.any?
         end
