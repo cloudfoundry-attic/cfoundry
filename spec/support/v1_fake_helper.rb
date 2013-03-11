@@ -80,7 +80,7 @@ module CFoundry::V1
 
 
   class FakeClient < Client
-    include Fake
+    include V1Fake
 
     def initialize(target = "http://example.com", token = nil)
       @base = FakeBase.new(target, token)
