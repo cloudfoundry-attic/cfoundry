@@ -103,7 +103,7 @@ describe CFoundry::BaseClient do
 
   describe "UAAClient" do
     context "with a valid uaa endpoint" do
-      let(:info) { { :token_endpoint => "http://uaa.example.com" } }
+      let(:info) { { :authorization_endpoint => "http://uaa.example.com" } }
 
       before do
         stub(subject).info { info }
@@ -172,7 +172,7 @@ describe CFoundry::BaseClient do
   describe "#password_score" do
     context "with a uaa" do
       before do
-        stub(subject).info { { :token_endpoint => "http://uaa.example.com" } }
+        stub(subject).info { { :authorization_endpoint => "http://uaa.example.com" } }
       end
 
       it "delegates to the uaa's password strength method" do
