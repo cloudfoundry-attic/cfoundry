@@ -9,7 +9,6 @@ describe CFoundry::UAAClient do
     uaa.token = CFoundry::AuthToken.new(auth_header)
     CF::UAA::Util.default_logger.level = 1
     stub_request(:get, "#{target}/login").
-      with(:headers => {'Accept'=>'application/json;charset=utf-8', 'User-Agent'=>'Ruby'}).
       to_return :status => 200, :headers => {'Content-Type' => 'application/json'},
         :body => <<EOF
           {
