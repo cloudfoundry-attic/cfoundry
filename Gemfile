@@ -6,7 +6,7 @@ group :development do
   gem "json_pure"
   gem "gem-release"
   gem "rake"
-  gem "timecop"
+  gem "timecop", ">= 0.6.1", "< 1.0"
   gem "pry"
 end
 
