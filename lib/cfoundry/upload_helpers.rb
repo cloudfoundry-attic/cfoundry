@@ -39,8 +39,10 @@ module CFoundry
       FileUtils.rm_f(zipfile)
       FileUtils.rm_rf(tmpdir)
 
+      p :preparing
       prepare_package(path, tmpdir)
 
+      p :checking
       resources = determine_resources(tmpdir) if check_resources
 
       packed = CFoundry::Zip.pack(tmpdir, zipfile)
@@ -190,19 +192,36 @@ module CFoundry
       fingerprints = []
       total_size = 0
 
-      all_files(path).each do |filename|
-        next if File.directory?(filename)
-
+      p [:making_fingerprints]
+      `find #{path} -type f | xargs shasum`.each_line do |sha|
+        sha, file = sha.split
         size = File.size(filename)
 
         total_size += size
 
+        p [:got, sha, file]
         fingerprints << {
           :size => size,
-          :sha1 => Digest::SHA1.file(filename).hexdigest,
-          :fn => filename
+          :sha1 => sha,
+          :fn => File.expand_path(file)
         }
       end
+      # fingerprints = []
+      # total_size = 0
+
+      # all_files(path).each do |filename|
+      #   next if File.directory?(filename)
+
+      #   size = File.size(filename)
+
+      #   total_size += size
+
+      #   fingerprints << {
+      #     :size => size,
+      #     :sha1 => Digest::SHA1.file(filename).hexdigest,
+      #     :fn => filename
+      #   }
+      # end
 
       [fingerprints, total_size]
     end
