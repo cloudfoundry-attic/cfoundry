@@ -55,4 +55,42 @@ describe CFoundry::V1::Base do
       end
     end
   end
+
+  describe "#upload_app" do
+    let!(:stubbed_request) do
+      stub_request(:post, 'https://api.cloudfoundry.com/apps/app_name/application').to_return(:status => 200).with(:body => /#{expected_zipfile}/)
+    end
+
+    subject { base.upload_app("app_name", zipfile)}
+
+    context "when passed a falsy zipfile" do
+      let(:zipfile) { false }
+      let(:expected_zipfile) { "empty.zip" }
+
+      it "creates a temporary empty zipfile" do
+        subject
+
+        stubbed_request.should have_been_requested
+      end
+    end
+
+    context "when passed a valid zipfile" do
+      let(:zipfile) { "proper-zipfile.zip" }
+      let(:expected_zipfile) { zipfile }
+
+      before do
+        File.new(zipfile, "wb")
+      end
+
+      after do
+        FileUtils.rm(zipfile)
+      end
+
+      it "uses that zipfile" do
+        subject
+
+        stubbed_request.should have_been_requested
+      end
+    end
+  end
 end

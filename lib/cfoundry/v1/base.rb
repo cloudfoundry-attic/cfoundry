@@ -1,4 +1,5 @@
 require "multi_json"
+require "tmpdir"
 
 require "cfoundry/baseclient"
 require "cfoundry/uaaclient"
@@ -50,22 +51,40 @@ module CFoundry::V1
     end
 
     def upload_app(name, zipfile = nil, resources = [])
-      payload = {
-        :_method => "put",
-        :resources => MultiJson.dump(resources),
-        :application =>
-          UploadIO.new(
-            if zipfile.is_a? File
-              zipfile
-            elsif zipfile.is_a? String
-              File.new(zipfile, "rb")
-            end,
-            "application/zip")
-      }
+      use_or_create_empty_zipfile(zipfile) do |zipfile|
+        payload = {
+          :_method => "put",
+          :resources => MultiJson.dump(resources),
+          :application =>
+            UploadIO.new(
+              if zipfile.is_a? File
+                zipfile
+              elsif zipfile.is_a? String
+                File.new(zipfile, "rb")
+              end,
+              "application/zip")
+        }
 
-      post("apps", name, "application", :payload => payload)
+        post("apps", name, "application", :payload => payload)
+      end
     rescue EOFError
       retry
+    end
+
+    private
+
+    def use_or_create_empty_zipfile(zipfile)
+      Dir.mktmpdir do |working_dir|
+        zip_path = "#{working_dir}/empty_zip.zip"
+
+        zipfile ||= Dir.mktmpdir do |zip_dir|
+          File.new("#{zip_dir}/.__empty_file", "wb").close
+          CFoundry::Zip.pack(zip_dir, zip_path)
+          zip_path
+        end
+
+        yield zipfile
+      end
     end
   end
 end
