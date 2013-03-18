@@ -16,4 +16,11 @@ describe CcApiStub::Domains do
 
     it_behaves_like "a stubbed delete request"
   end
+
+  describe ".succeed_to_load_spaces" do
+    let(:url) { "http://example.com/v2/domains/domain-id-1/spaces?inline-relationship-depth=1" }
+    subject { CcApiStub::Domains.succeed_to_load_spaces }
+
+    it_behaves_like "a stubbed get request"
+  end
 end

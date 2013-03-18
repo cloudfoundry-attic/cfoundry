@@ -100,7 +100,7 @@ module CcApiStub
     end
 
     def succeed_to_load_many(options={})
-      response_body = CcApiStub::Helper.load_fixtures(options.delete(:fixture) || "fake_#{object_name.pluralize}", options)
+      response_body = CcApiStub::Helper.load_fixtures(options.delete(:fixture) || "fake_cc_#{object_name.pluralize}", options)
       stub_get(collection_endpoint, {}, response(200, response_body))
     end
 

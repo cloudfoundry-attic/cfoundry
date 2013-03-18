@@ -11,6 +11,11 @@ module CcApiStub
       def succeed_to_delete
         stub_delete(%r{/v2/domains/[^/\?]+$}, {}, response(200))
       end
+
+      def succeed_to_load_spaces
+        response_body = Helper.load_fixtures("fake_cc_domain_spaces")
+        stub_get(%r{/v2/domains/[^/]+/spaces.*$}, {}, response(200, response_body))
+      end
     end
   end
 end

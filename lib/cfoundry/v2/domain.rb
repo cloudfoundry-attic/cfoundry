@@ -5,6 +5,7 @@ module CFoundry::V2
     attribute :name, :string
     attribute :wildcard, :boolean
     to_one    :owning_organization, :as => :organization, :default => nil
+    to_many   :spaces
 
     queryable_by :name, :owning_organization_guid, :space_guid
   end

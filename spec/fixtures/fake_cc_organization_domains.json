@@ -14,7 +14,9 @@
       "entity": {
         "name": "domain.com",
         "owning_organization_guid": null,
-        "wildcard": true
+        "wildcard": true,
+        "spaces_url": "/v2/domains/domain-id-1/spaces",
+        "spaces": []
       }
     },
     {
@@ -27,7 +29,29 @@
       "entity": {
         "name": "domain2.com",
         "owning_organization_guid": "organization-id-1",
-        "wildcard": true
+        "wildcard": true,
+        "spaces_url": "/v2/domains/domain-id-2/spaces",
+        "spaces": [
+          {
+            "metadata": {
+              "guid": "space-id-1",
+              "url": "/v2/spaces/space-id-1",
+              "created_at": "2013-03-11 12:17:38 -0700",
+              "updated_at": null
+            },
+            "entity": {
+              "name": "development",
+              "organization_guid": "organization-id-1",
+              "developers_url": "/v2/spaces/space-id-1/developers",
+              "managers_url": "/v2/spaces/space-id-1/managers",
+              "auditors_url": "/v2/spaces/space-id-1/auditors",
+              "apps_url": "/v2/spaces/space-id-1/apps",
+              "domains_url": "/v2/spaces/space-id-1/domains",
+              "service_instances_url": "/v2/spaces/space-id-1/service_instances",
+              "organization_url": "/v2/organizations/organization-id-1"
+            }
+          }
+        ]
       }
     }
   ]
