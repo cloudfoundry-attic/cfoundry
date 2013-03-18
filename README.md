@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/cloudfoundry/vmc-lib.png)](https://travis-ci.org/cloudfoundry/vmc-lib)
+[![Build Status](https://travis-ci.org/cloudfoundry/cfoundry.png)](https://travis-ci.org/cloudfoundry/cfoundry)
 
 # cfoundry gem
 
