@@ -8,3 +8,4 @@ after_success: "rake release:ci"
 allow_failures:
   - rvm: jruby-19mode
   - rvm: jruby-18mode
+  - rvm: rbx-19mode
