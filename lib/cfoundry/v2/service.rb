@@ -12,6 +12,7 @@ module CFoundry::V2
       :default => nil
     attribute :timeout, Integer, :default => nil
     attribute :active, :boolean, :default => false
+    attribute :extra, String
     to_many   :service_plans
 
     queryable_by :service_plan_guid
