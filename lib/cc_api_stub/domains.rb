@@ -16,6 +16,11 @@ module CcApiStub
         response_body = Helper.load_fixtures("fake_cc_domain_spaces")
         stub_get(%r{/v2/domains/[^/]+/spaces.*$}, {}, response(200, response_body))
       end
+
+      def succeed_to_add_space
+        response_body = Helper.load_fixtures("fake_cc_created_domain")
+        stub_put(%r{/v2/domains/[^/]+/spaces/[^/]+$}, {}, response(201, response_body))
+      end
     end
   end
 end

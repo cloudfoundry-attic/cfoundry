@@ -23,4 +23,11 @@ describe CcApiStub::Domains do
 
     it_behaves_like "a stubbed get request"
   end
+
+  describe ".succeed_to_add_space" do
+    let(:url) { "http://example.com/v2/domains/domain-id-1/spaces/space-id-1" }
+    subject { CcApiStub::Domains.succeed_to_add_space }
+
+    it_behaves_like "a stubbed put request", :code => 201
+  end
 end
