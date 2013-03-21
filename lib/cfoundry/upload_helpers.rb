@@ -208,7 +208,7 @@ module CFoundry
     end
 
     def all_files(path)
-      Dir.glob("#{path}/**/*", File::FNM_DOTMATCH).reject! do |fn|
+      Dir.glob("#{path}/**/*", File::FNM_DOTMATCH).reject do |fn|
         fn =~ /\.$/
       end
     end
