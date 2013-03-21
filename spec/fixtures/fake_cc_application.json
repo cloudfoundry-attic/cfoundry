@@ -8,8 +8,6 @@
   "entity": {
     "name": "newapp",
     "space_guid": "6eb251ee-1ddc-4947-b2b3-942c5fdf0742",
-    "framework_guid": "9cb7dfa5-7a90-4526-9458-c3380f67c505",
-    "runtime_guid": "3cbd5d44-932b-43c7-9654-1c69ebe597ce",
     "environment_json": null,
     "memory": 2048,
     "instances": 1,
@@ -17,8 +15,6 @@
     "disk_quota": 500,
     "state": "STARTED",
     "service_bindings_url": "/v2/service_bindings?q=app_guid:d336bafe-13dd-4efd-a425-1729f6191d91",
-    "space_url": "/v2/spaces/6eb251ee-1ddc-4947-b2b3-942c5fdf0742",
-    "runtime_url": "/v2/runtimes/3cbd5d44-932b-43c7-9654-1c69ebe597ce",
-    "framework_url": "/v2/frameworks/9cb7dfa5-7a90-4526-9458-c3380f67c505"
+    "space_url": "/v2/spaces/6eb251ee-1ddc-4947-b2b3-942c5fdf0742"
   }
 }

@@ -18,16 +18,6 @@
       "domain": { "guid": "domain-id-3", "name": "vcap.me", "owning_organization_guid": null}
     }
   ],
-  "framework":{
-    "guid":"framework-id-1",
-    "name":"Ruby on Rails",
-    "description":"Ruby on Rails 3.2"
-  },
-  "runtime":{
-    "guid":"runtime-id-1",
-    "name":"Ruby",
-    "description":"Ruby 1.9"
-  },
   "running_instances":0,
   "services":[{
     "guid":"service-id-1",
@@ -44,8 +34,6 @@
     }
   }],
   "space_guid":"space-id-1",
-  "framework_guid":"framework-id-1",
-  "runtime_guid":"runtime-id-1",
   "environment_json":{},
   "file_descriptors":256,
   "disk_quota":256,

@@ -11,8 +11,6 @@ require "cfoundry/v1/service_instance"
 require "cfoundry/v1/user"
 
 require "cfoundry/v2/app"
-require "cfoundry/v2/framework"
-require "cfoundry/v2/runtime"
 require "cfoundry/v2/service"
 require "cfoundry/v2/service_binding"
 require "cfoundry/v2/service_instance"

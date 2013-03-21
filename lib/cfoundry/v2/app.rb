@@ -20,8 +20,6 @@ module CFoundry::V2
     attribute :name,             :string
     attribute :production,       :boolean, :default => false
     to_one    :space
-    to_one    :runtime
-    to_one    :framework
     attribute :environment_json, :hash,    :default => {}
     attribute :memory,           :integer, :default => 256
     attribute :total_instances,  :integer, :default => 1, :at => :instances
@@ -37,48 +35,14 @@ module CFoundry::V2
 
     scoped_to_space
 
-    queryable_by :name, :space_guid, :organization_guid, :framework_guid,
-      :runtime_guid
+    queryable_by :name, :space_guid, :organization_guid
 
     has_summary :urls => proc { |x| self.cache[:uris] = x },
       :running_instances => proc { |x|
         self.cache[:running_instances] = x
       },
-
       :instances => proc { |x|
         self.total_instances = x
-      },
-
-      # TODO: remove these when cc consistently returns nested hashes
-      :framework_guid => proc { |x|
-        if f = self.cache[:framework]
-          f.guid = x
-        else
-          self.framework = @client.framework(x, true)
-        end
-      },
-      :framework_name => proc { |x|
-        if f = self.cache[:framework]
-          f.name = x
-        else
-          self.framework = @client.framework(nil, true)
-          self.framework.name = x
-        end
-      },
-      :runtime_guid => proc { |x|
-        if f = self.cache[:runtime]
-          f.guid = x
-        else
-          self.runtime = @client.runtime(x, true)
-        end
-      },
-      :runtime_name => proc { |x|
-        if f = self.cache[:runtime]
-          f.name = x
-        else
-          self.runtime = @client.runtime(nil, true)
-          self.runtime.name = x
-        end
       }
 
     private :environment_json
