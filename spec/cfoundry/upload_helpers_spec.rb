@@ -4,7 +4,7 @@ describe CFoundry::UploadHelpers do
   describe '#upload' do
     let(:base) { Object.new }
     let(:guid) { "123" }
-    let(:path) { "#{SPEC_ROOT}/fixtures/apps/with_vmcignore" }
+    let(:path) { "#{SPEC_ROOT}/fixtures/apps/with_cfignore" }
     let(:check_resources) { false }
     let(:tmpdir) { "#{SPEC_ROOT}/tmp/fake_tmpdir" }
 
@@ -95,11 +95,11 @@ describe CFoundry::UploadHelpers do
       subject
     end
 
-    it 'does not include files and directories specified in the vmcignore' do
+    it 'does not include files and directories specified in the cfignore' do
       mock_zip do |src, _|
         files = relative_glob(src)
         expect(files).to match_array(%w[
-          .hidden_file .vmcignore non_ignored_dir ambiguous_ignored
+          .hidden_file .cfignore non_ignored_dir ambiguous_ignored
           non_ignored_dir/file_in_non_ignored_dir.txt non_ignored_file.txt
           non_ignored_dir/toplevel_ignored.txt
         ])
@@ -140,7 +140,7 @@ describe CFoundry::UploadHelpers do
 
           stub(base).resource_match(anything) do
             %w{ xyz foo/bar/baz/fizz }.map do |path|
-              { :fn => "#{tmpdir}/.vmc_#{guid}_files/#{path}" }
+              { :fn => "#{tmpdir}/.cf_#{guid}_files/#{path}" }
             end
           end
 
@@ -161,7 +161,7 @@ describe CFoundry::UploadHelpers do
 
         stub(base).resource_match(anything) do
           %w{ xyz }.map do |path|
-            { :fn => "#{tmpdir}/.vmc_#{guid}_files/#{path}" }
+            { :fn => "#{tmpdir}/.cf_#{guid}_files/#{path}" }
           end
         end
 
@@ -182,7 +182,7 @@ describe CFoundry::UploadHelpers do
         }.to raise_error(CFoundry::Error, /contains links.*that point outside/)
       end
 
-      context "and it is vmcignored" do
+      context "and it is cfignored" do
         let(:path) { "#{SPEC_ROOT}/fixtures/apps/with_ignored_external_symlink" }
 
         it "ignores it" do

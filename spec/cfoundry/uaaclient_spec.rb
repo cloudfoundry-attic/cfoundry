@@ -68,7 +68,7 @@ EOF
     let(:password) { "test" }
     let(:creds) { {:username => username, :password => password} }
     let(:state) { 'somestate' }
-    let(:redirect_uri) { 'https://uaa.cloudfoundry.com/redirect/vmc' }
+    let(:redirect_uri) { 'https://uaa.cloudfoundry.com/redirect/cf' }
     let(:auth) { Object.new }
     let(:issuer) { Object.new }
 

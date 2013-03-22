@@ -20,7 +20,7 @@ module CFoundry
     #   A path pointing to either a directory, or a .jar, .war, or .zip
     #   file.
     #
-    #   If a .vmcignore file is detected under the given path, it will be used
+    #   If a .cfignore file is detected under the given path, it will be used
     #   to exclude paths from the payload, similar to a .gitignore.
     #
     # [check_resources]
@@ -34,7 +34,7 @@ module CFoundry
       end
 
       zipfile = "#{Dir.tmpdir}/#{@guid}.zip"
-      tmpdir = "#{Dir.tmpdir}/.vmc_#{@guid}_files"
+      tmpdir = "#{Dir.tmpdir}/.cf_#{@guid}_files"
 
       FileUtils.rm_f(zipfile)
       FileUtils.rm_rf(tmpdir)
@@ -56,14 +56,14 @@ module CFoundry
     def prepare_package(path, to)
       if path =~ /\.(jar|war|zip)$/
         CFoundry::Zip.unpack(path, to)
-      elsif war_file = Dir.glob("#{path}/*.war").first
+      elsif (war_file = Dir.glob("#{path}/*.war").first)
         CFoundry::Zip.unpack(war_file, to)
       else
         FileUtils.mkdir(to)
 
         exclude = UPLOAD_EXCLUDE
-        if File.exists?("#{path}/.vmcignore")
-          exclude += File.read("#{path}/.vmcignore").split(/\n+/)
+        if File.exists?("#{path}/.cfignore")
+          exclude += File.read("#{path}/.cfignore").split(/\n+/)
         end
 
         files = files_to_consider(path, exclude)

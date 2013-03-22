@@ -13,7 +13,7 @@ module CcApiStub
         WebMock::API.stub_request(:post, %r{uaa.localhost/oauth/authorize}).
           to_return(
             :status => 302,
-            :headers => {"Location" => "https://uaa.localhost/redirect/vmc#access_token=sre-admin-access-token&token_type=bearer"}
+            :headers => {"Location" => "https://uaa.localhost/redirect/cf#access_token=sre-admin-access-token&token_type=bearer"}
           )
       end
     end
