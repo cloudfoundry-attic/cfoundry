@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/cloudfoundry/cfoundry.png)](https://travis-ci.org/cloudfoundry/cfoundry)
 [![Gem Version](https://badge.fury.io/rb/cfoundry.png)](http://badge.fury.io/rb/cfoundry)
+[![Code Climate](https://codeclimate.com/github/cloudfoundry/cfoundry.png)](https://codeclimate.com/github/cloudfoundry/cfoundry)
 
 # cfoundry gem
 
