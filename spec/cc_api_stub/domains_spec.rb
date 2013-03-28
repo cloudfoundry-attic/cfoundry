@@ -30,4 +30,11 @@ describe CcApiStub::Domains do
 
     it_behaves_like "a stubbed put request", :code => 201
   end
+
+  describe ".succeed_to_update" do
+    let(:url) { "http://example.com/v2/domains/domain-id-1" }
+    subject { CcApiStub::Domains.succeed_to_update }
+
+    it_behaves_like "a stubbed put request"
+  end
 end

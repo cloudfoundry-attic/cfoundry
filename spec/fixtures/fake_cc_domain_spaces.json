@@ -12,7 +12,7 @@
         "updated_at": null
       },
       "entity": {
-        "name": "development",
+        "name": "space-name-1",
         "organization_guid": "organization-id-1",
         "developers_url": "/v2/spaces/space-id-1/developers",
         "managers_url": "/v2/spaces/space-id-1/managers",

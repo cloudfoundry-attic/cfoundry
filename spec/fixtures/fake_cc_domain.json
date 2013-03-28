@@ -19,7 +19,7 @@
           "updated_at": null
         },
         "entity": {
-          "name": "development",
+          "name": "space-name-1",
           "organization_guid": "organization-id-1",
           "developers_url": "/v2/spaces/space-id-1/developers",
           "managers_url": "/v2/spaces/space-id-1/managers",
@@ -28,6 +28,25 @@
           "domains_url": "/v2/spaces/space-id-1/domains",
           "service_instances_url": "/v2/spaces/space-id-1/service_instances",
           "organization_url": "/v2/organizations/organization-id-1"
+        }
+      },
+      {
+        "metadata": {
+          "guid": "space-id-2",
+          "url": "/v2/spaces/space-id-2",
+          "created_at": "2013-03-11 15:17:38 -0700",
+          "updated_at": null
+        },
+        "entity": {
+          "name": "space-name-2",
+          "organization_guid": "organization-id-1",
+          "developers_url": "/v2/spaces/space-id-2/developers",
+          "managers_url": "/v2/spaces/space-id-2/managers",
+          "auditors_url": "/v2/spaces/space-id-2/auditors",
+          "apps_url": "/v2/spaces/space-id-2/apps",
+          "domains_url": "/v2/spaces/space-id-2/domains",
+          "service_instances_url": "/v2/spaces/space-id-2/service_instances",
+          "organization_url": "/v2/organizations/organization-id-2"
         }
       }
     ]
