@@ -18,7 +18,6 @@ module CFoundry::V2
     include CFoundry::UploadHelpers
 
     attribute :name,             :string
-    attribute :production,       :boolean, :default => false
     to_one    :space
     attribute :environment_json, :hash,    :default => {}
     attribute :memory,           :integer, :default => 256
