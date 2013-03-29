@@ -89,6 +89,14 @@ describe CFoundry::V2::Base do
           end
         end
 
+        context 'when an HTTPUnauthorized error occurs' do
+          before { stub_request(:any, url).to_return(:status => 401, :body => "YE FOO SHALL BAR") }
+
+          it 'raises the correct error' do
+            expect { subject }.to raise_error CFoundry::Unauthorized, "401: YE FOO SHALL BAR"
+          end
+        end
+
         context "when any other type of error occurs" do
           before { stub_request(:any, url).to_return(:status => 411, :body => "NOT LONG ENOUGH") }
 

@@ -112,6 +112,8 @@ module CFoundry
             raise CFoundry::NotFound.new(response.body, 404)
           when Net::HTTPForbidden
             raise CFoundry::Denied.new(response.body, 403)
+          when Net::HTTPUnauthorized
+            raise CFoundry::Unauthorized.new(response.body, 401)
           else
             raise CFoundry::BadResponse.new(response.body, response.code)
           end
@@ -163,6 +165,8 @@ module CFoundry
           raise CFoundry::NotFound.new(nil, code, request, response)
         when 403
           raise CFoundry::Denied.new(nil, code, request, response)
+        when 401
+          raise CFoundry::Unauthorized.new(nil, code, request, response)
         else
           raise CFoundry::BadResponse.new(nil, code, request, response)
       end

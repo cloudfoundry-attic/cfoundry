@@ -121,6 +121,9 @@ module CFoundry
   class Denied < APIError
   end
 
+  class Unauthorized < APIError
+  end
+
   class BadResponse < APIError
   end
 

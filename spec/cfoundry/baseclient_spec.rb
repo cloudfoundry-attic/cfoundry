@@ -215,13 +215,22 @@ describe CFoundry::BaseClient do
       }.to raise_error(CFoundry::NotFound, /result/)
     end
 
-    it "raises NotFound if response is 403" do
+    it "raises Denied if response is 403" do
       stub_request(:get, "http://example.com/something").to_return(
         :status => 403, :body => "result")
 
       expect {
         subject.stream_url("http://example.com/something")
       }.to raise_error(CFoundry::Denied, /result/)
+    end
+
+    it "raises Unauthorized if response is 401" do
+      stub_request(:get, "http://example.com/something").to_return(
+        :status => 401, :body => "result")
+
+      expect {
+        subject.stream_url("http://example.com/something")
+      }.to raise_error(CFoundry::Unauthorized, /result/)
     end
 
     it "raises BadRespones if response is unexpected" do

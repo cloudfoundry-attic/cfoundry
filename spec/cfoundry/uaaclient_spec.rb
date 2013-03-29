@@ -94,6 +94,7 @@ EOF
         end
       end
 
+
       context 'in an unexpected way' do
         it 'raises a CFoundry::Denied error' do
           mock(issuer).owner_password_grant(anything, anything) { raise CF::UAA::BadResponse.new("no_status_code") }
@@ -102,10 +103,23 @@ EOF
       end
 
       context "with a CF::UAA::TargetError" do
-        it "retries with implicit grant" do
+        before do
           stub(issuer).owner_password_grant { raise CF::UAA::TargetError.new("useless info") }
+        end
+
+        it "retries with implicit grant" do
           mock(issuer).implicit_grant_with_creds(:username => username, :password => password)
           expect { subject }.to_not raise_error
+        end
+
+        it "fails with Denied when given a 401" do
+          stub(issuer).implicit_grant_with_creds(anything) { raise CF::UAA::BadResponse.new("status 401") }
+          expect { subject }.to raise_error(CFoundry::Denied, "401: Authorization failed")
+        end
+
+        it "fails with Denied when given any other status code" do
+          stub(issuer).implicit_grant_with_creds(anything) { raise CF::UAA::BadResponse.new("no status code") }
+          expect { subject }.to raise_error(CFoundry::Denied, "400: Authorization failed")
         end
       end
     end
