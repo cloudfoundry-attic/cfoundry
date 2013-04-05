@@ -179,10 +179,13 @@ module CFoundry::V2
       offset = 0
 
       while true
-        @client.stream_url(log_url + "&tail&tail_offset=#{offset}") do |out|
-          offset += out.size
-          yield out
-        end rescue Timeout::Error
+        begin
+          @client.stream_url(log_url + "&tail&tail_offset=#{offset}") do |out|
+            offset += out.size
+            yield out
+          end
+        rescue Timeout::Error
+        end
       end
     rescue CFoundry::APIError
     end
