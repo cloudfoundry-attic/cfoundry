@@ -22,6 +22,7 @@ require "cfoundry/v2/space"
 require "cfoundry/v2/domain"
 require "cfoundry/v2/route"
 require "cfoundry/v2/stack"
+require "cfoundry/v2/quota_definition"
 
 require "cfoundry/v1/base"
 require "cfoundry/v1/client"
