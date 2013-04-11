@@ -58,27 +58,40 @@ module CFoundry::V2
 
       define_base_client_methods do
         define_method(singular) do |guid, *args|
-          get("v2", plural, guid, :accept => :json,
-              :params => ModelMagic.params_from(args))
-        end
-
-        define_method(:"create_#{singular}") do |payload|
-          post("v2", plural, :content => :json, :accept => :json, :payload => payload)
-        end
-
-        define_method(:"delete_#{singular}") do |guid|
-          delete("v2", plural, guid)
-          true
-        end
-
-        define_method(:"update_#{singular}") do |guid, payload|
-          put("v2", plural, guid, :content => :json, :accept => :json, :payload => payload)
+          get("v2", plural, guid,
+            :accept => :json,
+            :params => ModelMagic.params_from(args)
+          )
         end
 
         define_method(plural) do |*args|
           all_pages(
-            get("v2", plural, :accept => :json,
-                :params => ModelMagic.params_from(args)))
+            get("v2", plural,
+              :accept => :json,
+              :params => ModelMagic.params_from(args)
+            )
+          )
+        end
+
+        define_method(:"create_#{singular}") do |payload|
+          post("v2", plural,
+            :content => :json,
+            :accept => :json,
+            :payload => payload
+          )
+        end
+
+        define_method(:"delete_#{singular}") do |guid, params|
+          delete("v2", plural, guid, :params => params)
+          true
+        end
+
+        define_method(:"update_#{singular}") do |guid, payload|
+          put("v2", plural, guid,
+            :content => :json,
+            :accept => :json,
+            :payload => payload
+          )
         end
       end
 

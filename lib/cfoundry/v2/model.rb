@@ -110,8 +110,8 @@ module CFoundry::V2
       true
     end
 
-    def delete!
-      @client.base.send(:"delete_#{object_name}", @guid)
+    def delete!(options = {})
+      @client.base.send(:"delete_#{object_name}", @guid, options)
 
       @guid = nil
 
