@@ -141,4 +141,82 @@ describe CFoundry::V2::App do
       end
     end
   end
+
+  describe "#stream_update_log" do
+    let(:client) { fake_client }
+    let(:base_url) { "http://example.com/log" }
+
+    subject { described_class.new(nil, client) }
+
+    def mock_log(url = anything)
+      mock(client).stream_url(url) do |_, blk|
+        blk.call(yield)
+      end.ordered
+    end
+
+    def stub_log(url = anything)
+      stub(client).stream_url(url) do |_, blk|
+        blk.call(yield)
+      end.ordered
+    end
+
+    it "yields chunks from the response to the block" do
+      mock_log { "a" }
+      mock_log { "b" }
+      mock_log { raise CFoundry::NotFound }
+
+      chunks = []
+      subject.stream_update_log(base_url) do |chunk|
+        chunks << chunk
+      end
+
+      expect(chunks).to eq(%w(a b))
+    end
+
+    it "retries when the connection times out" do
+      mock_log { raise Timeout::Error }
+      mock_log { "a" }
+      mock_log { raise Timeout::Error }
+      mock_log { "b" }
+      mock_log { raise Timeout::Error }
+      mock_log { raise CFoundry::NotFound }
+
+      chunks = []
+      subject.stream_update_log(base_url) do |chunk|
+        chunks << chunk
+      end
+
+      expect(chunks).to eq(%w(a b))
+    end
+
+    it "tracks the offset to stream from" do
+      url = "#{base_url}&tail&tail_offset="
+
+      mock_log("#{url}0") { "a" }
+      mock_log("#{url}1") { raise Timeout::Error }
+      mock_log("#{url}1") { "b" }
+      mock_log("#{url}2") { raise CFoundry::NotFound }
+
+      chunks = []
+      subject.stream_update_log(base_url) do |chunk|
+        chunks << chunk
+      end
+
+      expect(chunks).to eq(%w(a b))
+    end
+
+    it "stops when the endpoint disappears" do
+      mock_log { "a" }
+      mock_log { "b" }
+      mock_log { raise CFoundry::NotFound }
+      stub_log { "c" }
+
+      chunks = []
+      subject.stream_update_log(base_url) do |chunk|
+        chunks << chunk
+      end
+
+      expect(chunks).to eq(%w(a b))
+    end
+  end
 end

@@ -175,6 +175,21 @@ module CFoundry::V2
       true
     end
 
+    def stream_update_log(log_url)
+      offset = 0
+
+      while true
+        begin
+          @client.stream_url(log_url + "&tail&tail_offset=#{offset}") do |out|
+            offset += out.size
+            yield out
+          end
+        rescue Timeout::Error
+        end
+      end
+    rescue CFoundry::APIError
+    end
+
     # Determine application health.
     #
     # If all instances are running, returns "RUNNING". If only some are
