@@ -76,6 +76,28 @@ describe CFoundry::RestClient do
         end
       end
 
+      context "when params are passed" do
+        context "when params is an empty hash" do
+          let(:options) { { :params => {} } }
+
+          it "does not add a query string delimiter (the question mark)" do
+            request_stub = stub_request(:get, "https://api.cloudfoundry.com/some-path")
+            subject
+            expect(request_stub).to have_been_requested
+          end
+        end
+
+        context "when params has values" do
+          let(:options) { { :params => { "key" => "value" } } }
+
+          it "appends a query string and delimiter" do
+            request_stub = stub_request(:get, "https://api.cloudfoundry.com/some-path?key=value")
+            subject
+            expect(request_stub).to have_been_requested
+          end
+        end
+      end
+
       context 'and the token is set' do
         let(:token_header) { "bearer something" }
         let(:token) { CFoundry::AuthToken.new(token_header) }
@@ -136,10 +158,6 @@ describe CFoundry::RestClient do
           end
         end
       end
-    end
-
-    describe 'payload' do
-
     end
 
     describe 'errors' do

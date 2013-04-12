@@ -93,20 +93,19 @@ describe CFoundry::V2::ModelMagic do
 
         subject { myobject }
 
-        it "stores it in the diff under the json key" do
-          mock(client.base).update_my_fake_model(subject.guid, :not_foo => 123)
+        it "uses the 'at' value in the update payload" do
+          mock(client.base).put("v2", :my_fake_models, subject.guid, hash_including(:payload => {:not_foo => 123}))
           subject.foo = 123
           subject.update!
         end
 
-        it "stores it in the manifest under the json key" do
+        it "uses the 'at' value in the create payload" do
           subject.foo = 123
 
-          mock(client.base).create_my_fake_model(:not_foo => 123) do
-            { :metadata => { :guid => guid },
-              :entity => { :not_foo => 123 }
-            }
-          end
+          mock(client.base).post(
+            "v2", :my_fake_models,
+            hash_including(:payload => {:not_foo => 123})
+          ) { {:metadata => {}} }
 
           subject.create!
         end

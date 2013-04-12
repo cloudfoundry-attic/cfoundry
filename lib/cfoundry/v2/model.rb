@@ -93,7 +93,11 @@ module CFoundry::V2
         end
       end
 
-      @manifest = @client.base.send(:"create_#{object_name}", payload)
+      @manifest = @client.base.post("v2", plural_object_name,
+        :content => :json,
+        :accept => :json,
+        :payload => payload
+      )
 
       @guid = @manifest[:metadata][:guid]
 
@@ -103,7 +107,11 @@ module CFoundry::V2
     end
 
     def update!
-      @manifest = @client.base.send(:"update_#{object_name}", @guid, @diff)
+      @client.base.put("v2", plural_object_name, guid,
+        :content => :json,
+        :accept => :json,
+        :payload => @diff
+      )
 
       @diff.clear
 
@@ -111,7 +119,7 @@ module CFoundry::V2
     end
 
     def delete!(options = {})
-      @client.base.send(:"delete_#{object_name}", @guid, options)
+      @client.base.delete("v2", plural_object_name, guid, :params => options)
 
       @guid = nil
 

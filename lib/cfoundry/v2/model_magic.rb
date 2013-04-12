@@ -72,27 +72,6 @@ module CFoundry::V2
             )
           )
         end
-
-        define_method(:"create_#{singular}") do |payload|
-          post("v2", plural,
-            :content => :json,
-            :accept => :json,
-            :payload => payload
-          )
-        end
-
-        define_method(:"delete_#{singular}") do |guid, params|
-          delete("v2", plural, guid, :params => params)
-          true
-        end
-
-        define_method(:"update_#{singular}") do |guid, payload|
-          put("v2", plural, guid,
-            :content => :json,
-            :accept => :json,
-            :payload => payload
-          )
-        end
       end
 
       define_client_methods do

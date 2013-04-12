@@ -76,11 +76,14 @@ module CFoundry
       original_options = options.dup
       payload = options[:payload]
 
-      if params = options[:params]
-        if uri.query
-          uri.query += "&" + encode_params(params)
-        else
-          uri.query = encode_params(params)
+      if options[:params]
+        encoded_params = encode_params(options[:params])
+        if encoded_params.respond_to?(:empty?) ? !encoded_params.empty? : encoded_params
+          if uri.query
+            uri.query += "&" + encoded_params
+          else
+            uri.query = encoded_params
+          end
         end
       end
 
