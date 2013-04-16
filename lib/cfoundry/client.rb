@@ -22,7 +22,7 @@ require "cfoundry/v2/client"
 module CFoundry
   class Client < BaseClient
     def self.new(*args)
-      CFoundry::V2::Client.new(*args)
+      CFoundry::V2::Client.new(*args).tap { |client| client.info }
     end
   end
 end
