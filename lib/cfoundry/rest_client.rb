@@ -8,20 +8,19 @@ module CFoundry
   class RestClient
     class HTTPFactory
       def self.create(uri, http_proxy, https_proxy)
-        if (uri.instance_of?(URI::HTTP) && http_proxy) || (uri.instance_of?(URI::HTTPS) && https_proxy)
-          if uri.instance_of?(URI::HTTP)
-            http_proxy_uri = URI.parse(http_proxy)
-          else
-            http_proxy_uri = URI.parse(https_proxy)
-          end
-          http_proxy_user, http_proxy_pass = http_proxy_uri.userinfo.split(/:/) if http_proxy_uri.userinfo
-          http = Net::HTTP::Proxy(http_proxy_uri.host, http_proxy_uri.port, http_proxy_user, http_proxy_pass).
+        scheme = uri.scheme
+        proxy_to_use = (scheme == "http" ? http_proxy : https_proxy)
+
+        if proxy_to_use
+          proxy_uri = URI.parse(proxy_to_use)
+          proxy_user, proxy_pass = proxy_uri.userinfo.split(/:/) if proxy_uri.userinfo
+          http = Net::HTTP::Proxy(proxy_uri.host, proxy_uri.port, proxy_user, proxy_pass).
             new(uri.host, uri.port)
         else
           http = Net::HTTP.new(uri.host, uri.port)
         end
 
-        if uri.is_a?(URI::HTTPS)
+        if scheme == "https"
           http.use_ssl = true
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
         end
