@@ -8,11 +8,11 @@ describe CFoundry::RestClient do
   describe '#request' do
     let(:path) { "some-path" }
     let(:url) { "#{target}/#{path}" }
-    let(:method) { "GET" }
+    let(:verb) { "GET" }
     let(:options) { {} }
 
-    def check_request(method = :get, &block)
-      request_stub = stub_request(method, url).to_return do |req|
+    def check_request(verb = :get, &block)
+      request_stub = stub_request(verb, url).to_return do |req|
         block.call(req)
         {}
       end
@@ -20,7 +20,7 @@ describe CFoundry::RestClient do
       expect(request_stub).to have_been_requested
     end
 
-    subject { rest_client.request(method, path, options) }
+    subject { rest_client.request(verb, path, options) }
 
     describe 'headers' do
       %w[Authorization Proxy-User X-Request-Id Content-Type].each do |header_name|
@@ -65,8 +65,8 @@ describe CFoundry::RestClient do
         end
 
         context "when the payload is a hash (i.e. multipart upload)" do
-          let(:method) { "PUT" }
-          let(:options) { { :payload => { "key" => "value" } } }
+          let(:verb) { "PUT" }
+          let(:options) { {:payload => {"key" => "value"}} }
 
           it 'includes a nonzero content length' do
             check_request(:put) do |req|
@@ -78,7 +78,7 @@ describe CFoundry::RestClient do
 
       context "when params are passed" do
         context "when params is an empty hash" do
-          let(:options) { { :params => {} } }
+          let(:options) { {:params => {}} }
 
           it "does not add a query string delimiter (the question mark)" do
             request_stub = stub_request(:get, "https://api.cloudfoundry.com/some-path")
@@ -88,7 +88,7 @@ describe CFoundry::RestClient do
         end
 
         context "when params has values" do
-          let(:options) { { :params => { "key" => "value" } } }
+          let(:options) { {:params => {"key" => "value"}} }
 
           it "appends a query string and delimiter" do
             request_stub = stub_request(:get, "https://api.cloudfoundry.com/some-path?key=value")
@@ -149,7 +149,7 @@ describe CFoundry::RestClient do
         end
 
         context 'and it overrides an existing one' do
-          let(:options) { { :content => "text/xml", :headers => { "Content-Type" => "text/html" } } }
+          let(:options) { {:content => "text/xml", :headers => {"Content-Type" => "text/html"}} }
 
           it 'uses the custom header' do
             check_request do |req|
@@ -191,7 +191,7 @@ describe CFoundry::RestClient do
       before do
         stub_request(:get, url).to_return({
           :status => 201,
-          :headers => { "Content-Type" => "application/json"},
+          :headers => {"Content-Type" => "application/json"},
           :body => '{ "foo": 1 }'
         })
       end
@@ -202,11 +202,11 @@ describe CFoundry::RestClient do
       end
 
       describe "the returned request hash" do
-        it "returns a hash of :headers, :url, :body and :method" do
+        it "returns a hash of :headers, :url, :body and :verb" do
           expect(subject[0]).to eq({
             :url => url,
             :method => "GET",
-            :headers => { "Content-Length" => 0 },
+            :headers => {"Content-Length" => 0},
             :body => nil
           })
         end
@@ -216,7 +216,7 @@ describe CFoundry::RestClient do
         it "returns a hash of :headers, :status, :body" do
           expect(subject[1]).to eq({
             :status => "201",
-            :headers => { "content-type" => "application/json"},
+            :headers => {"content-type" => "application/json"},
             :body => '{ "foo": 1 }'
           })
         end
@@ -264,12 +264,12 @@ describe CFoundry::RestClient do
     describe 'trace' do
       before do
         rest_client.trace = true
-        stub_request(:get, url).to_return(:status => 200, :headers => { "content-type" => "application/json" }, :body => '{"some": "json"}')
+        stub_request(:get, url).to_return(:status => 200, :headers => {"content-type" => "application/json"}, :body => '{"some": "json"}')
       end
 
       it "prints the request and the response" do
-        mock(rest_client).print_request({:headers=>{"Content-Length"=>0}, :url=>"https://api.cloudfoundry.com/some-path", :method=>"GET", :body=>nil})
-        mock(rest_client).print_response({ :status => "200", :headers => { "content-type" => "application/json" }, :body => '{"some": "json"}' })
+        mock(rest_client).print_request({:headers => {"Content-Length" => 0}, :url => "https://api.cloudfoundry.com/some-path", :method => "GET", :body => nil})
+        mock(rest_client).print_response({:status => "200", :headers => {"content-type" => "application/json"}, :body => '{"some": "json"}'})
         subject
       end
     end
@@ -278,7 +278,7 @@ describe CFoundry::RestClient do
       before do
         stub_request(:post, "https://api.cloudfoundry.com/apps").to_return(
           :status => 301,
-          :headers => { "location" => "https://api.cloudfoundry.com/apps/some-guid" }
+          :headers => {"location" => "https://api.cloudfoundry.com/apps/some-guid"}
         )
         stub_request(:get, "https://api.cloudfoundry.com/apps/some-guid").to_return(
           :status => 200,
@@ -293,6 +293,88 @@ describe CFoundry::RestClient do
           :headers => {},
           :body => '{"some": "json"}'
         )
+      end
+    end
+  end
+
+  describe CFoundry::RestClient::HTTPFactory do
+    describe ".create" do
+      let(:http_proxy) { '' }
+      let(:https_proxy) { '' }
+      let(:target_uri) { "http://cloudfoundry.com" }
+
+      subject { CFoundry::RestClient::HTTPFactory.create(URI.parse(target_uri), http_proxy, https_proxy) }
+
+      context "when no proxy URI is set" do
+        it "should return an instance of the plain Net:HTTP class" do
+          expect(subject).to be_instance_of(Net::HTTP)
+          expect(subject.use_ssl?).to be_false
+          expect(subject.proxy?).to_not be_true
+        end
+      end
+
+      context "when the target is an https URI" do
+        let(:target_uri) { "https://cloudfoundry.com" }
+        it "should return an instance of the plain Net:HTTP class with use_ssl" do
+          expect(subject).to be_instance_of(Net::HTTP)
+          expect(subject.use_ssl?).to be_true
+          expect(subject.proxy?).to_not be_true
+        end
+      end
+
+      context "when a http proxy URI without user/password is set " do
+        let(:http_proxy) { "http://exapmle.com:8080" }
+
+        it "should return an instance of the proxy class" do
+          expect(subject.proxy?).to be_true
+          expect(subject.proxy_address).to eql("exapmle.com")
+          expect(subject.proxy_port).to eql(8080)
+        end
+      end
+
+      context "when a http proxy URI with user/password is set " do
+        let(:http_proxy) { "http://user:pass@exapmle.com:8080" }
+
+        it "should return an instance of the proxy class" do
+          expect(subject.proxy?).to be_true
+          expect(subject.proxy_user).to eql("user")
+          expect(subject.proxy_pass).to eql("pass")
+        end
+      end
+
+      context "when a https proxy URI is set and the target is an https URI" do
+        let(:target_uri) { "https://cloudfoundry.com" }
+        let(:https_proxy) { "http://exapmle.com:8080" }
+
+        it "should return an instance of the proxy class" do
+          expect(subject.proxy?).to be_true
+        end
+      end
+
+      context "when a https proxy URI is set and the target is an http URI" do
+        let(:target_uri) { "http://cloudfoundry.com" }
+        let(:https_proxy) { "http://exapmle.com:8080" }
+
+        it "should return an instance of the plain Net:HTTP class" do
+          expect(subject.proxy?).to be_nil
+        end
+      end
+
+      context "when a http proxy URI is set and the target is an https URI" do
+        let(:target_uri) { "https://cloudfoundry.com" }
+        let(:http_proxy) { "http://exapmle.com:8080" }
+
+        it "should return an instance of the plain Net:HTTP class" do
+          expect(subject.proxy?).to be_nil
+        end
+      end
+
+      context "when an invalid proxy URI is set" do
+        let(:http_proxy) { "invalid URI" }
+
+        it "should raise an error" do
+          expect { subject }.to raise_error(URI::InvalidURIError)
+        end
       end
     end
   end

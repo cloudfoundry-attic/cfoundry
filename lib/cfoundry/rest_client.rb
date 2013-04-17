@@ -6,6 +6,30 @@ require "fileutils"
 
 module CFoundry
   class RestClient
+    class HTTPFactory
+      def self.create(uri, http_proxy, https_proxy)
+        if (uri.instance_of?(URI::HTTP) && http_proxy) || (uri.instance_of?(URI::HTTPS) && https_proxy)
+          if uri.instance_of?(URI::HTTP)
+            http_proxy_uri = URI.parse(http_proxy)
+          else
+            http_proxy_uri = URI.parse(https_proxy)
+          end
+          http_proxy_user, http_proxy_pass = http_proxy_uri.userinfo.split(/:/) if http_proxy_uri.userinfo
+          http = Net::HTTP::Proxy(http_proxy_uri.host, http_proxy_uri.port, http_proxy_user, http_proxy_pass).
+            new(uri.host, uri.port)
+        else
+          http = Net::HTTP.new(uri.host, uri.port)
+        end
+
+        if uri.is_a?(URI::HTTPS)
+          http.use_ssl = true
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        end
+
+        return http
+      end
+    end
+
     include CFoundry::TraceHelpers
 
     LOG_LENGTH = 10
@@ -24,7 +48,7 @@ module CFoundry
 
     attr_reader :target
 
-    attr_accessor :trace, :backtrace, :log, :request_id, :token, :target, :proxy
+    attr_accessor :trace, :backtrace, :log, :request_id, :token, :target, :proxy, :http_proxy, :https_proxy
 
     def initialize(target, token = nil)
       @target = target
@@ -118,16 +142,10 @@ module CFoundry
 
       add_headers(request, headers)
 
-      # TODO: test http proxies
-      http = Net::HTTP.new(uri.host, uri.port)
+      http = HTTPFactory.create(uri, http_proxy, https_proxy)
 
       # TODO remove this when staging returns streaming responses
       http.read_timeout = 300
-
-      if uri.is_a?(URI::HTTPS)
-        http.use_ssl = true
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      end
 
       before = Time.now
       http.start do

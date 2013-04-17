@@ -54,6 +54,26 @@ module CFoundry::V2
       @base.proxy = email
     end
 
+    # Current http proxy URI. Usually nil.
+    def http_proxy
+      @base.http_proxy
+    end
+
+    # Set the http proxy URI.
+    def http_proxy=(uri)
+      @base.http_proxy = uri
+    end
+
+    # Current https proxy URI. Usually nil.
+    def https_proxy
+      @base.https_proxy
+    end
+
+    # Set the https proxy URI.
+    def https_proxy=(uri)
+      @base.https_proxy = uri
+    end
+
     # Is the client tracing API requests?
     def trace
       @base.trace
