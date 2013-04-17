@@ -1,4 +1,5 @@
 require File.expand_path("../../concerns/login_helpers", __FILE__)
+require "forwardable"
 
 module CFoundry::V2
   # The primary API entrypoint. Wraps a BaseClient to provide nicer return
@@ -6,6 +7,7 @@ module CFoundry::V2
   # are the only two internal states.
   class Client
     include ClientMethods, CFoundry::LoginHelpers
+    extend Forwardable
 
     # Internal BaseClient instance. Normally won't be touching this.
     attr_reader :base
@@ -16,6 +18,8 @@ module CFoundry::V2
     # [Space] Currently targeted space.
     attr_accessor :current_space
 
+    def_delegators :@base, :target, :token, :token=, :http_proxy, :http_proxy=,
+      :https_proxy, :https_proxy=, :trace, :trace=, :log, :log=, :info
 
     # Create a new Client for interfacing with the given target.
     #
@@ -28,67 +32,6 @@ module CFoundry::V2
       2
     end
 
-    # The current target URL of the client.
-    def target
-      @base.target
-    end
-
-    # Current authentication token.
-    def token
-      @base.token
-    end
-
-    # Set the authentication token.
-    def token=(token)
-      @base.token = token
-    end
-
-    # Current http proxy URI. Usually nil.
-    def http_proxy
-      @base.http_proxy
-    end
-
-    # Set the http proxy URI.
-    def http_proxy=(uri)
-      @base.http_proxy = uri
-    end
-
-    # Current https proxy URI. Usually nil.
-    def https_proxy
-      @base.https_proxy
-    end
-
-    # Set the https proxy URI.
-    def https_proxy=(uri)
-      @base.https_proxy = uri
-    end
-
-    # Is the client tracing API requests?
-    def trace
-      @base.trace
-    end
-
-    # Set the tracing flag; if true, API requests and responses will be
-    # printed out.
-    def trace=(bool)
-      @base.trace = bool
-    end
-
-    # The current log. See +log=+.
-    def log
-      @base.log
-    end
-
-    # Set the logging mode. Mode can be one of:
-    #
-    # [+String+] Name of a file to log the last 10 requests to.
-    # [+Array+]  Array to append with log data (a Hash).
-    # [+IO+]     An IO object to write to.
-    # [+false+]  No logging.
-    def log=(mode)
-      @base.log = mode
-    end
-
     # The currently authenticated user.
     def current_user
       return unless token
@@ -99,11 +42,6 @@ module CFoundry::V2
         user.emails = [{ :value => token_data[:email] }]
         user
       end
-    end
-
-    # Cloud metadata
-    def info
-      @base.info
     end
 
     def login(username, password)
