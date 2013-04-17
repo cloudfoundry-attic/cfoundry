@@ -43,17 +43,6 @@ module CFoundry::V2
       @base.token = token
     end
 
-    # Current proxy user. Usually nil.
-    def proxy
-      @base.proxy
-    end
-
-    # Set the proxy user for the client. Must be authorized as an
-    # administrator for this to have any effect.
-    def proxy=(email)
-      @base.proxy = email
-    end
-
     # Current http proxy URI. Usually nil.
     def http_proxy
       @base.http_proxy

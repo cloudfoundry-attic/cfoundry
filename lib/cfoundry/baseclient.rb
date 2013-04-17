@@ -12,8 +12,8 @@ module CFoundry
     attr_reader :rest_client
 
     def_delegators :rest_client, :target, :target=, :token,
-      :proxy, :proxy=, :trace, :backtrace, :backtrace=,
-      :log, :log=, :http_proxy, :http_proxy=, :https_proxy, :https_proxy=
+      :trace, :backtrace, :backtrace=, :log, :log=,
+      :http_proxy, :http_proxy=, :https_proxy, :https_proxy=
 
     def initialize(target = "https://api.cloudfoundry.com", token = nil)
       @rest_client = CFoundry::RestClient.new(target, token)

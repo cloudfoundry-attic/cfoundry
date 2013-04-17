@@ -23,7 +23,7 @@ describe CFoundry::RestClient do
     subject { rest_client.request(verb, path, options) }
 
     describe 'headers' do
-      %w[Authorization Proxy-User X-Request-Id Content-Type].each do |header_name|
+      %w[Authorization X-Request-Id Content-Type].each do |header_name|
         it "should not include the #{header_name} by default" do
           check_request do |req|
             expect(req.headers).not_to have_key(header_name)
@@ -115,16 +115,6 @@ describe CFoundry::RestClient do
         it 'should include X-Request-Id in the header' do
           check_request do |req|
             expect(req.headers["X-Request-Id"]).to eq "SomeRequestId"
-          end
-        end
-      end
-
-      context 'and the proxy is set' do
-        before { rest_client.instance_variable_set(:@proxy, "some proxy") }
-
-        it 'should include X-Request-Id in the header' do
-          check_request do |req|
-            expect(req.headers["Proxy-User"]).to eq "some proxy"
           end
         end
       end

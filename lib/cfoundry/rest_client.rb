@@ -48,7 +48,7 @@ module CFoundry
 
     attr_reader :target
 
-    attr_accessor :trace, :backtrace, :log, :request_id, :token, :target, :proxy, :http_proxy, :https_proxy
+    attr_accessor :trace, :backtrace, :log, :request_id, :token, :target, :http_proxy, :https_proxy
 
     def initialize(target, token = nil)
       @target = target
@@ -73,7 +73,6 @@ module CFoundry
 
       headers["X-Request-Id"] = @request_id if @request_id
       headers["Authorization"] = @token.auth_header if @token
-      headers["Proxy-User"] = @proxy if @proxy
 
       if accept_type = mimetype(options[:accept])
         headers["Accept"] = accept_type
