@@ -27,7 +27,7 @@
             "entity": {
               "name": "300",
               "description": "2TB, 1.7GB Memory, 100 Connections, CPU? (Dedicated)",
-              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 3.50, \"bullets\": [\"has memory and things\", \"customer data not included\"]}",
+              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 3.50, \"bullets\": [{\"content\": \"has memory and things\", \"tooltip\": \"for real! things!\"}, {\"content\": \"has other memory and things\", \"tooltip\": \"still for real! things!\"}]}",
               "service_guid": "service-id-1",
               "service_url": "/v2/services/service-id-1",
               "service_instances_url": "/v2/service_plans/paid-postgresql-id-1/service_instances"
@@ -41,7 +41,7 @@
             "entity": {
               "name": "100",
               "description": "Free Postgres, one per customer",
-              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 23.50, \"bullets\": [\"costs nothing\", \"is a database\"]}",
+              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 23.50, \"bullets\": [{\"content\": \"costs nothing\", \"tooltip\": \"for real! things!\"}, {\"content\": \"is a database\", \"tooltip\": \"for real! things!\"}]}",
               "service_guid": "service-id-1",
               "service_url": "/v2/services/service-id-1",
               "service_instances_url": "/v2/service_plans/development-postgresql-id-1/service_instances"
@@ -73,7 +73,7 @@
             "entity": {
               "name": "100",
               "description": "service-plan-description",
-              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 43.50, \"bullets\": [\"it's web scale, like php\", \"this is a bullet\"]}",
+              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 43.50, \"bullets\": [{\"content\": \"it's web scale, like php\", \"tooltip\": \"for real! things!\"}, {\"content\": \"this is a bullet\", \"tooltip\": \"for real! things!\"}]}",
               "service_guid": "service-id-1",
               "service_url": "/v2/services/service-id-1",
               "service_instances_url": "/v2/service_plans/development-mongodb-id-1/service_instances"
@@ -87,7 +87,7 @@
             "entity": {
               "name": "200",
               "description": "20GB, 1GB Memory, 10 Connections, CPU? (Shared)",
-              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 103.50, \"bullets\": [\"is mongo, and a db\", \"24x7 shards\"]}",
+              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 103.50, \"bullets\": [{\"content\": \"is mongo, and a db\", \"tooltip\": \"for real! things!\"}, {\"content\": \"24x7 shards\", \"tooltip\": \"for real! things!\"}]}",
               "service_guid": "service-id-2",
               "service_url": "/v2/services/service-id-2",
               "service_instances_url": "/v2/service_plans/paid-mongodb-id-1/service_instances"
@@ -119,7 +119,7 @@
             "entity": {
               "name": "100",
               "description": "1GB, 0.25GB Memory, 5 Connections, a CPU",
-              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 0, \"bullets\": [\"it's free as in beer\", \"cheap beer\"]}",
+              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 0, \"bullets\": [{\"content\": \"it's free as in beer\", \"tooltip\": \"for real! things!\"}, {\"content\": \"cheap beer\", \"tooltip\": \"for real! things!\"}]}",
               "service_guid": "service-id-3",
               "service_url": "/v2/services/service-id-3",
               "service_instances_url": "/v2/service_plans/paid-mongolab-mongodb-id-1/service_instances"
@@ -133,7 +133,7 @@
             "entity": {
               "name": "200",
               "description": "2GB, 2GB Memory, 10 Connections, CPU!",
-              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 83.50, \"bullets\": [\"cost is nil for this service\", \"we know nothing about this one\"]}",
+              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 83.50, \"bullets\": [{\"content\": \"cost is nil for this service\", \"tooltip\": \"for real! things!\"}, {\"content\": \"we know nothing about this one\", \"tooltip\": \"for real! things!\"}]}",
               "service_guid": "service-id-3",
               "service_url": "/v2/services/service-id-3",
               "service_instances_url": "/v2/service_plans/paid-mongolab-mongodb-id-2/service_instances"
@@ -147,7 +147,7 @@
             "entity": {
               "name": "300",
               "description": "2GB, 2GB Memory, 10 Connections, CPU!",
-              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 102.50, \"bullets\": [\"was grown in a lab\", \"we know nothing about this one\"]}",
+              "extra": "{\"businessLogicSampleData\":\"goes here\",\"cost\": 102.50, \"bullets\": [{\"content\": \"was grown in a lab\", \"tooltip\": \"for real! things!\"}, {\"content\": \"we know nothing about this one\", \"tooltip\": \"for real! things!\"}]}",
               "service_guid": "service-id-3",
               "service_url": "/v2/services/service-id-3",
               "service_instances_url": "/v2/service_plans/paid-mongolab-mongodb-id-3/service_instances"
