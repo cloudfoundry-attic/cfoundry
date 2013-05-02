@@ -102,7 +102,7 @@ module CFoundry
       entries = all_files(path)
 
       exclusions.each do |exclusion|
-        ignore_pattern = File.join(path, "**", exclusion)
+        ignore_pattern = exclusion.start_with?("/") ? File.join(path, exclusion) : File.join(path, "**", exclusion)
         dir_glob = Dir.glob(ignore_pattern, File::FNM_DOTMATCH)
         entries -= dir_glob
 
