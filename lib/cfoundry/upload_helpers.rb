@@ -98,25 +98,17 @@ module CFoundry
       end
     end
 
-    # TODO: handle negation
     def files_to_consider(path, exclusions)
       entries = all_files(path)
 
-      to_exclude = exclusions.dup
-      until to_exclude.empty?
-        exclude = to_exclude.shift
+      exclusions.each do |exclusion|
+        ignore_pattern = File.join(path, "**", exclusion)
+        dir_glob = Dir.glob(ignore_pattern, File::FNM_DOTMATCH)
+        entries -= dir_glob
 
-        entries.reject! do |entry|
-          is_dir = File.directory?(entry)
-          excluded = glob_matches?(entry, path, exclude)
-
-          if is_dir && excluded
-            # if a directory was excluded, exclude its contents
-            to_exclude.unshift(entry.sub(path + "/", "/") + "/**")
-          end
-
-          excluded
-        end
+        ignore_pattern = File.join(path, "**", exclusion, "**", "*")
+        dir_glob = Dir.glob(ignore_pattern, File::FNM_DOTMATCH)
+        entries -= dir_glob
       end
 
       entries
