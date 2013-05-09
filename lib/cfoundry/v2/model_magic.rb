@@ -242,27 +242,31 @@ module CFoundry::V2
       end
     end
 
-    def to_many(attribute, opts = {})
-      to_many_relations[attribute] = opts
+    def to_many(plural, opts = {})
+      to_many_relations[plural] = opts
 
-      singular = attribute.to_s.sub(/s$/, "").to_sym
+      singular = plural.to_s.sub(/s$/, "").to_sym
 
-      include QUERIES[attribute]
+      include QUERIES[singular]
 
       object = opts[:as] || singular
 
-      define_method(attribute) do |*args|
-        klass = self.class.objects[object]
+      kls = object.to_s.capitalize.gsub(/(.)_(.)/) do
+        $1 + $2.upcase
+      end
+
+      define_method(plural) do |*args|
+        klass = CFoundry::V2.const_get(kls)
 
         opts, _ = args
         opts ||= {}
 
-        if opts.empty? && cache = @cache[attribute]
+        if opts.empty? && cache = @cache[plural]
           return cache
         end
 
-        if @manifest && @manifest[:entity].key?(klass.plural_object_name) && opts.empty?
-          objs = @manifest[:entity][klass.plural_object_name]
+        if @manifest && @manifest[:entity].key?(plural) && opts.empty?
+          objs = @manifest[:entity][plural]
 
           if query = opts[:query]
             find_by, find_val = query
@@ -271,26 +275,25 @@ module CFoundry::V2
 
           res =
             objs.collect do |json|
-              @client.send(:"make_#{klass.object_name}", json)
+              @client.send(:"make_#{object}", json)
             end
         else
           res =
             @client.send(
               :"#{klass.plural_object_name}_from",
-              "/v2/#{plural_object_name}/#@guid/#{klass.plural_object_name}",
+              "/v2/#{plural_object_name}/#@guid/#{plural}",
               opts)
         end
 
         if opts.empty?
-          @cache[attribute] = res
+          @cache[plural] = res
         end
 
         res
       end
 
-      define_method(:"#{attribute}_url") do
-        klass = self.class.objects[object]
-        manifest[:entity][:"#{klass.plural_object_name}_url"]
+      define_method(:"#{plural}_url") do
+        manifest[:entity][:"#{plural}_url"]
       end
 
       define_method(:"add_#{singular}") do |x|
@@ -298,11 +301,11 @@ module CFoundry::V2
 
         CFoundry::Validator.validate_type(x, klass)
 
-        if cache = @cache[attribute]
+        if cache = @cache[plural]
           cache << x unless cache.include?(x)
         end
 
-        @client.base.put("v2", plural_object_name, @guid, klass.plural_object_name, x.guid, :accept => :json)
+        @client.base.put("v2", plural_object_name, @guid, plural, x.guid, :accept => :json)
       end
 
       define_method(:"remove_#{singular}") do |x|
@@ -310,14 +313,14 @@ module CFoundry::V2
 
         CFoundry::Validator.validate_type(x, klass)
 
-        if cache = @cache[attribute]
+        if cache = @cache[plural]
           cache.delete(x)
         end
 
-        @client.base.delete("v2", plural_object_name, @guid, klass.plural_object_name, x.guid, :accept => :json)
+        @client.base.delete("v2", plural_object_name, @guid, plural, x.guid, :accept => :json)
       end
 
-      define_method(:"#{attribute}=") do |xs|
+      define_method(:"#{plural}=") do |xs|
         klass = self.class.objects[object]
 
         CFoundry::Validator.validate_type(xs, [klass])
@@ -325,11 +328,11 @@ module CFoundry::V2
         @manifest ||= {}
         @manifest[:entity] ||= {}
 
-        old = @manifest[:entity][:"#{klass.object_name}_guids"]
+        old = @manifest[:entity][:"#{singular}_guids"]
         if old != xs.collect(&:guid)
           old_objs =
-            @cache[attribute] ||
-              if all = @manifest[:entity][klass.plural_object_name]
+            @cache[plural] ||
+              if all = @manifest[:entity][plural]
                 all.collect do |m|
                   klass.new(@client, m[:metadata][:guid], m)
                 end
@@ -337,13 +340,13 @@ module CFoundry::V2
                 old.collect { |id| klass.new(@client, id) }
               end
 
-          @changes[attribute] = [old_objs, xs]
+          @changes[plural] = [old_objs, xs]
         end
 
-        @cache[attribute] = xs
+        @cache[plural] = xs
 
-        @manifest[:entity][:"#{klass.object_name}_guids"] =
-          @diff[:"#{klass.object_name}_guids"] = xs.collect(&:guid)
+        @manifest[:entity][:"#{singular}_guids"] =
+          @diff[:"#{singular}_guids"] = xs.collect(&:guid)
       end
     end
 
