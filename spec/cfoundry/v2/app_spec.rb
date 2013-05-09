@@ -3,6 +3,25 @@ require "spec_helper"
 describe CFoundry::V2::App do
   let(:client) { fake_client }
 
+  subject { described_class.new("app-1", client) }
+
+  describe "#events" do
+    let(:events) { [fake(:app_event)] }
+
+    it "has events" do
+      subject.events = events
+      expect(subject.events).to eq(events)
+    end
+
+    context "when an invalid value is assigned" do
+      it "raises a Mismatch exception" do
+        expect {
+          subject.events = [fake(:organization)]
+        }.to raise_error(CFoundry::Mismatch)
+      end
+    end
+  end
+
   describe "environment" do
     let(:app) { fake :app, :env => { "FOO" => "1" } }
 

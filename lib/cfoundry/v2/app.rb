@@ -31,6 +31,7 @@ module CFoundry::V2
     attribute :debug,            :string,  :default => nil
     to_many   :service_bindings
     to_many   :routes
+    to_many   :events, :as => :app_event
 
     scoped_to_space
 
