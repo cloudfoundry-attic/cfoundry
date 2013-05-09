@@ -31,7 +31,7 @@ module CFoundry::V2
     attribute :debug,            :string,  :default => nil
     to_many   :service_bindings
     to_many   :routes
-    to_many   :events, :as => :app_event
+    to_many   :app_events
 
     scoped_to_space
 
@@ -46,6 +46,9 @@ module CFoundry::V2
       }
 
     private :environment_json
+
+    alias :events :app_events
+    alias :events= :app_events=
 
     def instances
       @client.base.instances(@guid).collect do |i, m|
