@@ -2,11 +2,13 @@ module CFoundry
   module Validator
     class << self
       def value_matches?(val, type)
+        return true if val.nil?
+
         case type
         when Class
           val.is_a?(type)
         when Regexp
-          val.is_a?(String) && val =~ type
+          val.is_a?(String) && !!(val =~ type)
         when :url
           value_matches?(val, URI::regexp(%w(http https)))
         when :https_url
