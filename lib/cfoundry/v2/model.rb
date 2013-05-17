@@ -148,7 +148,7 @@ module CFoundry::V2
     def delete!(options = {})
       @client.base.delete("v2", plural_object_name, guid, :params => options)
 
-      @guid = nil
+      @deleted = true
 
       @diff.clear
 
@@ -157,6 +157,14 @@ module CFoundry::V2
       end
 
       true
+    end
+
+    def to_key
+      persisted? ? [@guid] : nil
+    end
+
+    def persisted?
+      @guid && !@deleted
     end
 
     def exists?
@@ -174,6 +182,7 @@ module CFoundry::V2
     def eql?(other)
       other.is_a?(self.class) && @guid == other.guid
     end
+
     alias :== :eql?
 
     def hash

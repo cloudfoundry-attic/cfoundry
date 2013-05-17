@@ -177,12 +177,6 @@ describe CFoundry::V2::Model do
       end
     end
 
-    it "clears its guid" do
-      subject.guid.should be_present
-      subject.delete!
-      subject.guid.should_not be_present
-    end
-
     it "clears its manifest metadata" do
       subject.manifest.should have_key(:metadata)
       subject.delete!
@@ -203,6 +197,48 @@ describe CFoundry::V2::Model do
         ex.message.should_not =~ /\?/
       end
     end
+  end
 
+  describe "#to_key" do
+    context "when persisted" do
+      it "returns an enumerable containing the guid" do
+        subject.to_key.should respond_to(:each)
+        subject.to_key.first.should == guid
+      end
+    end
+
+    context "when not persisted" do
+      let(:guid) { nil }
+
+      it "returns nil" do
+        subject.to_key.should be_nil
+      end
+    end
+  end
+
+  describe "#persisted?" do
+    context "on a new object" do
+      let(:guid) { nil }
+      it "returns false" do
+        subject.should_not be_persisted
+      end
+    end
+
+    context "on an object with a guid" do
+      it "returns false" do
+        subject.should be_persisted
+      end
+    end
+
+    context "on an object that has been deleted" do
+      before do
+        stub(client.base).delete
+        subject.delete
+      end
+
+      it "returns false" do
+        subject.should_not be_persisted
+      end
+    end
   end
 end
