@@ -1,0 +1,168 @@
+en:
+  activemodel:
+    errors:
+      models:
+        abstract_model:
+          attributes:
+            base:
+              cc_client: "Cloud Controller reported an error during a request."
+        account:
+          attributes:
+            base:
+              create_or_update: "Billing services are currently unavailable. Please try again later."
+              invalid: "Please enter a valid value."
+            spending_alert_amount:
+              invalid: "Please enter a whole dollar amount without decimal places."
+              not_an_integer: "Please enter a whole dollar amount without decimal places."
+              not_a_number: "Please enter a dollar amount."
+              greater_than: "Please enter a positive dollar amount."
+        application:
+          attributes:
+            base:
+              cc_client: "Cloud Controller reported an error during a request."
+              application_invalid: "App is invalid."
+              application_not_found: "App is not found."
+              app_memory_free_quota_exceeded: "You have exceeded your organization's FREE memory limit.<br/> A credit card must be on-file for your organization before exceeding 512MB of application memory."
+              app_memory_paid_quota_exceeded: "You have exceeded your organization's PAID memory limit.<br/> Please file a support ticket to request additional resources."
+            name:
+              application_name_taken: "is already in use"
+            instances_count:
+              inclusion: "must be between 1 and 999"
+        change_password:
+          attributes:
+            base:
+              default: "Something went wrong. Please try again later."
+            current_password:
+              invalid: "incorrect password"
+            password:
+              insufficient_strength: "is not secure enough"
+              service_unavailable: "could not validate strength. Please, try again later"
+        domain:
+          attributes:
+            base:
+              cc_client: "Cloud Controller reported an error during a request."
+              domain_invalid: "Domain is invalid."
+              domain_not_found: "Domain is not found."
+            name:
+              invalid: "not a valid domain name"
+              domain_name_taken: "is already taken"
+        invitation:
+          attributes:
+            base:
+              create: "There was a problem with inviting. Please try again later."
+              cc_client: "Cloud Controller reported an error during a request."
+        invitations_form:
+          attributes:
+            emails:
+              invalid: "is invalid"
+        login:
+          attributes:
+            base:
+              default: "Unable to login. Please try again later."
+              invalid: "Unable to login. Invalid email and/or password."
+              unauthorized: "You don't have permission to access this site."
+        organization:
+          attributes:
+            base:
+              cc_client: "Cloud Controller reported an error during a request."
+              organization_invalid: "Organization is invalid."
+              organization_not_found: "Organization is not found."
+            name:
+              invalid: "cannot include spaces"
+              organization_name_taken: "is already in use"
+            spending_limit:
+              less_than_or_equal_to: "exceeds the maximum spending limit"
+        organization_user:
+          attributes:
+            base:
+              update: "There was an error updating user."
+              destroy: "There was an error deleting user. Please try again later."
+              cc_client: "Cloud Controller reported an error during a request."
+        organization/event/date_filter:
+          attributes:
+            base:
+              invalid_date_range: "Selected date range is invalid"
+            from:
+              invalid: "is invalid"
+            to:
+              invalid: "is invalid"
+        password_reset:
+          attributes:
+            base:
+              no_user: There was a problem updating the password. Please contact support.
+            password:
+              insufficient_strength: is not secure enough
+              service_unavailable: could not validate strength. Please, try again later
+        c_foundry/v2/route:
+          attributes:
+            base:
+              cc_client: "Cloud Controller reported an error during a request."
+              invalid_domain: "The URL provided is not valid."
+              route_not_found: cannot be found
+              route_invalid: is invalid
+            host:
+              route_host_taken: is already taken
+              invalid: "can only include a-z, 0-9 and -"
+        service_instance:
+          attributes:
+            base:
+              cc_client: "Cloud Controller reported an error during a request."
+              service_instance_wrong_space: "The service instance and the service binding are in different spaces."
+              service_instance_invalid: "Service is invalid."
+              service_instance_not_found: "Service is not found."
+              max_quota_exceeded: "Unable to add the service due to a quota issue."
+              free_service_quota_exceeded: A credit card must be on-file for your organization before completing this action.
+              paid_service_quota_exceeded: A credit card must be on-file for your organization before completing this action.
+              service_instance_not_allowed: A credit card must be on-file for your organization before completing this action.
+            name:
+              service_instance_name_invalid: "is invalid"
+              service_instance_name_taken: "is already in use"
+        space:
+          attributes:
+            base:
+              cc_client: "Cloud Controller reported an error during a request."
+              space_invalid: "Space is invalid."
+              space_not_found: "Space is not found."
+              space_wrong_organization: "The space and the user are not in the same organization."
+            name:
+              invalid: "cannot include spaces"
+              space_name_taken: "is already in use"
+            spending_limit:
+              less_than_or_equal_to: "exceeds the maximum spending limit"
+        user_registration:
+          attributes:
+            base:
+              create: "Registration failed. Please try again later."
+              invalid_email_for_invitation_code: "This invitation code cannot be used for your email address. Please register with a different invitation code or a different email address."
+            email:
+              email_already_exists: "An account with this email already exists"
+        user:
+          attributes:
+            base:
+              already_registered: "The username is already registered."
+              create: "There was a problem with registering. Please try again later."
+              update: "Could not update details"
+              cc_client: "Cloud Controller reported an error during a request."
+            user_name:
+              invalid: "can only include a-z, 0-9, and +-_.@ characters"
+            password:
+              insufficient_strength: "is not secure enough"
+              service_unavailable: "could not validate strength. Please, try again later"
+        user/permissions:
+          attributes:
+            base:
+              no_permissions_set: "Choose at least one role"
+        user/details:
+          attributes:
+            base:
+              update: "Could not update details"
+            phone:
+              invalid: "can only include numbers and +-. characters"
+
+  activerecord:
+    errors:
+      models:
+        user_registration:
+          attributes:
+            email:
+              duplicate: "has already been registered"

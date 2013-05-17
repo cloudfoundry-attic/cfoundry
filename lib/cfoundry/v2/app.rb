@@ -103,36 +103,6 @@ module CFoundry::V2
     end
     alias :urls= :uris=
 
-    def create_routes(*uris)
-      uris.each do |uri|
-        host, domain_name = uri.split(".", 2)
-
-        domain =
-          @client.current_space.domains.find { |d|
-            d.name == domain_name
-          }
-
-        unless domain
-          raise CFoundry::Error, "Invalid domain '#{domain_name}'"
-        end
-
-        route = @client.routes.find { |r|
-          r.host == host && r.domain == domain
-        }
-
-        unless route
-          route = @client.route
-          route.host = host
-          route.domain = domain
-          route.space = space
-          route.create!
-        end
-
-        add_route(route)
-      end
-    end
-    alias :create_route :create_routes
-
     def uri
       if uris = @cache[:uris]
         return uris.first

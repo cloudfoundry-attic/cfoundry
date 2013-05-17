@@ -1,10 +1,10 @@
 require "multi_json"
-
 require "cfoundry/v2/model_magic"
-
 
 module CFoundry::V2
   class Model
+    include ActiveModel::Validations
+
     @@objects = {}
 
     extend ModelMagic
@@ -64,6 +64,22 @@ module CFoundry::V2
       @changes = {}
     end
 
+    def create
+      create!
+      true
+    rescue CFoundry::APIError => e
+      if e.instance_of? CFoundry::APIError
+        errors.add(:base, :cc_client)
+      else
+        errors.add(attribute_for_error(e), e.message)
+      end
+      false
+    end
+
+    def attribute_for_error(error)
+      :base
+    end
+
     # this does a bit of extra processing to allow for
     # `delete!' followed by `create!'
     def create!
@@ -76,8 +92,8 @@ module CFoundry::V2
         if v.is_a?(Hash) && v.key?(:metadata)
           # skip; there's a _guid attribute already
         elsif v.is_a?(Array) && !v.empty? && v.all? { |x|
-                x.is_a?(Hash) && x.key?(:metadata)
-              }
+          x.is_a?(Hash) && x.key?(:metadata)
+        }
           singular = k.to_s.sub(/s$/, "")
 
           payload[:"#{singular}_guids"] = v.collect do |x|
@@ -116,6 +132,17 @@ module CFoundry::V2
       @diff.clear
 
       true
+    end
+
+    def delete
+      delete!
+    rescue CFoundry::APIError => e
+      if e.instance_of? CFoundry::APIError
+        errors.add(:base, :cc_client)
+      else
+        errors.add(attribute_for_error(e), e.message)
+      end
+      false
     end
 
     def delete!(options = {})

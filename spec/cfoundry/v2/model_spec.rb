@@ -7,10 +7,57 @@ describe CFoundry::V2::Model do
   let(:klass) {
     fake_model do
       attribute :foo, :string, :read => :x, :write => [:y, :z]
+
+      def attribute_for_error(e)
+        e.error_code == 1 ? :foo : :base
+      end
     end
   }
 
   subject { klass.new(guid, client, manifest) }
+
+  describe "create" do
+    it "uses #create!" do
+      mock(subject).create!
+      subject.create
+    end
+
+    context "without errors" do
+      it "returns true" do
+        mock(subject).create!
+        subject.create.should == true
+      end
+    end
+
+    context "with errors" do
+      before do
+        stub(subject.class).model_name { ActiveModel::Name.new(subject, nil, "abstract_model") }
+        stub(subject).create! { raise CFoundry::APIError.new("HELP") }
+      end
+
+      it "does not raise an exception" do
+        expect { subject.create }.to_not raise_error
+      end
+
+      it "returns false" do
+        subject.create.should == false
+      end
+
+      context "without model-specific errors" do
+        it "adds generic base error " do
+          subject.create
+          subject.errors.full_messages.first.should =~ /cloud controller reported an error/i
+        end
+      end
+
+      context "with model-specific errors" do
+        it "does not set the generic error on base" do
+          subject.create
+          subject.errors.size.should == 1
+        end
+      end
+    end
+  end
 
   describe "#create!" do
     before do
@@ -65,6 +112,49 @@ describe CFoundry::V2::Model do
       subject.diff.should be_present
       subject.update!
       subject.diff.should_not be_present
+    end
+  end
+
+  describe "delete" do
+    it "uses #delete!" do
+      mock(subject).delete! { true }
+      subject.delete
+    end
+
+    context "without errors" do
+      it "returns true" do
+        mock(subject).delete! { true }
+        subject.delete.should == true
+      end
+    end
+
+    context "with errors" do
+      before do
+        stub(subject.class).model_name { ActiveModel::Name.new(subject, nil, "abstract_model") }
+        stub(subject).delete! { raise CFoundry::APIError.new("HELP") }
+      end
+
+      it "does not raise an exception" do
+        expect { subject.delete }.to_not raise_error
+      end
+
+      it "returns false" do
+        subject.delete.should == false
+      end
+
+      context "without model-specific errors" do
+        it "adds generic base error " do
+          subject.delete
+          subject.errors.full_messages.first.should =~ /cloud controller reported an error/i
+        end
+      end
+
+      context "with model-specific errors" do
+        it "does not set the generic error on base" do
+          subject.delete
+          subject.errors.size.should == 1
+        end
+      end
     end
   end
 
