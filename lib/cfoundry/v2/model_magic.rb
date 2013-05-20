@@ -151,6 +151,7 @@ module CFoundry::V2
 
       define_method(name) do
         return @cache[name] if @cache.key?(name)
+        return nil unless persisted?
 
         @cache[name] =
           if manifest[:entity].key?(json_name)

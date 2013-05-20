@@ -241,4 +241,27 @@ describe CFoundry::V2::Model do
       end
     end
   end
+
+  describe "creating a new object" do
+    describe "getting attributes" do
+      let(:new_object) {
+        client.fake_model_with_attribute
+      }
+
+      it "does not go to cloud controller" do
+        expect {
+          new_object.time
+        }.to_not raise_error
+      end
+
+      it "remembers set values" do
+        new_object.time = "now"
+        new_object.time.should == "now"
+      end
+    end
+  end
+end
+
+class FakeModelWithAttribute < CFoundry::V2::FakeModel
+  attribute :time, :string
 end
