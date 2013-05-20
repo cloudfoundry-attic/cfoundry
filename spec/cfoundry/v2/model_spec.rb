@@ -216,6 +216,23 @@ describe CFoundry::V2::Model do
     end
   end
 
+  describe "#to_param" do
+    context "when persisted" do
+      it "returns the guid as a string" do
+        subject.to_param.should be_a(String)
+        subject.to_param.should == guid
+      end
+    end
+
+    context "when not persisted" do
+      let(:guid) { nil }
+
+      it "returns nil" do
+        subject.to_param.should be_nil
+      end
+    end
+  end
+
   describe "#persisted?" do
     context "on a new object" do
       let(:guid) { nil }

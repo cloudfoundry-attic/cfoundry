@@ -159,6 +159,10 @@ module CFoundry::V2
       true
     end
 
+    def to_param
+      persisted? ? @guid.to_s : nil
+    end
+
     def to_key
       persisted? ? [@guid] : nil
     end
