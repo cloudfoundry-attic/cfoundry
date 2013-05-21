@@ -6,13 +6,14 @@
     "updated_at": null
   },
   "entity": {
-    "name": "wut",
+    "name": "service-instance-name-1",
     "service_plan_guid": "service-plan-id-1",
     "space_guid": "space-id-1",
     "gateway_data": {
       "plan": "100",
       "version": "9.0"
     },
+    "dashboard_url": "https://dev3cloudfoundry.appdirect.com/api/custom/cloudfoundry/v1/services/service-instance-id-1/sso",
     "service_bindings_url": "/v2/service_instances/service-instance-id-1/service_bindings",
     "service_bindings": [
       {

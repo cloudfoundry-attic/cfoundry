@@ -1,0 +1,70 @@
+{
+  "total_results": 3,
+  "total_pages": 1,
+  "prev_url": null,
+  "next_url": null,
+  "resources": [
+    {
+      "metadata": {
+        "guid": "service-instance-id-1",
+        "url": "/v2/service_instances/service-instance-id-1",
+        "created_at": "2013-05-02 22:20:15 +0000",
+        "updated_at": null
+      },
+      "entity": {
+        "name": "billing-db",
+        "credentials": {
+          "name": "dfba7bcc1e4984d6e865dacf9f46624a1",
+          "hostname": "mysql-service-cf-internal.csvbuoabzxev.us-east-1.rds.amazonaws.com",
+          "host": "mysql-service-cf-internal.csvbuoabzxev.us-east-1.rds.amazonaws.com",
+          "port": 3306,
+          "user": "u5Ly7kM6yR54H",
+          "username": "u5Ly7kM6yR54H",
+          "password": "p6GsdwKKQRmes",
+          "node_id": "rds_mysql_node_cfinternal_0"
+        },
+        "service_plan_guid": "3757e197-8f8b-4e19-9bc0-111eac4ede21",
+        "space_guid": "space-id-1",
+        "gateway_data": {
+          "plan": "cfinternal",
+          "version": "n/a"
+        },
+        "dashboard_url": "https://dev3cloudfoundry.appdirect.com/api/custom/cloudfoundry/v1/services/service-instance-id-1/sso",
+        "service_bindings_url": "/v2/service_instances/service-instance-id-1/service_bindings",
+        "space_url": "/v2/spaces/space-id-1",
+        "service_plan_url": "/v2/service_plans/3757e197-8f8b-4e19-9bc0-111eac4ede21"
+      }
+    },
+    {
+      "metadata": {
+        "guid": "service-instance-id-2",
+        "url": "/v2/service_instances/service-instance-id-2",
+        "created_at": "2013-05-02 23:59:58 +0000",
+        "updated_at": null
+      },
+      "entity": {
+        "name": "console-db",
+        "credentials": {
+          "name": "d253638cc55d64088ab5fe4639c68464c",
+          "hostname": "mysql-service-cf-internal.csvbuoabzxev.us-east-1.rds.amazonaws.com",
+          "host": "mysql-service-cf-internal.csvbuoabzxev.us-east-1.rds.amazonaws.com",
+          "port": 3306,
+          "user": "ujkG3BChhB7g4",
+          "username": "ujkG3BChhB7g4",
+          "password": "piNlqVQM7iJ62",
+          "node_id": "rds_mysql_node_cfinternal_0"
+        },
+        "service_plan_guid": "3757e197-8f8b-4e19-9bc0-111eac4ede21",
+        "space_guid": "space-id-1",
+        "gateway_data": {
+          "plan": "cfinternal",
+          "version": "n/a"
+        },
+        "dashboard_url": null,
+        "service_bindings_url": "/v2/service_instances/service-instance-id-2/service_bindings",
+        "space_url": "/v2/spaces/space-id-1",
+        "service_plan_url": "/v2/service_plans/3757e197-8f8b-4e19-9bc0-111eac4ede21"
+      }
+    }
+  ]
+}

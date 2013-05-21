@@ -45,7 +45,7 @@
   ],
   "services":[
     {
-      "guid":"service-id-1",
+      "guid":"service-instance-id-1",
       "name":"service-name-1",
       "bound_app_count":1,
       "service_plan": {
