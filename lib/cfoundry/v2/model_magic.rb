@@ -203,6 +203,7 @@ module CFoundry::V2
 
       define_method(name) do
         return @cache[name] if @cache.key?(name)
+        return @client.send(name) unless persisted?
 
         @cache[name] =
           if @manifest && @manifest[:entity].key?(name)

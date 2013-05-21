@@ -3,10 +3,11 @@ require 'spec_helper'
 
 module CFoundry::V2
   describe Route do
-    subject { Route.new(nil, nil) }
+    subject { Route.new(nil, fake_client) }
 
     describe "validations" do
       it { should validate_presence_of(:domain) }
+      it { should validate_presence_of(:space) }
 
       # http://tools.ietf.org/html/rfc1035
       it "only allows host names according to RFC1035" do

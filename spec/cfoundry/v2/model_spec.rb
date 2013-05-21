@@ -260,10 +260,11 @@ describe CFoundry::V2::Model do
   end
 
   describe "creating a new object" do
+    let(:new_object) {
+      client.fake_model_with_attribute
+    }
+
     describe "getting attributes" do
-      let(:new_object) {
-        client.fake_model_with_attribute
-      }
 
       it "does not go to cloud controller" do
         expect {
@@ -276,9 +277,18 @@ describe CFoundry::V2::Model do
         new_object.time.should == "now"
       end
     end
+
+    describe "getting associations" do
+      describe "to_one associations" do
+        it "returns the an empty object of the association's type" do
+          new_object.domain.guid.should be_nil
+        end
+      end
+    end
   end
 end
 
 class FakeModelWithAttribute < CFoundry::V2::FakeModel
   attribute :time, :string
+  to_one :domain
 end

@@ -6,6 +6,7 @@ module CFoundry::V2
     validates_format_of :host, :with => /\A[a-z]+([a-z0-9\-]*[a-z0-9]+)?\Z/i
     validates_length_of :host, :maximum => 63
     validates_presence_of :domain
+    validates_presence_of :space
     to_one    :domain
     to_one    :space
 
