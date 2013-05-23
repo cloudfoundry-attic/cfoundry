@@ -231,6 +231,18 @@ module CFoundry::V2
 
       attr_writer plural
       Fake.define_many_association(self, plural)
+
+      define_method(klass.object_name) do |*args|
+        guid, _ = args
+
+        if guid
+          get_many(klass.plural_object_name).find do |o|
+            o.guid == guid
+          end || super(*args)
+        else
+          super(*args)
+        end
+      end
     end
   end
 end
