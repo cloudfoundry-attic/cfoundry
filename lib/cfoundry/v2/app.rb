@@ -50,6 +50,10 @@ module CFoundry::V2
     alias :events :app_events
     alias :events= :app_events=
 
+    def delete!
+      super({:recursive => true})
+    end
+
     def instances
       @client.base.instances(@guid).collect do |i, m|
         Instance.new(self, i.to_s, @client, m)

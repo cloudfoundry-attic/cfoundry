@@ -238,4 +238,12 @@ describe CFoundry::V2::App do
       expect(chunks).to eq(%w(a b))
     end
   end
+
+  describe "delete!" do
+    it "defaults to recursive" do
+      mock(client.base).delete("v2", :apps, subject.guid, {:params => {:recursive => true}})
+
+      subject.delete!
+    end
+  end
 end
