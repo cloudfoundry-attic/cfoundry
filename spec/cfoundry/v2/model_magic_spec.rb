@@ -146,6 +146,10 @@ module CFoundry::V2
             :foo => [before, otherobject])
         end
 
+        it "returns the assigned value" do
+          myobject.send(:foo=, otherobject).should == otherobject
+        end
+
         context "when there is a default" do
           let(:mymodel) { fake_model { to_one :foo, :default => nil } }
 

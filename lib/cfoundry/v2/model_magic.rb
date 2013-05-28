@@ -190,8 +190,7 @@ module CFoundry::V2
     def to_one(name, opts = {})
       to_one_relations[name] = opts
 
-      obj = opts[:as] || name
-
+      association_name = opts[:as] || name
       default = opts[:default]
 
       if has_default = opts.key?(:default)
@@ -204,9 +203,9 @@ module CFoundry::V2
 
         @cache[name] =
           if @manifest && @manifest[:entity].key?(name)
-            @client.send(:"make_#{obj}", @manifest[:entity][name])
+            @client.send(:"make_#{association_name}", @manifest[:entity][name])
           elsif url = send("#{name}_url")
-            @client.send(:"#{obj}_from", url)
+            @client.send(:"#{association_name}_from", url)
           else
             default
           end
@@ -216,28 +215,31 @@ module CFoundry::V2
         manifest[:entity][:"#{name}_url"]
       end
 
-      define_method(:"#{name}=") do |val|
-        klass = self.class.objects[obj]
+      define_method(:"#{name}=") do |assigned_value|
+        klass = self.class.objects[association_name]
 
-        unless has_default && val == default
-          CFoundry::Validator.validate_type(val, klass)
+        unless has_default && assigned_value == default
+          CFoundry::Validator.validate_type(assigned_value, klass)
         end
 
         @manifest ||= {}
         @manifest[:entity] ||= {}
 
-        old = @manifest[:entity][:"#{name}_guid"]
-        if old != (val && val.guid)
-          old_obj =
-            @cache[name] || klass.new(@client, old, @manifest[:entity][name])
+        old_guid = @manifest[:entity][:"#{name}_guid"]
+        association_guid = assigned_value ? assigned_value.guid : nil
 
-          @changes[name] = [old_obj, val]
+        if old_guid != (association_guid)
+          old_obj =
+            @cache[name] || klass.new(@client, old_guid, @manifest[:entity][name])
+
+          @changes[name] = [old_obj, assigned_value]
         end
 
-        @cache[name] = val
+        @cache[name] = assigned_value
 
-        @manifest[:entity][:"#{name}_guid"] =
-          @diff[:"#{name}_guid"] = val && val.guid
+        @manifest[:entity][:"#{name}_guid"] = association_guid
+        @diff[:"#{name}_guid"] = association_guid
+        assigned_value
       end
     end
 
