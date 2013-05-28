@@ -211,6 +211,16 @@ module CFoundry::V2
           end
       end
 
+      define_method("create_#{name}") do |*args|
+        associated_instance = @client.send(:"#{association_name}")
+        args.first.each do |name, value|
+          associated_instance.send("#{name}=", value)
+        end if args.first.is_a? Hash
+
+        associated_instance.create!
+        self.send("#{name}=", associated_instance)
+      end
+
       define_method(:"#{name}_url") do
         manifest[:entity][:"#{name}_url"]
       end

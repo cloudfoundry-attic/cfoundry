@@ -1,6 +1,10 @@
 require "spec_helper"
 
 module CFoundry::V2
+  class Associated < FakeModel
+    attribute :attribute, String
+  end
+
   describe ModelMagic do
     let(:client) { fake_client }
     let(:mymodel) { fake_model }
@@ -161,6 +165,41 @@ module CFoundry::V2
             expect { subject }.to change {
               myobject.manifest[:entity][:foo_guid]
             }.from(otherobject.guid).to(nil)
+          end
+        end
+      end
+
+      describe 'associated create' do
+        let!(:model) { fake_model { to_one :associated } }
+        let(:instance) { model.new(nil, client).fake }
+        let!(:request) { WebMock.stub_request(:post, /v2\/associated/).to_return(:body => {:metadata => {:guid => "thing"}}.to_json) }
+
+        it 'returns a new associated object' do
+          instance.create_associated.should be_a(Associated)
+        end
+
+        it 'sets the relation' do
+          created = instance.create_associated
+          instance.associated.should == created
+        end
+
+        context 'with attributes for the association' do
+          it 'sets these attributes on the association' do
+            created = instance.create_associated(:attribute => 'value')
+            created.attribute.should == 'value'
+          end
+        end
+
+        it 'calls out to cloud_controller' do
+          instance.create_associated
+          request.should have_been_requested
+        end
+
+        context 'when creation fails' do
+          let!(:request) { WebMock.stub_request(:post, /v2\/associated/).to_raise(:not_authorized) }
+
+          it 'raises an exception' do
+            expect { instance.create_associated }.to raise_error(StandardError)
           end
         end
       end
