@@ -57,6 +57,9 @@ module CFoundry::V2
       plural = klass.plural_object_name
 
       define_base_client_methods do
+        #
+        # def client.MODEL
+        #
         define_method(singular) do |guid, *args|
           get("v2", plural, guid,
             :accept => :json,
@@ -64,6 +67,9 @@ module CFoundry::V2
           )
         end
 
+        #
+        # def client.MODELs
+        #
         define_method(plural) do |*args|
           all_pages(
             get("v2", plural,
@@ -75,6 +81,9 @@ module CFoundry::V2
       end
 
       define_client_methods do
+        #
+        # def client.MODEL
+        #
         define_method(singular) do |*args|
           guid, partial, _ = args
 
@@ -94,6 +103,9 @@ module CFoundry::V2
           x
         end
 
+        #
+        # def client.MODELs
+        #
         define_method(plural) do |*args|
           # use current org/space
           if klass.scoped_space && current_space
@@ -107,6 +119,9 @@ module CFoundry::V2
           end
         end
 
+        #
+        # def client.MODEL_from
+        #
         define_method(:"#{singular}_from") do |path, *args|
           send(
             :"make_#{singular}",
@@ -116,6 +131,9 @@ module CFoundry::V2
               :params => ModelMagic.params_from(args)))
         end
 
+        #
+        # def client.MODELs_from
+        #
         define_method(:"#{plural}_from") do |path, *args|
           objs = @base.all_pages(
             @base.get(
@@ -128,6 +146,9 @@ module CFoundry::V2
           end
         end
 
+        #
+        # def client.make_MODEL
+        #
         define_method(:"make_#{singular}") do |json|
           klass.new(
             json[:metadata][:guid],
@@ -149,6 +170,9 @@ module CFoundry::V2
         defaults[name] = default
       end
 
+      #
+      # def ATTRIBUTE
+      #
       define_method(name) do
         return @cache[name] if @cache.key?(name)
         return nil unless persisted?
@@ -161,6 +185,9 @@ module CFoundry::V2
           end
       end
 
+      #
+      # def ATTRIBUTE=
+      #
       define_method(:"#{name}=") do |val|
         unless has_default && val == default
           CFoundry::Validator.validate_type(val, type)
@@ -197,6 +224,9 @@ module CFoundry::V2
         defaults[:"#{name}_guid"] = default
       end
 
+      #
+      # def MODEL
+      #
       define_method(name) do
         return @cache[name] if @cache.key?(name)
         return @client.send(name) unless persisted?
@@ -211,6 +241,9 @@ module CFoundry::V2
           end
       end
 
+      #
+      # def create_MODEL
+      #
       define_method("create_#{name}") do |*args|
         associated_instance = @client.send(:"#{association_name}")
         args.first.each do |name, value|
@@ -221,10 +254,16 @@ module CFoundry::V2
         self.send("#{name}=", associated_instance)
       end
 
+      #
+      # def MODEL_url
+      #
       define_method(:"#{name}_url") do
         manifest[:entity][:"#{name}_url"]
       end
 
+      #
+      # def MODEL=
+      #
       define_method(:"#{name}=") do |assigned_value|
         klass = self.class.objects[association_name]
 
@@ -264,6 +303,9 @@ module CFoundry::V2
 
       kls = object.to_s.camelcase
 
+      #
+      # def MODELs
+      #
       define_method(plural) do |*args|
         klass = CFoundry::V2.const_get(kls)
 
@@ -301,10 +343,16 @@ module CFoundry::V2
         res
       end
 
+      #
+      # def MODELs_url
+      #
       define_method(:"#{plural}_url") do
         manifest[:entity][:"#{plural}_url"]
       end
 
+      #
+      # def add_MODEL
+      #
       define_method(:"add_#{singular}") do |x|
         klass = self.class.objects[object]
 
@@ -317,6 +365,9 @@ module CFoundry::V2
         @client.base.put("v2", plural_object_name, @guid, plural, x.guid, :accept => :json)
       end
 
+      #
+      # def remove_MODEL
+      #
       define_method(:"remove_#{singular}") do |x|
         klass = self.class.objects[object]
 
@@ -329,6 +380,9 @@ module CFoundry::V2
         @client.base.delete("v2", plural_object_name, @guid, plural, x.guid, :accept => :json)
       end
 
+      #
+      # def MODELs=
+      #
       define_method(:"#{plural}=") do |xs|
         klass = self.class.objects[object]
 
@@ -360,10 +414,16 @@ module CFoundry::V2
     end
 
     def has_summary(actions = {})
+      #
+      # def summary
+      #
       define_method(:summary) do
         @client.base.get("v2", plural_object_name, @guid, "summary", :accept => :json)
       end
 
+      #
+      # def summarize!
+      #
       define_method(:summarize!) do |*args|
         body, _ = args
 
@@ -408,10 +468,16 @@ module CFoundry::V2
 
       query.module_eval do
         names.each do |name|
+          #
+          # def MODEL_by_ATTRIBUTE
+          #
           define_method(:"#{singular}_by_#{name}") do |*args|
             send(:"#{plural}_by_#{name}", *args).first
           end
 
+          #
+          # def MODELs_by_ATTRIBUTE
+          #
           define_method(:"#{plural}_by_#{name}") do |val, *args|
             options, _ = args
             options ||= {}
