@@ -191,9 +191,6 @@ module CFoundry::V2
       to_one_relations[name] = opts
 
       obj = opts[:as] || name
-      kls = obj.to_s.capitalize.gsub(/(.)_(.)/) do
-        $1 + $2.upcase
-      end
 
       default = opts[:default]
 
@@ -253,9 +250,7 @@ module CFoundry::V2
 
       object = opts[:as] || singular
 
-      kls = object.to_s.capitalize.gsub(/(.)_(.)/) do
-        $1 + $2.upcase
-      end
+      kls = object.to_s.camelcase
 
       define_method(plural) do |*args|
         klass = CFoundry::V2.const_get(kls)
