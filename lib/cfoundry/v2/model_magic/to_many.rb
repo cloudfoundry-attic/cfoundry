@@ -74,6 +74,20 @@ module CFoundry::V2::ModelMagic
       end
 
       #
+      # def create_MODEL
+      #
+      define_method("create_#{singular}") do |*args|
+        associated_instance = @client.send(:"#{singular}")
+        args.first.each do |name, value|
+          associated_instance.send("#{name}=", value)
+        end if args.first.is_a? Hash
+
+        associated_instance.create!
+        self.send(:"add_#{singular}", associated_instance)
+        associated_instance
+      end
+
+      #
       # def remove_MODEL
       #
       define_method(:"remove_#{singular}") do |x|
