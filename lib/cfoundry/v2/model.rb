@@ -134,8 +134,8 @@ module CFoundry::V2
       true
     end
 
-    def delete
-      delete!
+    def delete(options = {})
+      delete!(options)
     rescue CFoundry::APIError => e
       if e.instance_of? CFoundry::APIError
         errors.add(:base, :cc_client)

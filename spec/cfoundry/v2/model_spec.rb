@@ -117,13 +117,18 @@ describe CFoundry::V2::Model do
 
   describe "delete" do
     it "uses #delete!" do
-      mock(subject).delete! { true }
+      mock(subject).delete!({}) { true }
       subject.delete
+    end
+
+    it "passes options along to delete!" do
+      mock(subject).delete!(:recursive => true) { true }
+      subject.delete(:recursive => true)
     end
 
     context "without errors" do
       it "returns true" do
-        mock(subject).delete! { true }
+        mock(subject).delete!({}) { true }
         subject.delete.should == true
       end
     end
