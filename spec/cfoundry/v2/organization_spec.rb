@@ -1,30 +1,28 @@
 require "spec_helper"
 
-describe CFoundry::V2::Organization do
-  let(:client) { fake_client }
+module CFoundry
+  module V2
+    describe Organization do
+      let(:client) { build(:client) }
+      let(:organization) { build(:organization, :client => client) }
 
-  subject { CFoundry::V2::Organization.new("organization-1", client) }
+      it_behaves_like "a summarizeable model" do
+        subject { organization }
+        let(:summary_attributes) { {:name => "fizzbuzz"} }
+      end
 
-  describe "summarization" do
-    let(:mymodel) { CFoundry::V2::Organization }
-    let(:myobject) { fake(:organization) }
-    let(:summary_attributes) { { :name => "fizzbuzz" } }
+      it "has quota_definition" do
+        quota = build(:quota_definition)
+        organization.quota_definition = quota
+        expect(organization.quota_definition).to eq(quota)
+      end
 
-    subject { myobject }
-
-    it_behaves_like "a summarizeable model"
-  end
-
-  it "has quota_definition" do
-    quota = fake(:quota_definition)
-    subject.quota_definition = quota
-    expect(subject.quota_definition).to eq(quota)
-  end
-
-  it "has billing_enabled" do
-    [true, false].each do |v|
-      subject.billing_enabled = v
-      expect(subject.billing_enabled).to eq(v)
+      it "has billing_enabled" do
+        [true, false].each do |v|
+          organization.billing_enabled = v
+          expect(organization.billing_enabled).to eq(v)
+        end
+      end
     end
   end
 end

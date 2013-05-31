@@ -1,17 +1,17 @@
 require "multi_json"
 
-shared_examples_for 'a summarizeable model' do
-  describe '#summary' do
+shared_examples_for "a summarizeable model" do
+  describe "#summary" do
     let(:summary_endpoint) {
       [ client.target,
         "v2",
-        mymodel.plural_object_name,
-        myobject.guid,
+        subject.class.plural_object_name,
+        subject.guid,
         "summary"
       ].join("/")
     }
 
-    it 'returns the summary endpoint payload' do
+    it "returns the summary endpoint payload" do
       req = stub_request(:get, summary_endpoint).to_return :status => 200,
         :body => MultiJson.encode(summary_attributes)
 
@@ -20,8 +20,8 @@ shared_examples_for 'a summarizeable model' do
     end
   end
 
-  describe '#summarize!' do
-    it 'defines basic attributes via #summary' do
+  describe "#summarize!" do
+    it "defines basic attributes via #summary" do
       stub(subject).summary { summary_attributes }
 
       subject.summarize!
