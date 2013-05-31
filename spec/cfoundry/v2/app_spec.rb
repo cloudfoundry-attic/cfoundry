@@ -245,12 +245,12 @@ module CFoundry
           subject.delete!
         end
       end
-    end
 
-    it "accepts and ignores an options hash" do
-      mock(client.base).delete("v2", :apps, subject.guid, {:params => {:recursive => true}})
+      it "accepts and ignores an options hash" do
+        mock(client.base).delete("v2", :apps, subject.guid, {:params => {:recursive => true}})
 
-      subject.delete!(:recursive => false)
+        subject.delete!(:recursive => false)
+      end
     end
   end
 end
