@@ -47,8 +47,8 @@ module CFoundry::V2
 
     private :environment_json
 
-    def delete!
-      super({:recursive => true})
+    def delete!(opts = {})
+      super(opts.merge(:recursive => true))
     end
 
     def instances
