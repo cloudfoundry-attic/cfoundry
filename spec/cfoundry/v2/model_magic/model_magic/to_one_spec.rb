@@ -1,94 +1,103 @@
 require "spec_helper"
 
-module CFoundry::V2
-  include ModelMagic::ToOne
-  class Associated < FakeModel
-    attribute :attribute, String
-  end
+class AssociatedModel < CFoundry::V2::Model
+  attribute :attribute, String
+end
 
-  describe ModelMagic::ToOne do
-    let(:client) { fake_client }
-    let(:mymodel) { fake_model }
-    let(:guid) { random_string("my-object-guid") }
-    let(:myobject) { mymodel.new(guid, client) }
+module CFoundry
+  module V2
+    module ModelMagic
+      describe ToOne do
+        let(:client) { build(:client) }
+        let(:model) { model.new("my-object-guid-1", client) }
 
-    describe 'to_one relationships' do
-      describe 'writing' do
-        let!(:mymodel) { fake_model { to_one :foo } }
-        let!(:othermodel) { fake_model :foo }
+        describe "to_one relationships" do
+          describe "writing" do
+            let(:model) do
+              TestModelBuilder.build("my-model-guid-1", client) { to_one :associated_model }
+            end
 
-        let(:myobject) { mymodel.new(nil, client).fake }
-        let(:otherobject) { othermodel.new(nil, client).fake }
+            let(:othermodel) do
+              AssociatedModel.new("my-model-guid-2", client)
+            end
 
-        subject { myobject.foo = otherobject }
+            before do
+              stub_request(:get, /v2\/test_models\/.*/).to_return(:body => {:entity => {}}.to_json)
+            end
 
-        it "sets the GUID in the manifest to the object's GUID" do
-          expect { subject }.to change {
-            myobject.manifest[:entity][:foo_guid]
-          }.to(otherobject.guid)
-        end
+            it "sets the GUID in the manifest to the object's GUID" do
+              expect {
+                model.associated_model = othermodel
+              }.to change { model.manifest[:entity][:associated_model_guid] }.to(othermodel.guid)
+            end
 
-        it "tracks internal changes in the diff" do
-          expect { subject }.to change { myobject.diff }.to(
-            :foo_guid => otherobject.guid)
-        end
+            it "tracks internal changes in the diff" do
+              expect {
+                model.associated_model = othermodel
+              }.to change { model.diff }.to(:associated_model_guid => othermodel.guid)
+            end
 
-        it "tracks high-level changes in .changes" do
-          before = myobject.foo
-          expect { subject }.to change { myobject.changes }.to(
-            :foo => [before, otherobject])
-        end
+            it "tracks high-level changes in .changes" do
+              previous_associated_model = AssociatedModel.new("my-model-guid-3", client)
+              model.associated_model = previous_associated_model
 
-        it "returns the assigned value" do
-          myobject.send(:foo=, otherobject).should == otherobject
-        end
+              expect {
+                model.associated_model = othermodel
+              }.to change { model.changes }.to(:associated_model => [previous_associated_model, othermodel])
+            end
 
-        context "when there is a default" do
-          let(:mymodel) { fake_model { to_one :foo, :default => nil } }
+            it "returns the assigned value" do
+              model.send(:associated_model=, othermodel).should == othermodel
+            end
 
-          subject { myobject.foo = nil }
+            context "when there is a default" do
+              let(:model) { TestModelBuilder.build("my-model-guid-1", client) { to_one :associated_model, :default => nil } }
 
-          it "allows setting to the default" do
-            myobject.foo = otherobject
+              before do
+                model.associated_model = othermodel
+              end
 
-            expect { subject }.to change {
-              myobject.manifest[:entity][:foo_guid]
-            }.from(otherobject.guid).to(nil)
+              it "allows setting to the default" do
+                expect {
+                  model.associated_model = nil
+                }.to change {
+                  model.manifest[:entity][:associated_model_guid]
+                }.from(othermodel.guid).to(nil)
+              end
+            end
           end
-        end
-      end
 
-      describe 'associated create' do
-        let!(:model) { fake_model { to_one :associated } }
-        let(:instance) { model.new(nil, client).fake }
-        let!(:request) { WebMock.stub_request(:post, /v2\/associated/).to_return(:body => {:metadata => {:guid => "thing"}}.to_json) }
+          describe "associated create" do
+            let(:model) do
+              TestModelBuilder.build("my-model-guid-1", client) { to_one :associated_model }
+            end
 
-        it 'returns a new associated object' do
-          instance.create_associated.should be_a(Associated)
-        end
+            before do
+              WebMock.stub_request(:post, /v2\/associated_model/).to_return(:body => {:metadata => {:guid => "thing"}}.to_json)
+            end
 
-        it 'sets the relation' do
-          created = instance.create_associated
-          instance.associated.should == created
-        end
+            it "returns a new associated object" do
+              model.create_associated_model.should be_a(AssociatedModel)
+            end
 
-        context 'with attributes for the association' do
-          it 'sets these attributes on the association' do
-            created = instance.create_associated(:attribute => 'value')
-            created.attribute.should == 'value'
-          end
-        end
+            it "sets the relation" do
+              created = model.create_associated_model
+              model.associated_model.should == created
+            end
 
-        it 'calls out to cloud_controller' do
-          instance.create_associated
-          request.should have_been_requested
-        end
+            context "with attributes for the association" do
+              it "sets these attributes on the association" do
+                created = model.create_associated_model(:attribute => "value")
+                created.attribute.should == "value"
+              end
+            end
 
-        context 'when creation fails' do
-          let!(:request) { WebMock.stub_request(:post, /v2\/associated/).to_raise(:not_authorized) }
-
-          it 'raises an exception' do
-            expect { instance.create_associated }.to raise_error(StandardError)
+            context "when creation fails" do
+              it "raises an exception" do
+                WebMock.stub_request(:post, /v2\/associated/).to_raise(:not_authorized)
+                expect { instance.create_associated }.to raise_error(StandardError)
+              end
+            end
           end
         end
       end

@@ -10,48 +10,47 @@ module CFoundry
     describe Model do
       let(:client) { build(:client) }
       let(:guid) { random_string("my-object-guid") }
-      let(:manifest) { {:metadata => {:foo => "bar"}} }
-
-      subject { TestModel.new(guid, client, manifest) }
+      let(:manifest) { {:metadata => {:guid => "some-guid-1"}, :entity => {}} }
+      let(:model) { TestModel.new(guid, client, manifest) }
 
       describe "create" do
         it "uses #create!" do
-          mock(subject).create!
-          subject.create
+          mock(model).create!
+          model.create
         end
 
         context "without errors" do
           it "returns true" do
-            mock(subject).create!
-            subject.create.should == true
+            mock(model).create!
+            model.create.should == true
           end
         end
 
         context "with errors" do
           before do
-            stub(subject.class).model_name { ActiveModel::Name.new(subject, nil, "abstract_model") }
-            stub(subject).create! { raise CFoundry::APIError.new("HELP") }
+            stub(model.class).model_name { ActiveModel::Name.new(model, nil, "abstract_model") }
+            stub(model).create! { raise CFoundry::APIError.new("HELP") }
           end
 
           it "does not raise an exception" do
-            expect { subject.create }.to_not raise_error
+            expect { model.create }.to_not raise_error
           end
 
           it "returns false" do
-            subject.create.should == false
+            model.create.should == false
           end
 
           context "without model-specific errors" do
             it "adds generic base error " do
-              subject.create
-              subject.errors.full_messages.first.should =~ /cloud controller reported an error/i
+              model.create
+              model.errors.full_messages.first.should =~ /cloud controller reported an error/i
             end
           end
 
           context "with model-specific errors" do
             it "does not set the generic error on base" do
-              subject.create
-              subject.errors.size.should == 1
+              model.create
+              model.errors.size.should == 1
             end
           end
         end
@@ -62,7 +61,7 @@ module CFoundry
           stub(client.base).post {
             {:metadata => {:guid => "123"}}
           }
-          subject.foo = "bar"
+          model.foo = "bar"
         end
 
         it "posts to the model's create url with appropriate arguments" do
@@ -71,23 +70,23 @@ module CFoundry
             :accept => :json,
             :payload => {:foo => "bar"}
           ) { {:metadata => {}} }
-          subject.create!
+          model.create!
         end
 
         it "clears diff" do
-          subject.diff.should be_present
-          subject.create!
-          subject.diff.should_not be_present
+          model.diff.should be_present
+          model.create!
+          model.diff.should_not be_present
         end
 
         it "sets manifest from the response" do
-          subject.create!
-          subject.manifest.should == {:metadata => {:guid => "123"}}
+          model.create!
+          model.manifest.should == {:metadata => {:guid => "123"}}
         end
 
         it "sets guid from the response metadata" do
-          subject.create!
-          subject.guid.should == "123"
+          model.create!
+          model.guid.should == "123"
         end
       end
 
@@ -97,68 +96,68 @@ module CFoundry
         end
 
         it "updates using the client with the v2 api, its plural model name, object guid, and diff object" do
-          subject.foo = "bar"
+          model.foo = "bar"
 
           mock(client.base).put("v2", :test_models, guid,
             :content => :json,
             :accept => :json,
             :payload => {:foo => "bar"}
           )
-          subject.update!
+          model.update!
         end
 
         it "clears diff" do
-          subject.foo = "bar"
+          model.foo = "bar"
 
-          subject.diff.should be_present
-          subject.update!
-          subject.diff.should_not be_present
+          model.diff.should be_present
+          model.update!
+          model.diff.should_not be_present
         end
       end
 
       describe "delete" do
         it "uses #delete!" do
-          mock(subject).delete!({}) { true }
-          subject.delete
+          mock(model).delete!({}) { true }
+          model.delete
         end
 
         it "passes options along to delete!" do
-          mock(subject).delete!(:recursive => true) { true }
-          subject.delete(:recursive => true)
+          mock(model).delete!(:recursive => true) { true }
+          model.delete(:recursive => true)
         end
 
         context "without errors" do
           it "returns true" do
-            mock(subject).delete!({}) { true }
-            subject.delete.should == true
+            mock(model).delete!({}) { true }
+            model.delete.should == true
           end
         end
 
         context "with errors" do
           before do
-            stub(subject.class).model_name { ActiveModel::Name.new(subject, nil, "abstract_model") }
-            stub(subject).delete! { raise CFoundry::APIError.new("HELP") }
+            stub(model.class).model_name { ActiveModel::Name.new(model, nil, "abstract_model") }
+            stub(model).delete! { raise CFoundry::APIError.new("HELP") }
           end
 
           it "does not raise an exception" do
-            expect { subject.delete }.to_not raise_error
+            expect { model.delete }.to_not raise_error
           end
 
           it "returns false" do
-            subject.delete.should == false
+            model.delete.should == false
           end
 
           context "without model-specific errors" do
             it "adds generic base error " do
-              subject.delete
-              subject.errors.full_messages.first.should =~ /cloud controller reported an error/i
+              model.delete
+              model.errors.full_messages.first.should =~ /cloud controller reported an error/i
             end
           end
 
           context "with model-specific errors" do
             it "does not set the generic error on base" do
-              subject.delete
-              subject.errors.size.should == 1
+              model.delete
+              model.errors.size.should == 1
             end
           end
         end
@@ -170,7 +169,7 @@ module CFoundry
         context "without options" do
           it "deletes using the client with the v2 api, its plural model name, object guid, and empty params hash" do
             mock(client.base).delete("v2", :test_models, guid, :params => {})
-            subject.delete!
+            model.delete!
           end
         end
 
@@ -179,26 +178,26 @@ module CFoundry
             options = {:excellent => "billandted"}
             mock(client.base).delete("v2", :test_models, guid, :params => options)
 
-            subject.delete!(options)
+            model.delete!(options)
           end
         end
 
         it "clears its manifest metadata" do
-          subject.manifest.should have_key(:metadata)
-          subject.delete!
-          subject.manifest.should_not have_key(:metadata)
+          model.manifest.should have_key(:metadata)
+          model.delete!
+          model.manifest.should_not have_key(:metadata)
         end
 
         it "clears the diff" do
-          subject.foo = "bar"
-          subject.diff.should be_present
-          subject.delete!
-          subject.diff.should_not be_present
+          model.foo = "bar"
+          model.diff.should be_present
+          model.delete!
+          model.diff.should_not be_present
         end
 
         it "delete me" do
           begin
-            subject.delete!
+            model.delete!
           rescue => ex
             ex.message.should_not =~ /\?/
           end
@@ -208,8 +207,8 @@ module CFoundry
       describe "#to_key" do
         context "when persisted" do
           it "returns an enumerable containing the guid" do
-            subject.to_key.should respond_to(:each)
-            subject.to_key.first.should == guid
+            model.to_key.should respond_to(:each)
+            model.to_key.first.should == guid
           end
         end
 
@@ -217,7 +216,7 @@ module CFoundry
           let(:guid) { nil }
 
           it "returns nil" do
-            subject.to_key.should be_nil
+            model.to_key.should be_nil
           end
         end
       end
@@ -225,8 +224,8 @@ module CFoundry
       describe "#to_param" do
         context "when persisted" do
           it "returns the guid as a string" do
-            subject.to_param.should be_a(String)
-            subject.to_param.should == guid
+            model.to_param.should be_a(String)
+            model.to_param.should == guid
           end
         end
 
@@ -234,7 +233,7 @@ module CFoundry
           let(:guid) { nil }
 
           it "returns nil" do
-            subject.to_param.should be_nil
+            model.to_param.should be_nil
           end
         end
       end
@@ -243,24 +242,24 @@ module CFoundry
         context "on a new object" do
           let(:guid) { nil }
           it "returns false" do
-            subject.should_not be_persisted
+            model.should_not be_persisted
           end
         end
 
         context "on an object with a guid" do
           it "returns false" do
-            subject.should be_persisted
+            model.should be_persisted
           end
         end
 
         context "on an object that has been deleted" do
           before do
             stub(client.base).delete
-            subject.delete
+            model.delete
           end
 
           it "returns false" do
-            subject.should_not be_persisted
+            model.should_not be_persisted
           end
         end
       end
