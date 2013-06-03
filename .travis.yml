@@ -3,7 +3,6 @@ rvm:
   - "1.9.3"
   - "1.9.2"
   - rbx-19mode
-  - "1.8.7"
 after_success: "rake release:ci"
 matrix:
   allow_failures:
