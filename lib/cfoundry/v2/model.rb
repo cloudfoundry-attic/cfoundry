@@ -21,6 +21,7 @@ module CFoundry::V2
     end
 
     attr_accessor :guid, :cache, :changes
+    attr_reader :diff
 
     def initialize(guid, client, manifest = nil, partial = false)
       @guid = guid
