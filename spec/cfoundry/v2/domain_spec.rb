@@ -1,11 +1,13 @@
 require "spec_helper"
 
-describe CFoundry::V2::Domain do
-  let(:client) { fake_client }
+module CFoundry
+  module V2
+    describe Domain do
+      let(:domain) { build(:domain) }
 
-  subject { CFoundry::V2::Domain.new("domain-id-1", client) }
-
-  it "should have a spaces association" do
-    expect(subject.spaces).to eq([])
+      it "should have a spaces association" do
+        expect(domain.spaces).to eq([])
+      end
+    end
   end
 end
