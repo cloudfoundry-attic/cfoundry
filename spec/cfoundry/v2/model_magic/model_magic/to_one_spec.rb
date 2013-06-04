@@ -17,7 +17,7 @@ module CFoundry
               TestModelBuilder.build("my-model-guid-1", client) { to_one :associated_model }
             end
 
-            let(:othermodel) do
+            let(:other_model) do
               AssociatedModel.new("my-model-guid-2", client)
             end
 
@@ -27,14 +27,14 @@ module CFoundry
 
             it "sets the GUID in the manifest to the object's GUID" do
               expect {
-                model.associated_model = othermodel
-              }.to change { model.manifest[:entity][:associated_model_guid] }.to(othermodel.guid)
+                model.associated_model = other_model
+              }.to change { model.manifest[:entity][:associated_model_guid] }.to(other_model.guid)
             end
 
             it "tracks internal changes in the diff" do
               expect {
-                model.associated_model = othermodel
-              }.to change { model.diff }.to(:associated_model_guid => othermodel.guid)
+                model.associated_model = other_model
+              }.to change { model.diff }.to(:associated_model_guid => other_model.guid)
             end
 
             it "tracks high-level changes in .changes" do
@@ -42,19 +42,19 @@ module CFoundry
               model.associated_model = previous_associated_model
 
               expect {
-                model.associated_model = othermodel
-              }.to change { model.changes }.to(:associated_model => [previous_associated_model, othermodel])
+                model.associated_model = other_model
+              }.to change { model.changes }.to(:associated_model => [previous_associated_model, other_model])
             end
 
             it "returns the assigned value" do
-              model.send(:associated_model=, othermodel).should == othermodel
+              model.send(:associated_model=, other_model).should == other_model
             end
 
             context "when there is a default" do
               let(:model) { TestModelBuilder.build("my-model-guid-1", client) { to_one :associated_model, :default => nil } }
 
               before do
-                model.associated_model = othermodel
+                model.associated_model = other_model
               end
 
               it "allows setting to the default" do
@@ -62,7 +62,7 @@ module CFoundry
                   model.associated_model = nil
                 }.to change {
                   model.manifest[:entity][:associated_model_guid]
-                }.from(othermodel.guid).to(nil)
+                }.from(other_model.guid).to(nil)
               end
             end
           end

@@ -1,7 +1,7 @@
-require 'spec_helper'
+require "spec_helper"
 
 describe CFoundry::TraceHelpers do
-  let(:fake_class) { Class.new { include CFoundry::TraceHelpers } }
+  let(:tracehelper_test_class) { Class.new { include CFoundry::TraceHelpers } }
   let(:request) do
     {
       :method => "GET",
@@ -21,7 +21,7 @@ describe CFoundry::TraceHelpers do
     before { response[:body] = response_body }
 
     it "traces the provided response" do
-      fake_class.new.response_trace(response).should == response_trace
+      tracehelper_test_class.new.response_trace(response).should == response_trace
     end
   end
 
@@ -30,7 +30,7 @@ describe CFoundry::TraceHelpers do
     let(:header_trace) { "REQUEST_HEADERS:\n  accept : */*\n  bb-foo : bar" }
     let(:body_trace) { "" }
 
-    subject { fake_class.new.request_trace(request) }
+    subject { tracehelper_test_class.new.request_trace(request) }
 
     context "without a request body" do
       include_examples "request_trace tests"
@@ -45,7 +45,7 @@ describe CFoundry::TraceHelpers do
     end
 
     it "returns nil if request is nil" do
-      fake_class.new.request_trace(nil).should == nil
+      tracehelper_test_class.new.request_trace(nil).should == nil
     end
   end
 
@@ -66,7 +66,7 @@ describe CFoundry::TraceHelpers do
     end
 
     it "returns nil if response is nil" do
-      fake_class.new.response_trace(nil).should == nil
+      tracehelper_test_class.new.response_trace(nil).should == nil
     end
   end
 end

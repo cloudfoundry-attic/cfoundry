@@ -3,11 +3,10 @@ require "spec_helper"
 module CFoundry
   module V2
     describe AppEvent do
-      let(:app_event) { build(:app_event) }
+      let(:app) { build(:app) }
+      let(:app_event) { build(:app_event, :app => app) }
 
       it "has an app" do
-        app = build(:app)
-        app_event.app = app
         expect(app_event.app).to eq(app)
       end
 
@@ -57,8 +56,12 @@ module CFoundry
       end
 
       describe "#exit_description" do
+        before do
+          stub_request(:get, /v2\/app_events\/.*/).to_return(:body => {:entity => {}}.to_json)
+        end
+
         it "defaults to an empty string" do
-          expect(app_event.fake.exit_description).to eq("")
+          expect(app_event.exit_description).to eq("")
         end
 
         it "has an instance guid" do

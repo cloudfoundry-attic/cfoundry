@@ -3,10 +3,11 @@ require "spec_helper"
 module CFoundry
   module V2
     describe Domain do
-      let(:domain) { build(:domain) }
+      let(:space) { build(:space) }
+      let(:domain) { build(:domain, :spaces => [space]) }
 
       it "should have a spaces association" do
-        expect(domain.spaces).to eq([])
+        expect(domain.spaces).to eq([space])
       end
     end
   end

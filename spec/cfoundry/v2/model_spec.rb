@@ -9,7 +9,7 @@ module CFoundry
   module V2
     describe Model do
       let(:client) { build(:client) }
-      let(:guid) { random_string("my-object-guid") }
+      let(:guid) { "my-object-guid" }
       let(:manifest) { {:metadata => {:guid => "some-guid-1"}, :entity => {}} }
       let(:model) { TestModel.new(guid, client, manifest) }
 
