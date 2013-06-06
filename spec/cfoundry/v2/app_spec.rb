@@ -141,7 +141,7 @@ module CFoundry
       describe "#update!" do
         describe "changes" do
           subject { build(:app, :client => client) }
-          let(:response) { {:body => { "foo" => "bar" }.to_json } }
+          let(:response) { {:body => {"foo" => "bar"}.to_json} }
 
           before do
             stub(client.base).put("v2", "apps", subject.guid, anything) do
@@ -250,6 +250,17 @@ module CFoundry
         mock(client.base).delete("v2", :apps, subject.guid, {:params => {:recursive => true}})
 
         subject.delete!(:recursive => false)
+      end
+
+      describe "#health" do
+        describe "when staging failed for an app" do
+          it "returns 'STAGING FAILED' as state" do
+            stub(client.base).instances(subject.guid) { raise CFoundry::StagingError }
+            stub(subject).state { "STARTED" }
+
+            expect(subject.health).to eq("STAGING FAILED")
+          end
+        end
       end
     end
   end

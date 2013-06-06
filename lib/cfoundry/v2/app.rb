@@ -168,7 +168,7 @@ module CFoundry::V2
     # Determine application health.
     #
     # If all instances are running, returns "RUNNING". If only some are
-    # started, returns the precentage of them that are healthy.
+    # started, returns the percentage of them that are healthy.
     #
     # Otherwise, returns application's status.
     def health
@@ -189,6 +189,8 @@ module CFoundry::V2
       else
         state
       end
+    rescue CFoundry::StagingError
+      "STAGING FAILED"
     end
 
     def running_instances
