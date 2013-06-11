@@ -59,7 +59,11 @@ module CFoundry
       describe "#create!" do
         before do
           stub(client.base).post {
-            {:metadata => {:guid => "123"}}
+            {:metadata => {
+                :guid => "123",
+                :created_at => "2013-06-10 10:41:15 -0700",
+                :updated_at => "2015-06-10 10:41:15 -0700"
+            }}
           }
           model.foo = "bar"
         end
@@ -81,29 +85,62 @@ module CFoundry
 
         it "sets manifest from the response" do
           model.create!
-          model.manifest.should == {:metadata => {:guid => "123"}}
+          model.manifest.should == {
+            :metadata => {
+              :guid => "123",
+              :created_at => "2013-06-10 10:41:15 -0700",
+              :updated_at => "2015-06-10 10:41:15 -0700"
+            }
+          }
         end
 
         it "sets guid from the response metadata" do
           model.create!
           model.guid.should == "123"
         end
+
+        it "sets timestamps from the response metadata" do
+          model.create!
+
+          model.created_at.should == DateTime.parse("2013-06-10 10:41:15 -0700")
+          model.updated_at.should == DateTime.parse("2015-06-10 10:41:15 -0700")
+        end
       end
 
       describe "#update!" do
         before do
-          stub(client.base).put
+          stub(client.base).put {
+            {
+              :metadata => {
+                :guid => guid,
+                :created_at => "2013-06-10 10:41:15 -0700",
+                :updated_at => "2015-06-12 10:41:15 -0700"
+              },
+              :entity => {
+                :foo => "updated"
+              }
+            }
+          }
         end
 
         it "updates using the client with the v2 api, its plural model name, object guid, and diff object" do
           model.foo = "bar"
-
           mock(client.base).put("v2", :test_models, guid,
             :content => :json,
             :accept => :json,
             :payload => {:foo => "bar"}
           )
           model.update!
+        end
+
+        it "updates the updated_at timestamp" do
+          model.update!
+          model.updated_at.should == DateTime.parse("2015-06-12 10:41:15 -0700")
+        end
+
+        it "reloads it's data from the manifest" do
+          model.update!
+          model.foo.should == "updated"
         end
 
         it "clears diff" do
@@ -264,11 +301,32 @@ module CFoundry
         end
       end
 
+      describe "metadata" do
+        let(:new_object) { client.test_model }
+
+        context "when metadata are set" do
+          it "has timestamps" do
+            new_object.created_at.should be_nil
+            new_object.updated_at.should be_nil
+          end
+        end
+
+        context "when metadata are not defined" do
+          before do
+            stub(new_object).manifest(nil)
+          end
+
+          it "returns nil for timestamps" do
+            new_object.updated_at.should be_nil
+            new_object.updated_at.should be_nil
+          end
+        end
+      end
+
       describe "creating a new object" do
         let(:new_object) { client.test_model }
 
         describe "getting attributes" do
-
           it "does not go to cloud controller" do
             expect {
               new_object.foo

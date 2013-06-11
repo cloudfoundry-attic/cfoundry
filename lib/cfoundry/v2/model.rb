@@ -21,6 +21,7 @@ module CFoundry::V2
     end
 
     attr_accessor :guid, :cache, :changes
+    attr_reader :created_at, :updated_at
     attr_reader :diff
 
     def initialize(guid, client, manifest = nil, partial = false)
@@ -31,6 +32,16 @@ module CFoundry::V2
       @cache = {}
       @diff = {}
       @changes = {}
+    end
+
+    def created_at
+      timestamp = @manifest.try(:[], :metadata).try(:[], :created_at)
+      DateTime.parse(timestamp) if timestamp.present?
+    end
+
+    def updated_at
+      timestamp = @manifest.try(:[], :metadata).try(:[], :updated_at)
+      DateTime.parse(timestamp) if timestamp.present?
     end
 
     def manifest
@@ -124,7 +135,7 @@ module CFoundry::V2
     end
 
     def update!
-      @client.base.put("v2", plural_object_name, guid,
+      @manifest = @client.base.put("v2", plural_object_name, guid,
         :content => :json,
         :accept => :json,
         :payload => @diff
