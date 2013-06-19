@@ -36,6 +36,7 @@ module CcApiStub
         end
 
         stub_get(%r{/v2/users/[^/]+\?inline-relations-depth=2$}, {}, response(200, response_body))
+        stub_get(%r{/v2/users/[^/]+/summary(\?inline-relations-depth=\d)?$}, {}, response(200, response_body))
       end
 
       def fail_to_find
@@ -77,7 +78,7 @@ module CcApiStub
       end
 
       def object_endpoint
-        %r{/v2/users/[^/]+$}
+        %r{/v2/users/[^/]+(/summary)?}
       end
     end
   end
