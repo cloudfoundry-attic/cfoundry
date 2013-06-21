@@ -262,6 +262,59 @@ module CFoundry
           end
         end
       end
+
+      describe "#host" do
+        let(:route) { build(:route, :host => "my-host") }
+        let(:app) { build(:app) }
+
+        context "when at least one route exists" do
+          it "returns the host that the user has specified" do
+            app.stub(:routes).and_return([route])
+            expect(app.host).to eq("my-host")
+          end
+        end
+
+        context "when no routes exists" do
+          it "returns the host that the user has specified" do
+            app.stub(:routes).and_return([])
+            expect(app.host).to be_nil
+          end
+        end
+      end
+
+      describe "#domain" do
+        let(:domain) { build(:domain, :name => "my-domain") }
+        let(:route) { build(:route, :domain => domain) }
+        let(:app) { build(:app) }
+
+        context "when at least one route exists" do
+          it "returns the domain that the user has specified" do
+            app.stub(:routes).and_return([route])
+            expect(app.domain).to eq("my-domain")
+          end
+        end
+
+        context "when no routes exists" do
+          it "returns the domain that the user has specified" do
+            app.stub(:routes).and_return([])
+            expect(app.domain).to be_nil
+          end
+        end
+      end
+
+      describe "#uri" do
+        context "when there are one or more routes" do
+          let(:domain) { build(:domain, :name => "example.com") }
+          let(:route) { build(:route, :host => "my-host", :domain => domain) }
+          let(:other_route) { build(:route, :host => "other-host", :domain => domain) }
+          let(:app) { build(:app) }
+
+          it "return the first one" do
+            app.stub(:routes).and_return([route, other_route])
+            expect(app.uri).to eq("#{route.host}.#{route.domain.name}")
+          end
+        end
+      end
     end
   end
 end

@@ -115,6 +115,16 @@ module CFoundry::V2
     end
     alias :url :uri
 
+    def host
+      return nil if routes.empty?
+      routes.first.host
+    end
+
+    def domain
+      return nil if routes.empty?
+      routes.first.domain.name
+    end
+
     def uri=(x)
       self.uris = [x]
     end
