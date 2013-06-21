@@ -2,7 +2,7 @@ require "spec_helper"
 
 describe CFoundry::Client do
   before do
-    any_instance_of(CFoundry::V2::Client) { |cli| stub(cli).info }
+    CFoundry::V2::Client.any_instance.stub(:info)
   end
 
   subject { CFoundry::Client.new('http://example.com') }

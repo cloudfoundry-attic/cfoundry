@@ -20,7 +20,7 @@ EOF
 
   shared_examples "UAA wrapper" do
     it "converts UAA errors to CFoundry equivalents" do
-      mock(uaa).wrap_uaa_errors { nil }
+      uaa.should_receive(:wrap_uaa_errors) { nil }
       subject
     end
   end
@@ -75,21 +75,21 @@ EOF
     subject { uaa.authorize(username, password) }
 
     before do
-      stub(issuer).owner_password_grant { auth }
-      stub(uaa).token_issuer { issuer }
+      issuer.stub(:owner_password_grant) { auth }
+      uaa.stub(:token_issuer) { issuer }
     end
 
     include_examples "UAA wrapper"
 
     it 'returns the token on successful authentication' do
-      mock(issuer).owner_password_grant(username, password) { auth }
+      issuer.should_receive(:owner_password_grant).with(username, password) { auth }
       expect(subject).to eq auth
     end
 
     context 'when authorization fails' do
       context 'in the expected way' do
         it 'raises a CFoundry::Denied error' do
-          mock(issuer).owner_password_grant(anything, anything) { raise CF::UAA::BadResponse.new("401: FooBar") }
+          issuer.should_receive(:owner_password_grant) { raise CF::UAA::BadResponse.new("401: FooBar") }
           expect { subject }.to raise_error(CFoundry::Denied, "401: Authorization failed")
         end
       end
@@ -97,28 +97,28 @@ EOF
 
       context 'in an unexpected way' do
         it 'raises a CFoundry::Denied error' do
-          mock(issuer).owner_password_grant(anything, anything) { raise CF::UAA::BadResponse.new("no_status_code") }
+          issuer.should_receive(:owner_password_grant) { raise CF::UAA::BadResponse.new("no_status_code") }
           expect { subject }.to raise_error(CFoundry::Denied, "400: Authorization failed")
         end
       end
 
       context "with a CF::UAA::TargetError" do
         before do
-          stub(issuer).owner_password_grant { raise CF::UAA::TargetError.new("useless info") }
+          issuer.stub(:owner_password_grant) { raise CF::UAA::TargetError.new("useless info") }
         end
 
         it "retries with implicit grant" do
-          mock(issuer).implicit_grant_with_creds(:username => username, :password => password)
+          issuer.should_receive(:implicit_grant_with_creds).with(:username => username, :password => password)
           expect { subject }.to_not raise_error
         end
 
         it "fails with Denied when given a 401" do
-          stub(issuer).implicit_grant_with_creds(anything) { raise CF::UAA::BadResponse.new("status 401") }
+          issuer.stub(:implicit_grant_with_creds) { raise CF::UAA::BadResponse.new("status 401") }
           expect { subject }.to raise_error(CFoundry::Denied, "401: Authorization failed")
         end
 
         it "fails with Denied when given any other status code" do
-          stub(issuer).implicit_grant_with_creds(anything) { raise CF::UAA::BadResponse.new("no status code") }
+          issuer.stub(:implicit_grant_with_creds) { raise CF::UAA::BadResponse.new("no status code") }
           expect { subject }.to raise_error(CFoundry::Denied, "400: Authorization failed")
         end
       end
@@ -277,7 +277,7 @@ EOF
     subject { uaa }
 
     it "wraps uaa errors" do
-      mock(uaa).wrap_uaa_errors
+      uaa.should_receive(:wrap_uaa_errors)
       subject.delete_user(guid)
     end
 
@@ -351,7 +351,7 @@ EOF
 
   describe "#try_to_refresh_token!" do
     it "uses the refresh token to get a new access token" do
-      mock(uaa.send(:token_issuer)).refresh_token_grant(uaa.token.refresh_token) do
+      uaa.send(:token_issuer).should_receive(:refresh_token_grant).with(uaa.token.refresh_token) do
         CF::UAA::TokenInfo.new(
           :token_type => "bearer",
           :access_token => "refreshed-token",
@@ -365,7 +365,7 @@ EOF
 
     context "when the refresh token has expired" do
       it "returns the current token" do
-        stub(uaa.send(:token_issuer)).refresh_token_grant do
+        uaa.send(:token_issuer).should_receive(:refresh_token_grant) do
           raise CF::UAA::TargetError.new
         end
 

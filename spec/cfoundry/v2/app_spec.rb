@@ -60,7 +60,7 @@ module CFoundry
         let(:app) { build(:app) }
 
         it "assigns :instances as #total_instances" do
-          stub(app).summary { {:instances => 4} }
+          app.stub(:summary) { {:instances => 4} }
 
           app.summarize!
 
@@ -73,14 +73,14 @@ module CFoundry
         let(:response) { {:body => '{ "foo": "bar" }'} }
 
         before do
-          stub(client.base).put("v2", "apps", subject.guid, anything) do
+          client.base.stub(:put).with("v2", "apps", subject.guid, anything) do
             response
           end
         end
 
         context "when asynchronous is true" do
           it "sends the PUT request with &stage_async=true" do
-            mock(client.base).put(
+            client.base.should_receive(:put).with(
               "v2", "apps", subject.guid,
               hash_including(
                 :params => {:stage_async => true},
@@ -111,7 +111,7 @@ module CFoundry
 
         context "when asynchronous is false" do
           it "sends the PUT request with &stage_async=false" do
-            mock(client.base).put(
+            client.base.should_receive(:put).with(
               "v2", "apps", subject.guid,
               hash_including(:params => {:stage_async => false})) do
               response
@@ -144,7 +144,7 @@ module CFoundry
           let(:response) { {:body => {"foo" => "bar"}.to_json} }
 
           before do
-            stub(client.base).put("v2", "apps", subject.guid, anything) do
+            client.base.stub(:put).with("v2", "apps", subject.guid, anything) do
               response
             end
           end
@@ -167,13 +167,13 @@ module CFoundry
         let(:base_url) { "http://example.com/log" }
 
         def mock_log(url = anything)
-          mock(client).stream_url(url) do |_, blk|
+          client.should_receive(:stream_url).with(url) do |_, &blk|
             blk.call(yield)
           end.ordered
         end
 
         def stub_log(url = anything)
-          stub(client).stream_url(url) do |_, blk|
+          client.stub(:stream_url).with(url) do |_, blk|
             blk.call(yield)
           end.ordered
         end
@@ -240,14 +240,14 @@ module CFoundry
 
       describe "delete!" do
         it "defaults to recursive" do
-          mock(client.base).delete("v2", :apps, subject.guid, {:params => {:recursive => true}})
+          client.base.should_receive(:delete).with("v2", :apps, subject.guid, {:params => {:recursive => true}})
 
           subject.delete!
         end
       end
 
       it "accepts and ignores an options hash" do
-        mock(client.base).delete("v2", :apps, subject.guid, {:params => {:recursive => true}})
+        client.base.should_receive(:delete).with("v2", :apps, subject.guid, {:params => {:recursive => true}})
 
         subject.delete!(:recursive => false)
       end
@@ -255,8 +255,8 @@ module CFoundry
       describe "#health" do
         describe "when staging failed for an app" do
           it "returns 'STAGING FAILED' as state" do
-            stub(client.base).instances(subject.guid) { raise CFoundry::StagingError }
-            stub(subject).state { "STARTED" }
+            client.base.stub(:instances).with(subject.guid) { raise CFoundry::StagingError }
+            subject.stub(:state) { "STARTED" }
 
             expect(subject.health).to eq("STAGING FAILED")
           end

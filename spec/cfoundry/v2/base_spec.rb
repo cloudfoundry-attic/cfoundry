@@ -135,7 +135,7 @@ describe CFoundry::V2::Base do
           let(:args) { segments }
 
           it "makes a request with the correct url and options" do
-            mock(rest_client).request(verb, "first-segment/next-segment", {}) { [request, response] }
+            rest_client.should_receive(:request).with(verb, "first-segment/next-segment", {}) { [request, response] }
             subject
           end
         end
@@ -144,7 +144,7 @@ describe CFoundry::V2::Base do
           let(:args) { segments + [options] }
 
           it "makes a request with the correct url and options" do
-            mock(rest_client).request(verb, "first-segment/next-segment", options) { [request, response] }
+            rest_client.should_receive(:request).with(verb, "first-segment/next-segment", options) { [request, response] }
             subject
           end
         end
@@ -155,7 +155,7 @@ describe CFoundry::V2::Base do
           let(:args) { ["first-segment"] }
 
           it "makes a request with the correct url and options" do
-            mock(rest_client).request(verb, "first-segment", {}) { [request, response] }
+            rest_client.should_receive(:request).with(verb, "first-segment", {}) { [request, response] }
             subject
           end
         end
@@ -164,7 +164,7 @@ describe CFoundry::V2::Base do
           let(:args) { ["first-segment", options] }
 
           it "makes a request with the correct url and options" do
-            mock(rest_client).request(verb, "first-segment", options) { [request, response] }
+            rest_client.should_receive(:request).with(verb, "first-segment", options) { [request, response] }
             subject
           end
         end
@@ -185,7 +185,7 @@ describe CFoundry::V2::Base do
       subject { base.get(*args) }
 
       it "makes a GET request" do
-        mock(rest_client).request("GET", "some-path", options) { [request, response] }
+        rest_client.should_receive(:request).with("GET", "some-path", options) { [request, response] }
         subject
       end
 
@@ -197,7 +197,7 @@ describe CFoundry::V2::Base do
       subject { base.post(*args) }
 
       it "makes a POST request" do
-        mock(rest_client).request("POST", "some-path", options) { [request, response] }
+        rest_client.should_receive(:request).with("POST", "some-path", options) { [request, response] }
         subject
       end
 
@@ -209,7 +209,7 @@ describe CFoundry::V2::Base do
       subject { base.put(*args) }
 
       it "makes a PUT request" do
-        mock(rest_client).request("PUT", "some-path", options) { [request, response] }
+        rest_client.should_receive(:request).with("PUT", "some-path", options) { [request, response] }
         subject
       end
 
@@ -221,7 +221,7 @@ describe CFoundry::V2::Base do
       subject { base.delete(*args) }
 
       it "makes a DELETE request" do
-        mock(rest_client).request("DELETE", "some-path", options) { [request, response] }
+        rest_client.should_receive(:request).with("DELETE", "some-path", options) { [request, response] }
         subject
       end
 
@@ -278,7 +278,7 @@ describe CFoundry::V2::Base do
     let(:file_url) { "http://api.cloudfoundry.com/static/path/to/some/file" }
 
     before do
-      stub(base).token { CFoundry::AuthToken.new("bearer foo") }
+      base.stub(:token) { CFoundry::AuthToken.new("bearer foo") }
     end
 
     it "follows the redirect returned by the files endpoint" do

@@ -29,7 +29,7 @@ module CFoundry
 
       describe "errors" do
         before do
-          stub(route).create! { raise CFoundry::RouteHostTaken.new("the host is taken", 210003) }
+          route.stub(:create!) { raise CFoundry::RouteHostTaken.new("the host is taken", 210003) }
         end
 
         it "populates errors on host" do

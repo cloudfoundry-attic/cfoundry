@@ -13,12 +13,12 @@ module CFoundry
         subject { client.register(email, password) }
 
         it "creates the user in uaa and ccng" do
-          stub(client.base).uaa { uaa }
-          stub(uaa).add_user(email, password) { {"id" => "1234"} }
+          client.base.stub(:uaa) { uaa }
+          uaa.stub(:add_user).with(email, password) { {"id" => "1234"} }
 
           user = build(:user)
-          stub(client).user { user }
-          stub(user).create!
+          client.stub(:user) { user }
+          user.stub(:create!)
           subject
           expect(user.guid).to eq "1234"
         end

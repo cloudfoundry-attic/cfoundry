@@ -22,7 +22,7 @@ shared_examples_for "a summarizeable model" do
 
   describe "#summarize!" do
     it "defines basic attributes via #summary" do
-      stub(subject).summary { summary_attributes }
+      subject.stub(:summary) { summary_attributes }
 
       subject.summarize!
 

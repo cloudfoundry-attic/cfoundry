@@ -15,21 +15,21 @@ module CFoundry
 
       describe "create" do
         it "uses #create!" do
-          mock(model).create!
+          model.should_receive(:create!)
           model.create
         end
 
         context "without errors" do
           it "returns true" do
-            mock(model).create!
+            model.should_receive(:create!)
             model.create.should == true
           end
         end
 
         context "with errors" do
           before do
-            stub(model.class).model_name { ActiveModel::Name.new(model, nil, "abstract_model") }
-            stub(model).create! { raise CFoundry::APIError.new("HELP") }
+            model.class.stub(:model_name) { ActiveModel::Name.new(model, nil, "abstract_model") }
+            model.stub(:create!) { raise CFoundry::APIError.new("HELP") }
           end
 
           it "does not raise an exception" do
@@ -58,7 +58,7 @@ module CFoundry
 
       describe "#create!" do
         before do
-          stub(client.base).post {
+          client.base.stub(:post) {
             {:metadata => {
                 :guid => "123",
                 :created_at => "2013-06-10 10:41:15 -0700",
@@ -69,7 +69,7 @@ module CFoundry
         end
 
         it "posts to the model's create url with appropriate arguments" do
-          mock(client.base).post("v2", :test_models,
+          client.base.should_receive(:post).with("v2", :test_models,
             :content => :json,
             :accept => :json,
             :payload => {:foo => "bar"}
@@ -109,7 +109,7 @@ module CFoundry
 
       describe "#update!" do
         before do
-          stub(client.base).put {
+          client.base.stub(:put) {
             {
               :metadata => {
                 :guid => guid,
@@ -125,7 +125,7 @@ module CFoundry
 
         it "updates using the client with the v2 api, its plural model name, object guid, and diff object" do
           model.foo = "bar"
-          mock(client.base).put("v2", :test_models, guid,
+          client.base.should_receive(:put).with("v2", :test_models, guid,
             :content => :json,
             :accept => :json,
             :payload => {:foo => "bar"}
@@ -154,26 +154,26 @@ module CFoundry
 
       describe "delete" do
         it "uses #delete!" do
-          mock(model).delete!({}) { true }
+          model.should_receive(:delete!).with({}) { true }
           model.delete
         end
 
         it "passes options along to delete!" do
-          mock(model).delete!(:recursive => true) { true }
+          model.should_receive(:delete!).with(:recursive => true) { true }
           model.delete(:recursive => true)
         end
 
         context "without errors" do
           it "returns true" do
-            mock(model).delete!({}) { true }
+            model.should_receive(:delete!).with({}) { true }
             model.delete.should == true
           end
         end
 
         context "with errors" do
           before do
-            stub(model.class).model_name { ActiveModel::Name.new(model, nil, "abstract_model") }
-            stub(model).delete! { raise CFoundry::APIError.new("HELP") }
+            model.class.stub(:model_name) { ActiveModel::Name.new(model, nil, "abstract_model") }
+            model.stub(:delete!) { raise CFoundry::APIError.new("HELP") }
           end
 
           it "does not raise an exception" do
@@ -201,11 +201,11 @@ module CFoundry
       end
 
       describe "#delete!" do
-        before { stub(client.base).delete }
+        before { client.base.stub(:delete) }
 
         context "without options" do
           it "deletes using the client with the v2 api, its plural model name, object guid, and empty params hash" do
-            mock(client.base).delete("v2", :test_models, guid, :params => {})
+            client.base.should_receive(:delete).with("v2", :test_models, guid, :params => {})
             model.delete!
           end
         end
@@ -213,7 +213,7 @@ module CFoundry
         context "with options" do
           it "sends delete with the object guid and options" do
             options = {:excellent => "billandted"}
-            mock(client.base).delete("v2", :test_models, guid, :params => options)
+            client.base.should_receive(:delete).with("v2", :test_models, guid, :params => options)
 
             model.delete!(options)
           end
@@ -291,7 +291,7 @@ module CFoundry
 
         context "on an object that has been deleted" do
           before do
-            stub(client.base).delete
+            client.base.stub(:delete)
             model.delete
           end
 
@@ -313,7 +313,7 @@ module CFoundry
 
         context "when metadata are not defined" do
           before do
-            stub(new_object).manifest(nil)
+            new_object.stub(:manifest).with(nil)
           end
 
           it "returns nil for timestamps" do

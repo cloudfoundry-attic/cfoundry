@@ -3,12 +3,12 @@ require 'spec_helper'
 describe CFoundry::BaseClient do
   describe "#request" do
     before do
-      stub(subject).handle_response(anything, anything, anything)
+      subject.stub(:handle_response).with(anything, anything, anything)
     end
 
     context "when given multiple segments" do
       it "encodes the segments and joins them with '/'" do
-        mock(subject).request_raw("GET", "foo/bar%2Fbaz", {})
+        subject.should_receive(:request_raw).with("GET", "foo/bar%2Fbaz", {})
         subject.request("GET", "foo", "bar/baz")
       end
     end
@@ -16,14 +16,14 @@ describe CFoundry::BaseClient do
     context "when the first segment starts with a '/'" do
       context "and there's only one segment" do
         it "requests with the segment unaltered" do
-          mock(subject).request_raw("GET", "/v2/apps", {})
+          subject.should_receive(:request_raw).with("GET", "/v2/apps", {})
           subject.request("GET", "/v2/apps")
         end
       end
 
       context "and there's more than one segment" do
         it "encodes the segments and joins them with '/'" do
-          mock(subject).request_raw("GET", "%2Ffoo/bar%2Fbaz", {})
+          subject.should_receive(:request_raw).with("GET", "%2Ffoo/bar%2Fbaz", {})
           subject.request("GET", "/foo", "bar/baz")
         end
       end
@@ -34,9 +34,9 @@ describe CFoundry::BaseClient do
       let(:token) { CFoundry::AuthToken.new("bearer something", refresh_token) }
 
       before do
-        stub(subject).request_raw
+        subject.stub(:request_raw)
         subject.token = token
-        stub(token).expires_soon? { expires_soon? }
+        token.stub(:expires_soon?) { expires_soon? }
       end
 
       context "and the token is about to expire" do
@@ -47,12 +47,12 @@ describe CFoundry::BaseClient do
           let(:refresh_token) { "some-refresh-token" }
 
           it "sets the token's auth header to nil to prevent recursion" do
-            stub(subject).refresh_token!
+            subject.stub(:refresh_token!)
             subject.request("GET", "foo")
           end
 
           it "refreshes the access token" do
-            mock(subject).refresh_token!
+            subject.should_receive(:refresh_token!)
             subject.request("GET", "foo")
           end
         end
@@ -61,8 +61,8 @@ describe CFoundry::BaseClient do
           let(:refresh_token) { nil }
 
           it "moves along" do
-            mock(subject).request_raw(anything, anything, anything)
-            dont_allow(subject).refresh_token!
+            subject.should_receive(:request_raw).with(anything, anything, anything)
+            subject.should_not_receive(:refresh_token!)
             subject.request("GET", "foo")
           end
         end
@@ -72,8 +72,8 @@ describe CFoundry::BaseClient do
         let(:expires_soon?) { nil }
 
         it "moves along" do
-          mock(subject).request_raw(anything, anything, anything)
-          dont_allow(subject).refresh_token!
+          subject.should_receive(:request_raw).with(anything, anything, anything)
+          subject.should_not_receive(:refresh_token!)
           subject.request("GET", "foo")
         end
       end
@@ -86,10 +86,10 @@ describe CFoundry::BaseClient do
       let(:new_access_token) { Base64.encode64(%Q|{"algo": "h1234"}{"a":"x"}random-bytes|) }
       let(:auth_token) { CFoundry::AuthToken.new("bearer #{access_token}", refresh_token) }
 
-      before { stub(subject).uaa { uaa } }
+      before { subject.stub(:uaa) { uaa } }
 
       it "refreshes the token with UAA client and assigns it" do
-        mock(uaa).try_to_refresh_token! {
+        uaa.should_receive(:try_to_refresh_token!) {
           CFoundry::AuthToken.new("bearer #{new_access_token}", auth_token.refresh_token)
         }
 
@@ -106,7 +106,7 @@ describe CFoundry::BaseClient do
       let(:info) { { :authorization_endpoint => "http://uaa.example.com" } }
 
       before do
-        stub(subject).info { info }
+        subject.stub(:info) { info }
       end
 
       describe "#uaa" do
@@ -121,7 +121,7 @@ describe CFoundry::BaseClient do
 
         it "has the same AuthToken as BaseClient" do
           token = CFoundry::AuthToken.new(nil)
-          stub(subject).token { token }
+          subject.stub(:token) { token }
           expect(subject.uaa.token).to eq token
         end
 
@@ -157,7 +157,7 @@ describe CFoundry::BaseClient do
 
     context "with no uaa endpoint" do
       before do
-        stub(subject).info { { :something => "else" } }
+        subject.stub(:info) { { :something => "else" } }
       end
 
       describe "#uaa" do
@@ -172,18 +172,18 @@ describe CFoundry::BaseClient do
   describe "#password_score" do
     context "with a uaa" do
       before do
-        stub(subject).info { { :authorization_endpoint => "http://uaa.example.com" } }
+        subject.stub(:info) { { :authorization_endpoint => "http://uaa.example.com" } }
       end
 
       it "delegates to the uaa's password strength method" do
-        mock(subject.uaa).password_score('password')
+        subject.uaa.should_receive(:password_score).with('password')
         subject.password_score('password')
       end
     end
 
     context "without a uaa" do
       before do
-        stub(subject).info { { :something => "else" } }
+        subject.stub(:info) { { :something => "else" } }
       end
 
       it "returns :unknown" do

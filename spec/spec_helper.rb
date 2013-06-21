@@ -17,5 +17,4 @@ require "support/factory_girl"
 require "support/test_model_builder"
 
 RSpec.configure do |c|
-  c.mock_with :rr
 end

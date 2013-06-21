@@ -8,8 +8,8 @@ shared_examples_for 'client login prompts' do
   end
 
   before do
-    stub(client.base).uaa { uaa }
-    stub(uaa).prompts { prompts }
+    client.base.stub(:uaa) { uaa }
+    uaa.stub(:prompts) { prompts }
   end
 
   subject { client.login_prompts }
@@ -27,8 +27,8 @@ shared_examples_for 'client login' do
   let(:token_info) { CF::UAA::TokenInfo.new({ :access_token => access_token, :token_type => "bearer" }) }
 
   before do
-    stub(client.base).uaa { uaa }
-    stub(uaa).authorize(email, password) { token_info }
+    client.base.stub(:uaa) { uaa }
+    uaa.stub(:authorize).with(email, password) { token_info }
   end
 
   subject { client.login(email, password) }

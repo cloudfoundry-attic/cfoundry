@@ -54,13 +54,13 @@ module CFoundry
             end
 
             it "retrieves the manifest the first time" do
-              mock(client.base).test_model("test-model-guid-1") {
+              client.base.should_receive(:test_model).with("test-model-guid-1") {
                 {:entity => {:foo => "fizz"}}
               }.ordered
 
               expect(model.foo).to eq "fizz"
 
-              dont_allow(client.base).model.ordered
+              client.base.should_not_receive(:model)
 
               expect(model.foo).to eq "fizz"
             end
@@ -82,7 +82,7 @@ module CFoundry
             end
 
             before do
-              stub(client.base).test_model("test-model-guid-1") {
+              client.base.stub(:test_model).with("test-model-guid-1") {
                 {:entity => {:not_foo => "fizz"}}
               }
             end
@@ -100,14 +100,14 @@ module CFoundry
             end
 
             it "uses the 'at' value in the update payload" do
-              mock(client.base).put("v2", :test_models, model.guid, hash_including(:payload => {:not_foo => 123}))
+              client.base.should_receive(:put).with("v2", :test_models, model.guid, hash_including(:payload => {:not_foo => 123}))
               model.foo = 123
               model.update!
             end
 
             it "uses the 'at' value in the create payload" do
               model.foo = 123
-              mock(client.base).post("v2", :test_models, hash_including(:payload => {:not_foo => 123})) { {:metadata => {}} }
+              client.base.should_receive(:post).with("v2", :test_models, hash_including(:payload => {:not_foo => 123})) { {:metadata => {}} }
               model.create!
             end
 
