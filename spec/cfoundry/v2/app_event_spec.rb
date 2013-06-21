@@ -81,7 +81,7 @@ module CFoundry
       describe "#timestamp" do
         it "has a timestamp" do
           app_event.timestamp = "2013-04-23 12:43:23 +0000"
-          expect(app_event.exit_status).to eq("2013-04-23 12:43:23 +0000")
+          expect(app_event.timestamp).to eq("2013-04-23 12:43:23 +0000")
         end
 
         context "when an invalid value is assigned" do
