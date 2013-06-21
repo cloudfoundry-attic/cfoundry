@@ -8,5 +8,6 @@ module CFoundry::V2
     attribute :instance_index, :integer
     attribute :exit_status, :integer
     attribute :exit_description, :string, :default => ""
+    attribute :timestamp, :string
   end
 end
