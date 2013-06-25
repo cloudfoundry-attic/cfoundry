@@ -10,6 +10,14 @@ module CFoundry
         expect(domain.spaces).to eq([space])
       end
 
+      describe "validations" do
+        subject { build(:domain) }
+        it { should validate_presence_of(:name) }
+        it { should allow_value("run.pivotal.io").for(:name) }
+        it { should_not allow_value("not-a-url").for(:name) }
+        it { should validate_presence_of(:owning_organization) }
+      end
+
       describe "#system?" do
         let(:params) { {} }
         let(:domain) { build(:domain, {:owning_organization => nil, client: client}.merge(params)) }
