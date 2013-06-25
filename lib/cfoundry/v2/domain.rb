@@ -8,5 +8,9 @@ module CFoundry::V2
     to_many   :spaces
 
     queryable_by :name, :owning_organization_guid, :space_guid
+
+    def system?
+      guid.present? && !owning_organization.present?
+    end
   end
 end
