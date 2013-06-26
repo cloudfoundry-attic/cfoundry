@@ -7,11 +7,21 @@
   "routes":[
     { "guid": "route-id",
       "host": "host",
-      "domain": { "guid": "domain-id", "name": "app-domain.com", "owning_organization_guid": "organization-id"}
+      "domain": {
+          "guid": "domain-id",
+          "name": "app-domain.com",
+          "owning_organization_guid": "organization-id",
+          "owning_organization_url": "/v2/organizations/organization-id"
+      }
     },
     { "guid": "route-id-2",
       "host": null,
-      "domain": { "guid": "domain-id", "name": "app-domain.com", "owning_organization_guid": "organization-id"}
+      "domain": {
+          "guid": "domain-id",
+          "name": "app-domain.com",
+          "owning_organization_guid": "organization-id",
+          "owning_organization_url": "/v2/organizations/organization-id"
+      }
     },
     { "guid": "route-id-3",
       "host": "host-3",
@@ -39,8 +49,8 @@
   "file_descriptors":256,
   "disk_quota":256,
   "available_domains":[
-    {"guid":"domain-id", "name":"app-domain.com", "owning_organization_guid":"organization-id"},
-    {"guid":"domain-id-2", "name":"app-domain-2.com", "owning_organization_guid":"organization-id"},
+    {"guid":"domain-id", "name":"app-domain.com", "owning_organization_guid":"organization-id", "owning_organization_url": "/v2/organizations/organization-id"},
+    {"guid":"domain-id-2", "name":"app-domain-2.com", "owning_organization_guid":"organization-id", "owning_organization_url": "/v2/organizations/organization-id"},
     {"guid":"domain-id-3", "name":"vcap.me", "owning_organization_guid":null}
   ]
 }

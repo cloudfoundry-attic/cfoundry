@@ -8,6 +8,7 @@
   "entity": {
     "name": "domain.com",
     "owning_organization_guid": "organization-id-1",
+    "owning_organization_url": "/v2/organizations/organization-id-1",
     "wildcard": true,
     "spaces_url": "/v2/domains/domain-id-1/spaces",
     "spaces": [
