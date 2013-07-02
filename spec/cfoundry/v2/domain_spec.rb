@@ -10,6 +10,18 @@ module CFoundry
         expect(domain.spaces).to eq([space])
       end
 
+      describe "#owning_organization" do
+        context "when the domain is not persisted" do
+          let(:client) { build(:client) }
+          let(:domain) { build(:domain, client: client, guid: nil)}
+          it "asdf" do
+            client.should_not_receive(:owning_organization)
+            client.should_receive(:organization)
+            domain.owning_organization
+          end
+        end
+      end
+
       describe "validations" do
         subject { build(:domain) }
         it { should validate_presence_of(:name) }
