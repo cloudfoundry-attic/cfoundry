@@ -98,7 +98,14 @@ module CFoundry
     def stream_url(url, &blk)
       uri = URI.parse(url)
 
-      Net::HTTP.start(uri.host, uri.port) do |http|
+      opts = {}
+      
+      if uri.scheme == "https"
+        opts[:use_ssl] = true
+        opts[:verify_mode] = OpenSSL::SSL::VERIFY_NONE 
+      end
+
+      Net::HTTP.start(uri.host, uri.port, opts) do |http|
         http.read_timeout = 5
 
         req = Net::HTTP::Get.new(uri.request_uri)

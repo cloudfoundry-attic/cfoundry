@@ -206,6 +206,18 @@ describe CFoundry::BaseClient do
       expect(chunks).to eq(["result"])
     end
 
+    it "handles https" do
+      stub_request(:get, "https://example.com/something").to_return(
+        :body => "https result")
+
+      chunks = []
+      subject.stream_url("https://example.com/something") do |chunk|
+        chunks << chunk
+      end
+
+      expect(chunks).to eq(["https result"])
+    end
+
     it "raises NotFound if response is 404" do
       stub_request(:get, "http://example.com/something").to_return(
         :status => 404, :body => "result")
