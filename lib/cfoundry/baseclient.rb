@@ -134,8 +134,6 @@ module CFoundry
 
     def handle_response(response, options, request)
       if status_is_successful?(response[:status].to_i)
-        uaa.delete_user(options[:params][:user_delete]) if options[:params] && options[:params][:user_delete]
-
         handle_successful_response(response, options)
       else
         handle_error_response(response, request)

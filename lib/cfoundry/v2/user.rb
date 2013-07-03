@@ -63,8 +63,8 @@ module CFoundry
       end
 
       def delete! (options = {})
-        options[:user_delete] = guid
         super (options)
+        @client.base.uaa.delete_user(guid)
       end
     end
   end

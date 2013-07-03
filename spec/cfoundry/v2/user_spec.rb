@@ -16,7 +16,17 @@ module CFoundry
           it "also removes the user from uaa" do
             CFoundry::UAAClient.any_instance.should_receive(:delete_user)
 
-            subject.delete!({})
+            subject.delete!
+          end
+        end
+
+        describe "when cloud controller was unable to delete the user" do
+          before do
+            client.base.stub(:delete).and_raise(CFoundry::APIError)
+          end
+
+          it "allows the exception to bubble up" do
+            expect{ subject.delete! }.to raise_error(CFoundry::APIError)
           end
         end
       end
