@@ -64,9 +64,22 @@ module CFoundry
               elsif klass.scoped_organization && current_organization
                 current_organization.send(plural, *args)
               else
-                @base.send(plural, *args).collect do |json|
+                prefiltered = @base.send(plural, *args).collect do |json|
                   send(:"make_#{singular}", json)
                 end
+
+                filtered = prefiltered
+                if args && args[0]
+                  opts = args[0]
+                  if opts[:query]
+                    filtered.select! do |obj|
+                      key = opts[:query][0].to_s
+                      value = opts[:query][1]
+                      obj.send(key) == value
+                    end
+                  end
+                end
+                filtered
               end
             end
 
