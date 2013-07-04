@@ -49,6 +49,7 @@
           },
           "entity": {}
         }],
+        "billing_enabled": true,
         "quota_definition": {
           "metadata": {
             "guid": "quota-definition-id-1",
