@@ -16,7 +16,7 @@ module CFoundry
           it "also removes the user from uaa" do
             CFoundry::UAAClient.any_instance.should_receive(:delete_user)
 
-            subject.delete!
+            subject.delete!.should be_true
           end
         end
 
