@@ -372,9 +372,14 @@ describe CFoundry::RestClient do
   describe "#target=" do
     let(:token) { "some-token" }
 
-    it "invalidates the token" do
+    it "invalidates the token if the target has changed" do
       rest_client.target = "http://some-target.com"
       expect(rest_client.token).to be_nil
+    end
+
+    it "does not invalidate the token if the target has not changed" do
+      rest_client.target = target
+      expect(rest_client.token).to eq token
     end
   end
 end

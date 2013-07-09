@@ -59,6 +59,8 @@ module CFoundry
     end
 
     def target=(target)
+      return if target == @target
+
       @target = target
       @token = nil
     end

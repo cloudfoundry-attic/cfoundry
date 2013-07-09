@@ -25,6 +25,7 @@ describe CFoundry::V2::Client do
         client.login(ENV["CF_V2_TEST_USER"], ENV["CF_V2_TEST_PASSWORD"])
         client.quota_definitions # Getting quota definitions will always be the shortest request that requires auth
 
+        client.target = nil
         client.target = "http://api." + a1_domain
         expect { client.quota_definitions }.to raise_error(CFoundry::InvalidAuthToken)
 
