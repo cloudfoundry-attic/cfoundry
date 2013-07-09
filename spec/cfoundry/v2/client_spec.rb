@@ -60,16 +60,28 @@ module CFoundry
       end
 
       describe "#login" do
-        include_examples "client login" do
-          it 'sets the current organization to nil' do
-            client.current_organization = "org"
-            expect { subject }.to change { client.current_organization }.from("org").to(nil)
-          end
+        include_examples "client login"
 
-          it 'sets the current space to nil' do
-            client.current_space = "space"
-            expect { subject }.to change { client.current_space }.from("space").to(nil)
-          end
+        it 'sets the current organization to nil' do
+          client.current_organization = "org"
+          expect { subject }.to change { client.current_organization }.from("org").to(nil)
+        end
+
+        it 'sets the current space to nil' do
+          client.current_space = "space"
+          expect { subject }.to change { client.current_space }.from("space").to(nil)
+        end
+      end
+
+      describe "#target=" do
+        let(:new_target) { "some-target-url.com"}
+
+        it "sets a new target" do
+          expect{client.target = new_target}.to change {client.target}.from("http://api.cloudfoundry.com").to(new_target)
+        end
+
+        it "sets a new target on the base client" do
+          expect{client.target = new_target}.to change{client.base.target}.from("http://api.cloudfoundry.com").to(new_target)
         end
       end
     end

@@ -80,7 +80,7 @@ describe CFoundry::BaseClient do
     end
 
     describe "#refresh_token!" do
-      let(:uaa) { stub }
+      let(:uaa) { double }
       let(:access_token) { Base64.encode64(%Q|{"algo": "h1234"}{"a":"b"}random-bytes|) }
       let(:refresh_token) { "xyz" }
       let(:new_access_token) { Base64.encode64(%Q|{"algo": "h1234"}{"a":"x"}random-bytes|) }
@@ -252,6 +252,19 @@ describe CFoundry::BaseClient do
       expect {
         subject.stream_url("http://example.com/something")
       }.to raise_error(CFoundry::BadResponse, /result/)
+    end
+  end
+
+  describe "#target=" do
+    let(:base_client) { CFoundry::BaseClient.new }
+    let(:new_target) { "some-target-url.com"}
+
+    it "sets a new target" do
+      expect{base_client.target = new_target}.to change {base_client.target}.from("https://api.cloudfoundry.com").to(new_target)
+    end
+
+    it "sets a new target on the rest client" do
+      expect{base_client.target = new_target}.to change{base_client.rest_client.target}.from("https://api.cloudfoundry.com").to(new_target)
     end
   end
 end
