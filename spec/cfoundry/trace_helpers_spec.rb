@@ -76,6 +76,13 @@ describe CFoundry::TraceHelpers do
 
       include_examples "response_trace tests"
     end
+    
+    context "with credentials in the response body" do
+      let(:response_body) { '{"resources": [{"entity": {"credentials": {"super_secret_stuff": "goes here"}, "other_stuff": "still here"}}]}' }
+      let(:response_trace) { "RESPONSE: [404]\nRESPONSE_HEADERS:\n\nRESPONSE_BODY:\n#{MultiJson.dump({"resources" => [{"entity" => {"credentials" => "[PRIVATE DATA HIDDEN]", "other_stuff" => "still here"}}]}, :pretty => true)}" }
+
+      include_examples "response_trace tests"
+    end
 
     it "returns nil if response is nil" do
       tracehelper_test_class.new.response_trace(nil).should == nil
