@@ -23,6 +23,11 @@ require "cfoundry/v2/client"
 module CFoundry
   class Client < BaseClient
     def self.new(*args)
+      puts "DEPRECATION WARNING: Please use CFoundry::Client.get instead of CFoundry::Client.new"
+      get(*args)
+    end
+
+    def self.get(*args)
       CFoundry::V2::Client.new(*args).tap { |client| client.info }
     end
   end
