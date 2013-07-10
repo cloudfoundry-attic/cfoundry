@@ -47,6 +47,18 @@ describe CFoundry::TraceHelpers do
     it "returns nil if request is nil" do
       tracehelper_test_class.new.request_trace(nil).should == nil
     end
+
+    context "with protected attributes" do
+      let(:header_trace) { "REQUEST_HEADERS:\n  Authorization : [PRIVATE DATA HIDDEN]" }
+      let(:request) do
+        {
+            :method => "GET",
+            :url => "http://api.cloudfoundry.com/foo",
+            :headers => { 'Authorization' => "SECRET STUFF" }
+        }
+      end
+      include_examples "request_trace tests"
+    end
   end
 
 

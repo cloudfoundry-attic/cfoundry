@@ -3,6 +3,7 @@ require "multi_json"
 
 module CFoundry
   module TraceHelpers
+    PROTECTED_ATTRIBUTES = ['Authorization']
 
     def request_trace(request)
       return nil unless request
@@ -33,7 +34,11 @@ module CFoundry
 
     def header_trace(headers)
       headers.sort.map do |key, value|
-        "  #{key} : #{value}"
+        unless PROTECTED_ATTRIBUTES.include?(key)
+          "  #{key} : #{value}"
+        else
+          "  #{key} : [PRIVATE DATA HIDDEN]"
+        end
       end
     end
   end
