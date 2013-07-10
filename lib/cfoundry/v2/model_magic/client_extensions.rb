@@ -28,6 +28,16 @@ module CFoundry
                 )
               )
             end
+
+            #
+            # def client.MODELs_first_page
+            #
+            define_method(:"#{plural}_first_page") do |*args|
+              get("v2", plural,
+                :accept => :json,
+                :params => ModelMagic.params_from(args)
+              )
+            end
           end
 
 
@@ -68,6 +78,20 @@ module CFoundry
                   send(:"make_#{singular}", json)
                 end
               end
+            end
+
+            #
+            # def client.MODELs_first_page
+            #
+            define_method(:"#{plural}_first_page") do |*args|
+              response = @base.send(:"#{plural}_first_page", *args)
+              results = response[:resources].collect do |json|
+                send(:"make_#{singular}", json)
+              end
+              {
+                  :next_page => !!response[:next_url],
+                  :results => results
+              }
             end
 
             #

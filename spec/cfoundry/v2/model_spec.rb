@@ -347,6 +347,43 @@ module CFoundry
           end
         end
       end
+
+      describe "first_page" do
+        before do
+          WebMock.stub_request(:get, /v2\/test_models/).to_return(:body => {
+              "prev_url" => nil,
+              "next_url" => next_url,
+              "resources" => [{:metadata => {:guid => '1234'}}]
+          }.to_json)
+        end
+
+        context "when there is a next page" do
+          let(:next_url) { "/v2/test_models?&page=2&results-per-page=50" }
+          before do
+            WebMock.stub_request(:get, /v2\/test_models/).to_return(:body => {
+                "prev_url" => nil,
+                "next_url" => "/v2/test_models?&page=2&results-per-page=50",
+                "resources" => [{:metadata => {:guid => '1234'}}]
+            }.to_json)
+          end
+
+          it "has next_page set to true" do
+            results = client.test_models_first_page
+            results[:next_page].should be_true
+            results[:results].length.should == 1
+            results[:results].first.should be_a TestModel
+          end
+        end
+
+        context "when there is no next page" do
+          let(:next_url) { nil }
+
+          it "has next_page set to false" do
+            results = client.test_models_first_page
+            results[:next_page].should be_false
+          end
+        end
+      end
     end
   end
 end
