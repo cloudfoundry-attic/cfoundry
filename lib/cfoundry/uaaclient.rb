@@ -18,11 +18,9 @@ module CFoundry
     end
 
     def authorize(username, password)
-      @username = username
-      @password = password
-
       wrap_uaa_errors do
-        authenticate_with_password_grant || authenticate_with_implicit_grant
+        authenticate_with_password_grant(username, password) ||
+          authenticate_with_implicit_grant(username, password)
       end
     end
 
@@ -103,9 +101,9 @@ module CFoundry
       @uaa_url ||= CF::UAA::Misc.discover_uaa(target)
     end
 
-    def authenticate_with_password_grant
+    def authenticate_with_password_grant(username, password)
       begin
-        token_issuer.owner_password_grant(@username, @password)
+        token_issuer.owner_password_grant(username, password)
       rescue CF::UAA::BadResponse => e
         status_code = e.message[/\d+/] || 400
         raise CFoundry::Denied.new("Authorization failed", status_code)
@@ -114,9 +112,9 @@ module CFoundry
       end
     end
 
-    def authenticate_with_implicit_grant
+    def authenticate_with_implicit_grant(username, password)
       begin
-        token_issuer.implicit_grant_with_creds(:username => @username, :password => @password)
+        token_issuer.implicit_grant_with_creds(:username => username, :password => password)
       rescue CF::UAA::BadResponse => e
         status_code = e.message[/\d+/] || 400
         raise CFoundry::Denied.new("Authorization failed", status_code)
