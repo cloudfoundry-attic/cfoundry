@@ -78,7 +78,8 @@ module CFoundry
       private 
 
       def get_meta_from_uaa
-        user = @client.base.uaa.user(guid)["resources"].first
+        user = @client.base.uaa.user(guid)
+
         return if user.nil?
         
         @emails = user["emails"]

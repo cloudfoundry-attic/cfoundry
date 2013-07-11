@@ -28,8 +28,7 @@ module CFoundry
 
     def user(guid)
       wrap_uaa_errors do
-        filter = "id Eq \"#{guid}\""
-        scim.query(:user, {'filter' => filter})
+        scim.get(:user, guid)
       end
     end
 
