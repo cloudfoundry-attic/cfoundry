@@ -72,24 +72,29 @@ EOF
     let(:auth) { Object.new }
     let(:issuer) { Object.new }
 
-    subject { uaa.authorize(username, password) }
+    subject { uaa.authorize(creds) }
 
     before do
-      issuer.stub(:owner_password_grant) { auth }
+      issuer.stub(:request_token) { auth }
       uaa.stub(:token_issuer) { issuer }
     end
 
     include_examples "UAA wrapper"
 
     it 'returns the token on successful authentication' do
-      issuer.should_receive(:owner_password_grant).with(username, password) { auth }
+      issuer
+        .should_receive(:request_token)
+        .with(:grant_type => "password",
+              :scope => nil,
+              :username => username,
+              :password => password) { auth }
       expect(subject).to eq auth
     end
 
     context 'when authorization fails' do
       context 'in the expected way' do
         it 'raises a CFoundry::Denied error' do
-          issuer.should_receive(:owner_password_grant) { raise CF::UAA::BadResponse.new("401: FooBar") }
+          issuer.should_receive(:request_token) { raise CF::UAA::BadResponse.new("401: FooBar") }
           expect { subject }.to raise_error(CFoundry::Denied, "401: Authorization failed")
         end
       end
@@ -97,15 +102,13 @@ EOF
 
       context 'in an unexpected way' do
         it 'raises a CFoundry::Denied error' do
-          issuer.should_receive(:owner_password_grant) { raise CF::UAA::BadResponse.new("no_status_code") }
+          issuer.should_receive(:request_token) { raise CF::UAA::BadResponse.new("no_status_code") }
           expect { subject }.to raise_error(CFoundry::Denied, "400: Authorization failed")
         end
       end
 
       context "with a CF::UAA::TargetError" do
-        before do
-          issuer.stub(:owner_password_grant) { raise CF::UAA::TargetError.new("useless info") }
-        end
+        before { issuer.stub(:request_token) { raise CF::UAA::TargetError.new("useless info") } }
 
         it "retries with implicit grant" do
           issuer.should_receive(:implicit_grant_with_creds).with(:username => username, :password => password)

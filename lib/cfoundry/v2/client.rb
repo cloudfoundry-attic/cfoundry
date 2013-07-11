@@ -44,7 +44,7 @@ module CFoundry::V2
       end
     end
 
-    def login(username, password)
+    def login(credentials)
       @current_organization = nil
       @current_space = nil
       super
