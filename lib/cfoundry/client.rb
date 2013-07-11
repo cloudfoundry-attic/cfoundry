@@ -19,7 +19,7 @@ require "cfoundry/v2/app_event"
 
 require "cfoundry/v2/base"
 require "cfoundry/v2/client"
-require "cfoundry/v2/fake_client"
+#require "cfoundry/v2/fake_client"
 
 module CFoundry
   class Client < BaseClient
