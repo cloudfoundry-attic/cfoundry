@@ -28,10 +28,10 @@ shared_examples_for 'client login' do
 
   before do
     client.base.stub(:uaa) { uaa }
-    uaa.stub(:authorize).with(email, password) { token_info }
+    uaa.stub(:authorize).with(:username => email, :password => password) { token_info }
   end
 
-  subject { client.login(email, password) }
+  subject { client.login(:username => email, :password => password) }
 
   it 'returns a UAA token' do
     expect(subject).to be_a(CFoundry::AuthToken)
