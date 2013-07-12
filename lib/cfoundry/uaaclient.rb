@@ -1,5 +1,5 @@
 require "cfoundry/baseclient"
-require 'uaa'
+require "uaa"
 
 module CFoundry
   class UAAClient
@@ -17,12 +17,10 @@ module CFoundry
       end
     end
 
-    def authorize(username, password)
-      @username = username
-      @password = password
-
+    def authorize(credentials)
       wrap_uaa_errors do
-        authenticate_with_password_grant || authenticate_with_implicit_grant
+        authenticate_with_password_grant(credentials) ||
+          authenticate_with_implicit_grant(credentials)
       end
     end
 
@@ -103,9 +101,12 @@ module CFoundry
       @uaa_url ||= CF::UAA::Misc.discover_uaa(target)
     end
 
-    def authenticate_with_password_grant
+    def authenticate_with_password_grant(credentials)
       begin
-        token_issuer.owner_password_grant(@username, @password)
+        # Currently owner_password_grant method does not allow
+        # non-password based authenticate; so we have cheat a little bit.
+        token_issuer.send(:request_token,
+          {:grant_type => "password", :scope => nil}.merge(credentials))
       rescue CF::UAA::BadResponse => e
         status_code = e.message[/\d+/] || 400
         raise CFoundry::Denied.new("Authorization failed", status_code)
@@ -114,9 +115,9 @@ module CFoundry
       end
     end
 
-    def authenticate_with_implicit_grant
+    def authenticate_with_implicit_grant(credentials)
       begin
-        token_issuer.implicit_grant_with_creds(:username => @username, :password => @password)
+        token_issuer.implicit_grant_with_creds(credentials)
       rescue CF::UAA::BadResponse => e
         status_code = e.message[/\d+/] || 400
         raise CFoundry::Denied.new("Authorization failed", status_code)
