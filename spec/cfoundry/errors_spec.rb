@@ -21,7 +21,7 @@ describe 'Errors' do
   end
 
   describe CFoundry::APIError do
-    let(:request) { { :method => "GET", :url => "http://api.cloudfoundry.com/foo", :headers => {} } }
+    let(:request) { { :method => "GET", :url => "http://api.example.com/foo", :headers => {} } }
     let(:response_body) { "NOT FOUND" }
     let(:response) { { :status => 404, :headers => {}, :body => response_body } }
 

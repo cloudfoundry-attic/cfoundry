@@ -5,7 +5,7 @@ module CFoundry
   class UAAClient
     attr_accessor :target, :client_id, :token, :trace
 
-    def initialize(target = "https://uaa.cloudfoundry.com", client_id = "cf")
+    def initialize(target, client_id = "cf")
       @target = target
       @client_id = client_id
       CF::UAA::Misc.symbolize_keys = true

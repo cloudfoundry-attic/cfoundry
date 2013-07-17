@@ -33,10 +33,10 @@ module CFoundry
 
       describe '#get_meta_from_uaa' do
         
-        let(:api_target) { 'http://api.cloudfoundry.com' } 
-        let(:login_target) { 'https://login.cloudfoundry.com' }
-        let(:uaa_target) { 'https://uaa.cloudfoundry.com' }
-        let(:user_email) { 'test-user@cloudfoundry.com' }
+        let(:api_target) { 'http://api.example.com' } 
+        let(:login_target) { 'https://login.example.com' }
+        let(:uaa_target) { 'https://uaa.example.com' }
+        let(:user_email) { 'test-user@example.com' }
         let(:given_name) { 'John' }
         let(:family_name) { 'Doe' }
  
@@ -48,11 +48,11 @@ module CFoundry
             {
               "name": "vcap",
               "build": "2222",
-              "support": "http://support.cloudfoundry.com",
+              "support": "http://support.example.com",
               "version": 2,
               "description": "Cloud Foundry sponsored by Pivotal",
-              "authorization_endpoint": "https://login.cloudfoundry.com",
-              "token_endpoint": "https://uaa.cloudfoundry.com",
+              "authorization_endpoint": "https://login.example.com",
+              "token_endpoint": "https://uaa.example.com",
               "allow_debug": true,
               "user": "00000000-0000-0000-0000-000000000000",
               "limits": {
@@ -81,15 +81,15 @@ EOF
                 "version": "1.2.3"
               },
               "links": {
-                "register": "https://console.cloudfoundry.com/register",
-                "passwd": "https://console.cloudfoundry.com/password_resets/new",
-                "home": "https://console.cloudfoundry.com",
-                "login": "https://login.cloudfoundry.com",
-                "uaa": "https://uaa.cloudfoundry.com"
+                "register": "https://console.example.com/register",
+                "passwd": "https://console.example.com/password_resets/new",
+                "home": "https://console.example.com",
+                "login": "https://login.example.com",
+                "uaa": "https://uaa.example.com"
               },
               "analytics": {
                 "code": "UA-00000000-00",
-                "domain": "cloudfoundry.com"
+                "domain": "example.com"
               },
               "commit_id": "0000000",
               "prompts": {

@@ -5,7 +5,7 @@ describe CFoundry::TraceHelpers do
   let(:request) do
     {
       :method => "GET",
-      :url => "http://api.cloudfoundry.com/foo",
+      :url => "http://api.example.com/foo",
       :headers => { "bb-foo" => "bar", "accept" => "*/*" }
     }
   end
@@ -26,7 +26,7 @@ describe CFoundry::TraceHelpers do
   end
 
   describe "#request_trace" do
-    let(:request_trace) { "REQUEST: GET http://api.cloudfoundry.com/foo" }
+    let(:request_trace) { "REQUEST: GET http://api.example.com/foo" }
     let(:header_trace) { "REQUEST_HEADERS:\n  accept : */*\n  bb-foo : bar" }
     let(:body_trace) { "" }
 
@@ -53,7 +53,7 @@ describe CFoundry::TraceHelpers do
       let(:request) do
         {
             :method => "GET",
-            :url => "http://api.cloudfoundry.com/foo",
+            :url => "http://api.example.com/foo",
             :headers => { 'Authorization' => "SECRET STUFF" }
         }
       end
@@ -71,7 +71,7 @@ describe CFoundry::TraceHelpers do
     end
 
     context "with a JSON response body" do
-      let(:response_body) { "{\"name\": \"vcap\",\"build\": 2222,\"support\": \"http://support.cloudfoundry.com\"}" }
+      let(:response_body) { "{\"name\": \"vcap\",\"build\": 2222,\"support\": \"http://support.example.com\"}" }
       let(:response_trace) { "RESPONSE: [404]\nRESPONSE_HEADERS:\n\nRESPONSE_BODY:\n#{MultiJson.dump(MultiJson.load(response_body), :pretty => true)}" }
 
       include_examples "response_trace tests"

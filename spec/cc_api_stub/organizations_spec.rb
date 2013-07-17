@@ -3,7 +3,7 @@ require 'net/http'
 require 'uri'
 
 describe CcApiStub::Organizations do
-  let(:client) { CFoundry::V2::Client.new }
+  let(:client) { build(:client) }
 
   describe ".succeed_to_create" do
     let(:url) { "http://example.com/v2/organizations/" }

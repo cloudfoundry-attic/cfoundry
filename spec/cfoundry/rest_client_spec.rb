@@ -2,7 +2,7 @@ require "spec_helper"
 
 describe CFoundry::RestClient do
   let(:token) { nil }
-  let(:target) { "https://api.cloudfoundry.com" }
+  let(:target) { "https://api.example.com" }
   let(:rest_client) { CFoundry::RestClient.new(target, token) }
 
   describe '#request' do
@@ -81,7 +81,7 @@ describe CFoundry::RestClient do
           let(:options) { {:params => {}} }
 
           it "does not add a query string delimiter (the question mark)" do
-            request_stub = stub_request(:get, "https://api.cloudfoundry.com/some-path")
+            request_stub = stub_request(:get, "https://api.example.com/some-path")
             subject
             expect(request_stub).to have_been_requested
           end
@@ -91,7 +91,7 @@ describe CFoundry::RestClient do
           let(:options) { {:params => {"key" => "value"}} }
 
           it "appends a query string and delimiter" do
-            request_stub = stub_request(:get, "https://api.cloudfoundry.com/some-path?key=value")
+            request_stub = stub_request(:get, "https://api.example.com/some-path?key=value")
             subject
             expect(request_stub).to have_been_requested
           end
@@ -217,7 +217,7 @@ describe CFoundry::RestClient do
       let(:path) { "/some-path/some-segment" }
 
       it "doesn't add a double slash" do
-        stub = stub_request(:get, "https://api.cloudfoundry.com/some-path/some-segment")
+        stub = stub_request(:get, "https://api.example.com/some-path/some-segment")
         subject
         expect(stub).to have_been_requested
       end
@@ -227,7 +227,7 @@ describe CFoundry::RestClient do
       let(:path) { "some-path/some-segment" }
 
       it "doesn't add a double slash" do
-        stub = stub_request(:get, "https://api.cloudfoundry.com/some-path/some-segment")
+        stub = stub_request(:get, "https://api.example.com/some-path/some-segment")
         subject
         expect(stub).to have_been_requested
       end
@@ -258,7 +258,7 @@ describe CFoundry::RestClient do
       end
 
       it "prints the request and the response" do
-        rest_client.should_receive(:print_request).with({:headers => {"Content-Length" => 0}, :url => "https://api.cloudfoundry.com/some-path", :method => "GET", :body => nil})
+        rest_client.should_receive(:print_request).with({:headers => {"Content-Length" => 0}, :url => "https://api.example.com/some-path", :method => "GET", :body => nil})
         rest_client.should_receive(:print_response).with({:status => "200", :headers => {"content-type" => "application/json"}, :body => '{"some": "json"}'})
         subject
       end
@@ -266,11 +266,11 @@ describe CFoundry::RestClient do
 
     describe "following redirects" do
       before do
-        stub_request(:post, "https://api.cloudfoundry.com/apps").to_return(
+        stub_request(:post, "https://api.example.com/apps").to_return(
           :status => 301,
-          :headers => {"location" => "https://api.cloudfoundry.com/apps/some-guid"}
+          :headers => {"location" => "https://api.example.com/apps/some-guid"}
         )
-        stub_request(:get, "https://api.cloudfoundry.com/apps/some-guid").to_return(
+        stub_request(:get, "https://api.example.com/apps/some-guid").to_return(
           :status => 200,
           :body => '{"some": "json"}'
         )
@@ -291,7 +291,7 @@ describe CFoundry::RestClient do
     describe ".create" do
       let(:http_proxy) { '' }
       let(:https_proxy) { '' }
-      let(:target_uri) { "http://cloudfoundry.com" }
+      let(:target_uri) { "http://api.example.com" }
 
       subject { CFoundry::RestClient::HTTPFactory.create(URI.parse(target_uri), http_proxy, https_proxy) }
 
@@ -304,7 +304,7 @@ describe CFoundry::RestClient do
       end
 
       context "when the target is an https URI" do
-        let(:target_uri) { "https://cloudfoundry.com" }
+        let(:target_uri) { "https://example.com" }
         it "should return an instance of the plain Net:HTTP class with use_ssl" do
           expect(subject).to be_instance_of(Net::HTTP)
           expect(subject.use_ssl?).to be_true
@@ -333,7 +333,7 @@ describe CFoundry::RestClient do
       end
 
       context "when a https proxy URI is set and the target is an https URI" do
-        let(:target_uri) { "https://cloudfoundry.com" }
+        let(:target_uri) { "https://example.com" }
         let(:https_proxy) { "http://exapmle.com:8080" }
 
         it "should return an instance of the proxy class" do
@@ -342,7 +342,7 @@ describe CFoundry::RestClient do
       end
 
       context "when a https proxy URI is set and the target is an http URI" do
-        let(:target_uri) { "http://cloudfoundry.com" }
+        let(:target_uri) { "http://example.com" }
         let(:https_proxy) { "http://exapmle.com:8080" }
 
         it "should return an instance of the plain Net:HTTP class" do
@@ -351,7 +351,7 @@ describe CFoundry::RestClient do
       end
 
       context "when a http proxy URI is set and the target is an https URI" do
-        let(:target_uri) { "https://cloudfoundry.com" }
+        let(:target_uri) { "https://example.com" }
         let(:http_proxy) { "http://exapmle.com:8080" }
 
         it "should return an instance of the plain Net:HTTP class" do

@@ -1,5 +1,5 @@
 shared_examples_for 'client login prompts' do
-  let(:uaa) { CFoundry::UAAClient.new }
+  let(:uaa) { CFoundry::UAAClient.new('http://uaa.example.com') }
   let(:prompts) do
     {
       :user_id => ["text", "User ID"],
@@ -22,7 +22,7 @@ end
 shared_examples_for 'client login' do
   let(:email) { 'test@test.com' }
   let(:password) { 'secret' }
-  let(:uaa) { CFoundry::UAAClient.new }
+  let(:uaa) { CFoundry::UAAClient.new('http://uaa.example.com') }
   let(:access_token) { "some-access-token" }
   let(:token_info) { CF::UAA::TokenInfo.new({ :access_token => access_token, :token_type => "bearer" }) }
 

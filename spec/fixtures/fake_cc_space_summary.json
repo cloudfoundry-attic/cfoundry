@@ -6,10 +6,10 @@
       "guid":"application-id-1",
       "name":"application-name-1",
       "routes":[
-        { "guid": "aa14f148-3d82-4db3-982e-fe0fd00582f4", "host": "app", "domain": { "name": "cloudfoundry.com"}}
+        { "guid": "aa14f148-3d82-4db3-982e-fe0fd00582f4", "host": "app", "domain": { "name": "example.com"}}
       ],
       "urls":[
-        "app.cloudfoundry.com"
+        "app.example.com"
       ],
       "state":"STARTED",
       "memory":128,
@@ -25,12 +25,12 @@
       "guid":"application-id-2",
       "name":"application-name-2",
       "routes":[
-        { "guid": "a14c5666-5354-49a7-8da8-2c29eaaaac18", "host": "app2-1", "domain": { "name": "cloudfoundry.com"}},
-        { "guid": "7c183670-2e4b-4dd1-b2b5-d7ada5d470fb", "host": "app2-2", "domain": { "name": "cloudfoundry.com"}}
+        { "guid": "a14c5666-5354-49a7-8da8-2c29eaaaac18", "host": "app2-1", "domain": { "name": "example.com"}},
+        { "guid": "7c183670-2e4b-4dd1-b2b5-d7ada5d470fb", "host": "app2-2", "domain": { "name": "example.com"}}
       ],
       "urls":[
-        "app2-1.cloudfoundry.com",
-        "app2-2.cloudfoundry.com"
+        "app2-1.example.com",
+        "app2-2.example.com"
       ],
       "state":"STOPPED",
       "memory":256,
