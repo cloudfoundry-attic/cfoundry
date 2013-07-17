@@ -40,16 +40,23 @@ module CFoundry
       attr_accessor :emails, :name
 
       def email
+        # if the email collection is nil or empty? collect from UAA
+        get_meta_from_uaa if @emails.nil?
+
         return unless @emails && @emails.first
-        @emails.first[:value]
+        @emails.first["value"]
       end
 
       def given_name
+        get_meta_from_uaa if @name.nil?
+
         return unless @name && @name[:givenName] != email
         @name[:givenName]
       end
 
       def family_name
+        get_meta_from_uaa if @name.nil?
+
         return unless @name && @name[:familyName] != email
         @name[:familyName]
       end
@@ -67,6 +74,20 @@ module CFoundry
         @client.base.uaa.delete_user(guid)
         true
       end
+
+      private 
+
+      def get_meta_from_uaa
+        user = @client.base.uaa.user(guid)
+        return if user.nil?
+        return if not user['error'].nil?
+        
+        @emails = user["emails"]
+        @name ||= {}
+        @name[:familyName] = user["name"]["familyname"]
+        @name[:givenName] = user["name"]["givenname"]
+      end
+
     end
   end
 end
