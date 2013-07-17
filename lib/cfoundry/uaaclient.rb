@@ -24,6 +24,12 @@ module CFoundry
       end
     end
 
+    def user(guid)
+      wrap_uaa_errors do
+        scim.get(:user, guid)
+      end
+    end
+
     def users
       wrap_uaa_errors do
         scim.query(:user)
