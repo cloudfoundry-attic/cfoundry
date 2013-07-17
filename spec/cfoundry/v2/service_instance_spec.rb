@@ -26,7 +26,7 @@ module CFoundry
       describe "service_plan" do
         let(:service_plan) { build(:service_plan) }
 
-        it "has a space" do
+        it "has a service plan" do
           subject.service_plan = service_plan
           expect(subject.service_plan).to eq(service_plan)
         end
