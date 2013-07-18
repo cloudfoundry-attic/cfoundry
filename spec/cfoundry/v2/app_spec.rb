@@ -78,62 +78,64 @@ module CFoundry
           end
         end
 
-        context "when asynchronous is true" do
-          it "sends the PUT request with &stage_async=true" do
-            client.base.should_receive(:put).with(
-              "v2", "apps", subject.guid,
-              hash_including(
-                :params => {:stage_async => true},
-                :return_response => true)) do
-              response
-            end
-
-            update(true)
+        it "sends the PUT request" do
+          client.base.should_receive(:put).with(
+            "v2", "apps", subject.guid,
+            hash_including(
+              :return_response => true)) do
+            response
           end
 
-          context "and a block is given" do
+          update
+        end
+
+        context "and a block is given" do
+          let(:response) do
+            { :headers => { "x-app-staging-log" => "http://app/staging/log" },
+              :body => "{}"
+            }
+          end
+
+          it "yields the URL for the logs" do
+            yielded_url = nil
+            update do |url|
+              yielded_url = url
+            end
+
+            expect(yielded_url).to eq "http://app/staging/log"
+          end
+
+          context "and no staging header is returned" do
             let(:response) do
-              {:headers => {"x-app-staging-log" => "http://app/staging/log"},
+              { :headers => {},
                 :body => "{}"
               }
             end
 
-            it "yields the URL for the logs" do
-              yielded_url = nil
-              update(true) do |url|
+            it "yields nil" do
+              yielded_url = :something
+              update do |url|
                 yielded_url = url
               end
 
-              expect(yielded_url).to eq "http://app/staging/log"
+              expect(yielded_url).to be_nil
             end
-          end
-        end
-
-        context "when asynchronous is false" do
-          it "sends the PUT request with &stage_async=false" do
-            client.base.should_receive(:put).with(
-              "v2", "apps", subject.guid,
-              hash_including(:params => {:stage_async => false})) do
-              response
-            end
-
-            update(false)
           end
         end
       end
 
       describe "#start!" do
         it_should_behave_like "something may stage the app" do
-          def update(async, &blk)
-            subject.start!(async, &blk)
+          def update(&blk)
+            subject.start!(&blk)
           end
         end
       end
 
       describe "#restart!" do
         it_should_behave_like "something may stage the app" do
-          def update(async, &blk)
-            subject.restart!(async, &blk)
+          def update(&blk)
+            subject.restart!(&blk)
           end
         end
       end
@@ -157,8 +159,8 @@ module CFoundry
         end
 
         it_should_behave_like "something may stage the app" do
-          def update(async, &blk)
-            subject.update!(async, &blk)
+          def update(&blk)
+            subject.update!(&blk)
           end
         end
       end

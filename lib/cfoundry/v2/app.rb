@@ -137,19 +137,19 @@ module CFoundry::V2
     end
 
     # Start the application.
-    def start!(async = false, &blk)
+    def start!(&blk)
       self.state = "STARTED"
-      update!(async, &blk)
+      update!(&blk)
     end
 
     # Restart the application.
-    def restart!(async = false, &blk)
+    def restart!(&blk)
       stop!
-      start!(async, &blk)
+      start!(&blk)
     end
 
-    def update!(async = false)
-      response = @client.base.update_app(@guid, @diff, async)
+    def update!
+      response = @client.base.update_app(@guid, @diff)
 
       yield response[:headers]["x-app-staging-log"] if block_given?
 
