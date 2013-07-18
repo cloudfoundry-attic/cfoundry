@@ -5,7 +5,7 @@ module CFoundry
   class UAAClient
     attr_accessor :target, :client_id, :token, :trace
 
-    def initialize(target = "https://uaa.cloudfoundry.com", client_id = "cf")
+    def initialize(target, client_id = "cf")
       @target = target
       @client_id = client_id
       CF::UAA::Misc.symbolize_keys = true
@@ -21,6 +21,12 @@ module CFoundry
       wrap_uaa_errors do
         authenticate_with_password_grant(credentials) ||
           authenticate_with_implicit_grant(credentials)
+      end
+    end
+
+    def user(guid)
+      wrap_uaa_errors do
+        scim.get(:user, guid)
       end
     end
 

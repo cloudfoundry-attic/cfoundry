@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe CFoundry::BaseClient do
+  subject(:client) { CFoundry::BaseClient.new("http://api.example.com") }
   describe "#request" do
     before do
       subject.stub(:handle_response).with(anything, anything, anything)
@@ -256,15 +257,15 @@ describe CFoundry::BaseClient do
   end
 
   describe "#target=" do
-    let(:base_client) { CFoundry::BaseClient.new }
+    let(:base_client) { CFoundry::BaseClient.new("https://api.example.com") }
     let(:new_target) { "some-target-url.com"}
 
     it "sets a new target" do
-      expect{base_client.target = new_target}.to change {base_client.target}.from("https://api.cloudfoundry.com").to(new_target)
+      expect{base_client.target = new_target}.to change {base_client.target}.from("https://api.example.com").to(new_target)
     end
 
     it "sets a new target on the rest client" do
-      expect{base_client.target = new_target}.to change{base_client.rest_client.target}.from("https://api.cloudfoundry.com").to(new_target)
+      expect{base_client.target = new_target}.to change{base_client.rest_client.target}.from("https://api.example.com").to(new_target)
     end
   end
 end

@@ -3,10 +3,10 @@ require "spec_helper"
 module CFoundry
   module V2
     describe Client do
-      let(:client) { build(:client) }
+      subject(:client) { build(:client) }
 
       describe "#register" do
-        let(:uaa) { UAAClient.new }
+        let(:uaa) { UAAClient.new('http://uaa.example.com') }
         let(:email) { "test@test.com" }
         let(:password) { "secret" }
 
@@ -77,11 +77,11 @@ module CFoundry
         let(:new_target) { "some-target-url.com"}
 
         it "sets a new target" do
-          expect{client.target = new_target}.to change {client.target}.from("http://api.cloudfoundry.com").to(new_target)
+          expect{client.target = new_target}.to change {client.target}.from("http://api.example.com").to(new_target)
         end
 
         it "sets a new target on the base client" do
-          expect{client.target = new_target}.to change{client.base.target}.from("http://api.cloudfoundry.com").to(new_target)
+          expect{client.target = new_target}.to change{client.base.target}.from("http://api.example.com").to(new_target)
         end
       end
     end

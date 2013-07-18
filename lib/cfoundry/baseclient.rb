@@ -15,7 +15,7 @@ module CFoundry
       :trace, :backtrace, :backtrace=, :log, :log=,
       :http_proxy, :http_proxy=, :https_proxy, :https_proxy=
 
-    def initialize(target = "https://api.cloudfoundry.com", token = nil)
+    def initialize(target, token = nil)
       @rest_client = CFoundry::RestClient.new(target, token)
       self.trace = false
       self.backtrace = false

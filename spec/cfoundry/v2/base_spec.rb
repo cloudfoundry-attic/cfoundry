@@ -1,7 +1,7 @@
 require "spec_helper"
 
 describe CFoundry::V2::Base do
-  let(:target) { "https://api.cloudfoundry.com" }
+  let(:target) { "https://api.example.com" }
   let(:base) { CFoundry::V2::Base.new(target) }
 
   describe "helper methods for HTTP verbs" do
@@ -17,7 +17,7 @@ describe CFoundry::V2::Base do
           let(:options) { {:accept => :json} }
 
           it 'returns the parsed JSON' do
-            stub_request(:any, 'https://api.cloudfoundry.com/some-path').to_return(:status => 200, :body => "{\"hello\": \"there\"}")
+            stub_request(:any, 'https://api.example.com/some-path').to_return(:status => 200, :body => "{\"hello\": \"there\"}")
             expect(subject).to eq(:hello => "there")
           end
         end
@@ -26,7 +26,7 @@ describe CFoundry::V2::Base do
           let(:options) { {:accept => :form} }
 
           it 'returns the body' do
-            stub_request(:any, 'https://api.cloudfoundry.com/some-path').to_return :status => 200, :body =>  "body"
+            stub_request(:any, 'https://api.example.com/some-path').to_return :status => 200, :body =>  "body"
             expect(subject).to eq "body"
           end
         end
@@ -36,7 +36,7 @@ describe CFoundry::V2::Base do
         let(:response_code) { 404 }
 
         it 'raises the correct error if JSON is parsed successfully' do
-          stub_request(:any, 'https://api.cloudfoundry.com/some-path').to_return(
+          stub_request(:any, 'https://api.example.com/some-path').to_return(
             :status => response_code,
             :body =>  "{\"code\": 111, \"description\": \"Something bad happened\"}"
           )
@@ -44,7 +44,7 @@ describe CFoundry::V2::Base do
         end
 
         it 'raises the correct error if code is missing from response' do
-          stub_request(:any, 'https://api.cloudfoundry.com/some-path').to_return(
+          stub_request(:any, 'https://api.example.com/some-path').to_return(
             :status => response_code,
             :body =>  "{\"description\": \"Something bad happened\"}"
           )
@@ -52,7 +52,7 @@ describe CFoundry::V2::Base do
         end
 
         it 'raises the correct error if response body is not JSON' do
-          stub_request(:any, 'https://api.cloudfoundry.com/some-path').to_return(
+          stub_request(:any, 'https://api.example.com/some-path').to_return(
             :status => response_code,
             :body =>  "Error happened"
           )
@@ -60,7 +60,7 @@ describe CFoundry::V2::Base do
         end
 
         it 'raises a generic APIError if code is not recognized' do
-          stub_request(:any, 'https://api.cloudfoundry.com/some-path').to_return :status => response_code,
+          stub_request(:any, 'https://api.example.com/some-path').to_return :status => response_code,
             :body =>  "{\"code\": 6932, \"description\": \"Something bad happened\"}"
           expect {subject}.to raise_error CFoundry::APIError, "6932: Something bad happened"
         end
@@ -120,7 +120,7 @@ describe CFoundry::V2::Base do
               :headers => { "Content-Length" => 0 },
               :method => verb,
               :body => nil,
-              :url => "https://api.cloudfoundry.com/some-path"
+              :url => "https://api.example.com/some-path"
             })
           end
         end
@@ -175,7 +175,7 @@ describe CFoundry::V2::Base do
     let(:request) do
       {
         :method => "GET",
-        :url => "http://api.cloudfoundry.com/some-path",
+        :url => "http://api.example.com/some-path",
         :headers => { "some-header-key" => "some-header-value" },
         :body => "some-body"
       }
@@ -234,7 +234,7 @@ describe CFoundry::V2::Base do
     let(:fingerprints) { "some-fingerprints" }
 
     it "makes a PUT request to the resource_match endpoint with the correct payload" do
-      stub = stub_request(:put, "https://api.cloudfoundry.com/v2/resource_match").
+      stub = stub_request(:put, "https://api.example.com/v2/resource_match").
         with(:body => fingerprints).
         to_return(:body => "{}")
       base.resource_match(fingerprints)
@@ -248,7 +248,7 @@ describe CFoundry::V2::Base do
     let(:fake_zipfile) { File.new("#{SPEC_ROOT}/fixtures/empty_file") }
 
     it "makes a PUT request to the app bits endpoint with the correct payload" do
-      stub = stub_request(:put, "https://api.cloudfoundry.com/v2/apps/#{guid}/bits").to_return(:body => "{}")
+      stub = stub_request(:put, "https://api.example.com/v2/apps/#{guid}/bits").to_return(:body => "{}")
       base.upload_app(guid, fake_zipfile)
       expect(stub).to have_been_requested
     end
@@ -258,7 +258,7 @@ describe CFoundry::V2::Base do
         stub =
           stub_request(
             :put,
-            "https://api.cloudfoundry.com/v2/apps/#{guid}/bits"
+            "https://api.example.com/v2/apps/#{guid}/bits"
           ).with { |request|
             request.body =~ /name="resources"/ &&
               request.body !~ /name="application"/
@@ -274,8 +274,8 @@ describe CFoundry::V2::Base do
   describe "#stream_file" do
     let(:app_guid) { "1234" }
     let(:instance_guid) { "3456" }
-    let(:api_url) { "https://api.cloudfoundry.com/v2/apps/#{app_guid}/instances/#{instance_guid}/files/some/path/segments" }
-    let(:file_url) { "http://api.cloudfoundry.com/static/path/to/some/file" }
+    let(:api_url) { "https://api.example.com/v2/apps/#{app_guid}/instances/#{instance_guid}/files/some/path/segments" }
+    let(:file_url) { "http://api.example.com/static/path/to/some/file" }
 
     before do
       base.stub(:token) { CFoundry::AuthToken.new("bearer foo") }
