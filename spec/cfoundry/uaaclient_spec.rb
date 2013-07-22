@@ -138,7 +138,7 @@ EOF
         :headers => {'Content-Type' => 'application/json'},
         :body => '{ "resources": [] }'
       )
-      expect(subject).to eq({'resources' => []})
+      expect(subject).to eq({:resources => []})
     end
 
     context "when there is no token" do
@@ -149,7 +149,7 @@ EOF
           :headers => {'Content-Type' => 'application/json'},
           :body => '{ "resources": [] }'
         )
-        expect(subject).to eq({'resources' => []})
+        expect(subject).to eq({:resources => []})
       end
     end
   end
@@ -262,7 +262,7 @@ EOF
             :headers => { "Content-Type" => 'application/json' }
           )
 
-        expect(subject).to eq({"id" => "id"})
+        expect(subject).to eq({:id => "id"})
         expect(req).to have_been_requested
       end
     end

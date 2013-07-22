@@ -44,7 +44,7 @@ module CFoundry
         get_meta_from_uaa if @emails.nil?
 
         return unless @emails && @emails.first
-        @emails.first["value"]
+        @emails.first[:value]
       end
 
       def given_name
@@ -80,12 +80,12 @@ module CFoundry
       def get_meta_from_uaa
         user = @client.base.uaa.user(guid)
         return if user.nil?
-        return if not user['error'].nil?
+        return if not user[:error].nil?
         
-        @emails = user["emails"]
+        @emails = user[:emails]
         @name ||= {}
-        @name[:familyName] = user["name"]["familyname"]
-        @name[:givenName] = user["name"]["givenname"]
+        @name[:familyName] = user[:name][:familyname]
+        @name[:givenName] = user[:name][:givenname]
       end
 
     end
