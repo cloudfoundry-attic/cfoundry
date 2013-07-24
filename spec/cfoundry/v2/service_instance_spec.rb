@@ -40,6 +40,85 @@ module CFoundry
         end
       end
 
+      describe "fetching the service instances" do
+        let(:example_response) do
+         '{
+  "total_results": 2,
+  "total_pages": 1,
+  "prev_url": null,
+  "next_url": null,
+  "resources": [
+    {
+      "metadata": {
+        "guid": "2148b3c4-3d3d-4361-87a3-1b4bf834cdea",
+        "url": "/v2/service_instances/2148b3c4-3d3d-4361-87a3-1b4bf834cdea",
+        "created_at": "2013-07-24 00:32:23 +0000",
+        "updated_at": null
+      },
+      "entity": {
+        "name": "user-provided-6a19d",
+        "credentials": {
+          "thing": "a"
+        },
+        "space_guid": "15ee90c2-8654-40c9-a311-ecfef8cbc921",
+        "space_url": "/v2/spaces/15ee90c2-8654-40c9-a311-ecfef8cbc921",
+        "service_bindings_url": "/v2/service_instances/2148b3c4-3d3d-4361-87a3-1b4bf834cdea/service_bindings"
+      }
+    },
+    {
+      "metadata": {
+        "guid": "746c36b0-4b5f-4e46-876a-2948804ef464",
+        "url": "/v2/service_instances/746c36b0-4b5f-4e46-876a-2948804ef464",
+        "created_at": "2013-07-24 00:32:33 +0000",
+        "updated_at": null
+      },
+      "entity": {
+        "name": "rds-mysql-3991f",
+        "credentials": {
+          "name": "da2f110d519d848a1a677f8df77890cc3",
+          "hostname": "mysql-service-public.cze9ndyywtkf.us-east-1.rds.amazonaws.com",
+          "host": "mysql-service-public.cze9ndyywtkf.us-east-1.rds.amazonaws.com",
+          "port": 3306,
+          "user": "ufZEqKvAXQogC",
+          "username": "ufZEqKvAXQogC",
+          "password": "p8QGNHykcSTu2",
+          "node_id": "rds_mysql_node_10mb_0"
+        },
+        "service_plan_guid": "2c7ab67d-4354-46b5-8423-b19ef6e4b50a",
+        "space_guid": "15ee90c2-8654-40c9-a311-ecfef8cbc921",
+        "gateway_data": {
+          "plan": "10mb",
+          "version": "n/a"
+        },
+        "dashboard_url": null,
+        "space_url": "/v2/spaces/15ee90c2-8654-40c9-a311-ecfef8cbc921",
+        "service_plan_url": "/v2/service_plans/2c7ab67d-4354-46b5-8423-b19ef6e4b50a",
+        "service_bindings_url": "/v2/service_instances/746c36b0-4b5f-4e46-876a-2948804ef464/service_bindings"
+      }
+    }
+  ]
+}'
+        end
+
+        context "when there is no current org or current space" do
+          it "gets both user-provided and cf-managed service instances" do
+            stub_request(:get, "#{client.target}/v2/service_instances?inline-relations-depth=1&return_user_provided_service_instances=true").to_return(:status => 200, :body => example_response)
+            client.service_instances
+          end
+        end
+
+        context "when there is a current org and a current space" do
+          let(:org) { build(:organization) }
+          let(:space) { build(:space, organization: org) }
+          let(:client) { build(:client, current_organization: org, current_space: space) }
+          it "gets both user-provided and cf-managed service instances" do
+            stub_request(:get, "#{client.target}/v2/spaces/#{space.guid}/service_instances?inline-relations-depth=1&return_user_provided_service_instances=true").to_return(:status => 200, :body => example_response)
+            client.service_instances
+          end
+        end
+
+      end
+
       describe 'query params' do
         it 'allows query by name' do
           client.should respond_to(:service_instance_by_name)

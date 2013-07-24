@@ -81,5 +81,11 @@ module CFoundry::V2
     def stream_url(url, &blk)
       @base.stream_url(url, &blk)
     end
+
+    # client.service_instances override
+    def service_instances(opts={})
+      opts[:user_provided] =  true
+      super(opts)
+    end
   end
 end

@@ -82,6 +82,8 @@ module CFoundry::V2
           params[:"inline-relations-depth"] = v
         when :query
           params[:q] = v.join(":")
+        when :user_provided
+          params[:"return_user_provided_service_instances"] = v
         end
       end
 
