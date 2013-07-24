@@ -102,8 +102,15 @@ module CFoundry
 
         context "when there is no current org or current space" do
           it "gets both user-provided and cf-managed service instances" do
-            stub_request(:get, "#{client.target}/v2/service_instances?inline-relations-depth=1&return_user_provided_service_instances=true").to_return(:status => 200, :body => example_response)
+            http_stub = stub_request(:get, "#{client.target}/v2/service_instances?inline-relations-depth=1&return_user_provided_service_instances=true").to_return(:status => 200, :body => example_response)
             client.service_instances
+            http_stub.should have_been_requested
+          end
+
+          it "gets only cf-managed service instances if the user explicitly sets :user_provided to false" do
+            http_stub = stub_request(:get, "#{client.target}/v2/service_instances?inline-relations-depth=1&return_user_provided_service_instances=false").to_return(:status => 200, :body => example_response)
+            client.service_instances(user_provided: false)
+            http_stub.should have_been_requested
           end
         end
 
@@ -112,8 +119,9 @@ module CFoundry
           let(:space) { build(:space, organization: org) }
           let(:client) { build(:client, current_organization: org, current_space: space) }
           it "gets both user-provided and cf-managed service instances" do
-            stub_request(:get, "#{client.target}/v2/spaces/#{space.guid}/service_instances?inline-relations-depth=1&return_user_provided_service_instances=true").to_return(:status => 200, :body => example_response)
+            http_stub = stub_request(:get, "#{client.target}/v2/spaces/#{space.guid}/service_instances?inline-relations-depth=1&return_user_provided_service_instances=true").to_return(:status => 200, :body => example_response)
             client.service_instances
+            http_stub.should have_been_requested
           end
         end
 

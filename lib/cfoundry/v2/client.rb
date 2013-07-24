@@ -84,7 +84,7 @@ module CFoundry::V2
 
     # client.service_instances override
     def service_instances(opts={})
-      opts[:user_provided] =  true
+      opts[:user_provided] =  opts[:user_provided] || opts[:user_provided].nil?
       super(opts)
     end
   end
