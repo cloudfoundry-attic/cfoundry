@@ -114,6 +114,13 @@ module CFoundry
           end
         end
 
+          it "defaults to true when user_provided is set to a bogus value (not true or false)" do
+            http_stub = stub_request(:get, "#{client.target}/v2/service_instances?inline-relations-depth=1&return_user_provided_service_instances=true").to_return(:status => 200, :body => example_response)
+            client.service_instances(user_provided: 'some_non-boolean_value')
+            http_stub.should have_been_requested
+          end
+
+
         context "when there is a current org and a current space" do
           let(:org) { build(:organization) }
           let(:space) { build(:space, organization: org) }
