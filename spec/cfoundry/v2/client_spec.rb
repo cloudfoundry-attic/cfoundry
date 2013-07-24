@@ -14,7 +14,7 @@ module CFoundry
 
         it "creates the user in uaa and ccng" do
           client.base.stub(:uaa) { uaa }
-          uaa.stub(:add_user).with(email, password) { {"id" => "1234"} }
+          uaa.stub(:add_user).with(email, password) { {:id => "1234"} }
 
           user = build(:user)
           client.stub(:user) { user }
