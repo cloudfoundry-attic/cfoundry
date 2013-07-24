@@ -1,6 +1,7 @@
 {
   "guid": "organization-id-1",
   "name": "organization-name-1",
+  "status": "active",
   "spaces": [{
     "guid": "space-id-1",
     "name": "space-name-1",
