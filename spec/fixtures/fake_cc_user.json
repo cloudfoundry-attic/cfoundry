@@ -13,6 +13,7 @@
       },
       "entity": {
         "name": "organization-name-1",
+        "status": "active",
         "spaces": [
           {
             "metadata": {
@@ -70,6 +71,7 @@
       },
       "entity": {
         "name": "organization-name-2",
+        "status": "active",
         "spaces": [
           {
             "metadata": {
