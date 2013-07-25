@@ -3,6 +3,9 @@ require "cfoundry/v2/model"
 module CFoundry::V2
   class Organization < Model
     attribute :name, :string
+    attribute :billing_enabled, :boolean
+    attribute :status, :string
+
     to_many   :spaces
     to_many   :domains
     to_many   :users
@@ -11,7 +14,6 @@ module CFoundry::V2
     to_many   :auditors, :as => :user
 
     to_one    :quota_definition
-    attribute :billing_enabled, :boolean
 
     queryable_by :name, :space_guid, :user_guid, :manager_guid,
       :billing_manager_guid, :auditor_guid
