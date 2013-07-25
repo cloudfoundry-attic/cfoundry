@@ -5,6 +5,7 @@ describe CFoundry::V2::Client do
     WebMock.allow_net_connect!
   end
 
+  let(:environment_api) { ENV["CF_V2_TEST_TARGET"] || "api.#{a1_domain}"}
   let(:a1_domain) { "a1.cf-app.com" }
   let(:prod_domain) { "run.pivotal.io" }
 
@@ -21,12 +22,12 @@ describe CFoundry::V2::Client do
 
     if ENV["CF_V2_RUN_INTEGRATION"]
       it "requires a re-login" do
-        client = CFoundry::V2::Client.new("http://api." + a1_domain)
+        client = CFoundry::V2::Client.new("http://#{environment_api}")
         client.login({username: ENV["CF_V2_TEST_USER"], password: ENV["CF_V2_TEST_PASSWORD"]})
         client.quota_definitions # Getting quota definitions will always be the shortest request that requires auth
 
         client.target = nil
-        client.target = "http://api." + a1_domain
+        client.target = "http://#{environment_api}"
         expect { client.quota_definitions }.to raise_error(CFoundry::InvalidAuthToken)
 
         client.login({username: ENV["CF_V2_TEST_USER"], password: ENV["CF_V2_TEST_PASSWORD"]})
