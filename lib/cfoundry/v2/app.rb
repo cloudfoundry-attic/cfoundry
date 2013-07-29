@@ -199,7 +199,7 @@ module CFoundry::V2
       else
         state
       end
-    rescue CFoundry::StagingError
+    rescue CFoundry::StagingError, CFoundry::NotStaged
       "STAGING FAILED"
     end
 
