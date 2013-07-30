@@ -82,10 +82,15 @@ module CFoundry::V2
       @base.stream_url(url, &blk)
     end
 
-    # client.service_instances override
     def service_instances(opts={})
-      opts[:user_provided] =  !!(opts[:user_provided] || opts[:user_provided].nil?)
+      opts[:user_provided] = true
       super(opts)
+    end
+
+    def service_instances_from(path, *args)
+      opts = args.first || {}
+      opts[:user_provided] = true
+      super(path, opts, *args)
     end
   end
 end

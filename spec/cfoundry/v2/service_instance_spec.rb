@@ -111,12 +111,6 @@ module CFoundry
             http_stub.should have_been_requested
           end
 
-          it "gets only cf-managed service instances when user_provided is set to false" do
-            http_stub = stub_request(:get, "#{client.target}/v2/spaces/#{space.guid}/service_instances?inline-relations-depth=1&return_user_provided_service_instances=false").to_return(:status => 200, :body => example_response)
-            client.service_instances(user_provided: false)
-            http_stub.should have_been_requested
-          end
-
           describe "via service_instance_from" do
             it "defaults to true when user_provided is set to a bogus value (not true or false)" do
               http_stub = stub_request(:get, "#{client.target}/v2/spaces/#{space.guid}/service_instances?inline-relations-depth=1&return_user_provided_service_instances=true").to_return(:status => 200, :body => example_response)
