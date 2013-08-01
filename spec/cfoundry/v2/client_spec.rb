@@ -84,6 +84,27 @@ module CFoundry
           expect{client.target = new_target}.to change{client.base.target}.from("http://api.example.com").to(new_target)
         end
       end
+
+      describe "#service_instances" do
+        let(:client) { build(:client) }
+
+        it "includes user-provided instances" do
+          expect(client.base).to receive(:service_instances).with(hash_including(user_provided: true)).and_return([])
+          client.service_instances
+        end
+      end
+
+      describe "#make_service_instance" do
+        it "returns a UserProvidedServiceInstance when json[:type] is user_provided_service_instance" do
+          json = MultiJson.load(CcApiStub::Helper.load_fixtures(:fake_cc_user_provided_service_instance).to_json, :symbolize_keys => true)
+          instance = client.make_service_instance(json)
+          expect(instance).to be_a(CFoundry::V2::UserProvidedServiceInstance)
+
+          json = MultiJson.load(CcApiStub::Helper.load_fixtures(:fake_cc_managed_service_instance).to_json, :symbolize_keys => true)
+          instance = client.make_service_instance(json)
+          expect(instance).to be_a(CFoundry::V2::ManagedServiceInstance)
+        end
+      end
     end
   end
 end

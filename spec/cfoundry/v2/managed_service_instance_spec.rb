@@ -2,7 +2,7 @@ require "spec_helper"
 
 module CFoundry
   module V2
-    describe ServiceInstance do
+    describe ManagedServiceInstance do
       let(:client) { build(:client) }
       subject { build(:service_instance, :client => client) }
 
@@ -56,6 +56,7 @@ module CFoundry
         "updated_at": null
       },
       "entity": {
+        "type": "user_provided_service_instance",
         "name": "user-provided-6a19d",
         "credentials": {
           "thing": "a"
@@ -73,6 +74,7 @@ module CFoundry
         "updated_at": null
       },
       "entity": {
+        "type": "managed_service_instance",
         "name": "rds-mysql-3991f",
         "credentials": {
           "name": "da2f110d519d848a1a677f8df77890cc3",

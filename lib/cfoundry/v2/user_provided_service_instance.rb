@@ -1,11 +1,7 @@
-require "cfoundry/v2/model"
+require "cfoundry/v2/service_instance"
 
 module CFoundry::V2
-  class UserProvidedServiceInstance < Model
-    attribute :name, :string
+  class UserProvidedServiceInstance < ServiceInstance
     attribute :credentials, :hash
-    to_one    :space
-
-    scoped_to_space
   end
 end

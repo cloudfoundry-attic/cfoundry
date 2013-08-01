@@ -92,5 +92,13 @@ module CFoundry::V2
       opts[:user_provided] = true
       super(path, opts, *args)
     end
+
+    def make_service_instance(json)
+      klass = "CFoundry::V2::#{json[:entity][:type].camelize}".constantize
+      klass.new(
+        json[:metadata][:guid],
+        self,
+        json)
+    end
   end
 end
