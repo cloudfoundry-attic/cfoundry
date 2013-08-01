@@ -1,6 +1,7 @@
 SPEC_ROOT = File.dirname(__FILE__).freeze
 
 require "rspec"
+require "putsinator"
 require "cfoundry"
 require "webmock/rspec"
 require "ostruct"

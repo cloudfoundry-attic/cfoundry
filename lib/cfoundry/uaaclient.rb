@@ -3,17 +3,19 @@ require "uaa"
 
 module CFoundry
   class UAAClient
-    attr_accessor :target, :client_id, :token, :trace
+    attr_accessor :target, :client_id, :token, :trace, :http_proxy, :https_proxy
 
-    def initialize(target, client_id = "cf")
+    def initialize(target, client_id = "cf", options = {})
       @target = target
       @client_id = client_id
-      CF::UAA::Misc.symbolize_keys = true
+      @http_proxy = options[:http_proxy]
+      @https_proxy = options[:https_proxy]
+      @uaa_info_client = uaa_info_client_for(target)
     end
 
     def prompts
       wrap_uaa_errors do
-        CF::UAA::Misc.server(target)[:prompts]
+        @uaa_info_client.server[:prompts]
       end
     end
 
@@ -44,7 +46,7 @@ module CFoundry
 
     def password_score(password)
       wrap_uaa_errors do
-        response = CF::UAA::Misc.password_strength(uaa_url, password)
+        response = uaa_info_client_for(uaa_url).password_strength(password)
 
         required_score = response[:requiredScore] || 0
         case (response[:score] || 0)
@@ -90,8 +92,20 @@ module CFoundry
 
     private
 
+    def uaa_info_client_for(url)
+      CF::UAA::Info.new(url,
+                        :symbolize_keys => true,
+                        :http_proxy => http_proxy,
+                        :https_proxy => https_proxy
+      )
+    end
+
     def token_issuer
-      @token_issuer ||= CF::UAA::TokenIssuer.new(target, client_id, nil, :symbolize_keys => true)
+      @token_issuer ||= CF::UAA::TokenIssuer.new(target, client_id, nil,
+        :symbolize_keys => true,
+        :http_proxy => @http_proxy,
+        :https_proxy => @https_proxy
+      )
       @token_issuer.logger.level = @trace ? Logger::Severity::TRACE : 1
       @token_issuer
     end
@@ -104,7 +118,7 @@ module CFoundry
     end
 
     def uaa_url
-      @uaa_url ||= CF::UAA::Misc.discover_uaa(target)
+      @uaa_url ||= @uaa_info_client.discover_uaa
     end
 
     def authenticate_with_password_grant(credentials)
