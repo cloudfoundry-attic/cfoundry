@@ -38,7 +38,7 @@ module CFoundry::V2
     end
 
     def plural_object_name
-      :"#{object_name}s"
+      "#{object_name}s"
     end
 
     def defaults

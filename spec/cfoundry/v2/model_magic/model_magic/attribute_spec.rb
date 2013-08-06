@@ -100,14 +100,14 @@ module CFoundry
             end
 
             it "uses the 'at' value in the update payload" do
-              client.base.should_receive(:put).with("v2", :test_models, model.guid, hash_including(:payload => {:not_foo => 123}))
+              client.base.should_receive(:put).with("v2", 'test_models', model.guid, hash_including(:payload => {:not_foo => 123}))
               model.foo = 123
               model.update!
             end
 
             it "uses the 'at' value in the create payload" do
               model.foo = 123
-              client.base.should_receive(:post).with("v2", :test_models, hash_including(:payload => {:not_foo => 123})) { {:metadata => {}} }
+              client.base.should_receive(:post).with("v2", 'test_models', hash_including(:payload => {:not_foo => 123})) { {:metadata => {}} }
               model.create!
             end
 

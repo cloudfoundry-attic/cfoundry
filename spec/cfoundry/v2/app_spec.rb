@@ -242,14 +242,14 @@ module CFoundry
 
       describe "delete!" do
         it "defaults to recursive" do
-          client.base.should_receive(:delete).with("v2", :apps, subject.guid, {:params => {:recursive => true}})
+          client.base.should_receive(:delete).with("v2", 'apps', subject.guid, {:params => {:recursive => true}})
 
           subject.delete!
         end
       end
 
       it "accepts and ignores an options hash" do
-        client.base.should_receive(:delete).with("v2", :apps, subject.guid, {:params => {:recursive => true}})
+        client.base.should_receive(:delete).with("v2", 'apps', subject.guid, {:params => {:recursive => true}})
 
         subject.delete!(:recursive => false)
       end

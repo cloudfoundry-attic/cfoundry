@@ -68,6 +68,10 @@ module CFoundry::V2
       @plural_object_name ||= self.class.plural_object_name
     end
 
+    def create_name
+      plural_object_name
+    end
+
     def invalidate!
       @manifest = nil
       @partial = false
@@ -121,7 +125,7 @@ module CFoundry::V2
         end
       end
 
-      @manifest = @client.base.post("v2", plural_object_name,
+      @manifest = @client.base.post("v2", create_name,
         :content => :json,
         :accept => :json,
         :payload => payload

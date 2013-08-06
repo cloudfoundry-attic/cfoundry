@@ -5,6 +5,12 @@ class TestModel < CFoundry::V2::Model
   to_one :domain
 end
 
+class TestModelWithCreateName < CFoundry::V2::Model
+  def create_name
+    "extra_special_name"
+  end
+end
+
 module CFoundry
   module V2
     describe Model do
@@ -57,53 +63,67 @@ module CFoundry
       end
 
       describe "#create!" do
-        before do
-          client.base.stub(:post) {
-            {:metadata => {
+        context "when create_name is overridden" do
+          let(:model) { TestModelWithCreateName.new(guid, client, manifest) }
+          it "posts to the models customized create namespace" do
+            client.base.should_receive(:post).with("v2", 'extra_special_name',
+              :content => :json,
+              :accept => :json,
+              :payload => {}
+            ) { {:metadata => {}} }
+            model.create!
+          end
+        end
+
+        context "when create_name is not overriden" do
+          before do
+            client.base.stub(:post) {
+              {:metadata => {
+                  :guid => "123",
+                  :created_at => "2013-06-10 10:41:15 -0700",
+                  :updated_at => "2015-06-10 10:41:15 -0700"
+              }}
+            }
+            model.foo = "bar"
+          end
+
+          it "posts to the model's create url with appropriate arguments" do
+            client.base.should_receive(:post).with("v2", 'test_models',
+              :content => :json,
+              :accept => :json,
+              :payload => {:foo => "bar"}
+            ) { {:metadata => {}} }
+            model.create!
+          end
+
+          it "clears diff" do
+            model.diff.should be_present
+            model.create!
+            model.diff.should_not be_present
+          end
+
+          it "sets manifest from the response" do
+            model.create!
+            model.manifest.should == {
+              :metadata => {
                 :guid => "123",
                 :created_at => "2013-06-10 10:41:15 -0700",
                 :updated_at => "2015-06-10 10:41:15 -0700"
-            }}
-          }
-          model.foo = "bar"
-        end
-
-        it "posts to the model's create url with appropriate arguments" do
-          client.base.should_receive(:post).with("v2", :test_models,
-            :content => :json,
-            :accept => :json,
-            :payload => {:foo => "bar"}
-          ) { {:metadata => {}} }
-          model.create!
-        end
-
-        it "clears diff" do
-          model.diff.should be_present
-          model.create!
-          model.diff.should_not be_present
-        end
-
-        it "sets manifest from the response" do
-          model.create!
-          model.manifest.should == {
-            :metadata => {
-              :guid => "123",
-              :created_at => "2013-06-10 10:41:15 -0700",
-              :updated_at => "2015-06-10 10:41:15 -0700"
+              }
             }
-          }
-        end
+          end
 
-        it "sets guid from the response metadata" do
-          model.create!
-          model.guid.should == "123"
-        end
+          it "sets guid from the response metadata" do
+            model.create!
+            model.guid.should == "123"
+          end
 
-        it "sets timestamps from the response metadata" do
-          model.create!
+          it "sets timestamps from the response metadata" do
+            model.create!
 
-          model.created_at.should == DateTime.parse("2013-06-10 10:41:15 -0700")
-          model.updated_at.should == DateTime.parse("2015-06-10 10:41:15 -0700")
+            model.created_at.should == DateTime.parse("2013-06-10 10:41:15 -0700")
+            model.updated_at.should == DateTime.parse("2015-06-10 10:41:15 -0700")
+          end
         end
       end
 
@@ -125,7 +145,7 @@ module CFoundry
 
         it "updates using the client with the v2 api, its plural model name, object guid, and diff object" do
           model.foo = "bar"
-          client.base.should_receive(:put).with("v2", :test_models, guid,
+          client.base.should_receive(:put).with("v2", 'test_models', guid,
             :content => :json,
             :accept => :json,
             :payload => {:foo => "bar"}
@@ -205,7 +225,7 @@ module CFoundry
 
         context "without options" do
           it "deletes using the client with the v2 api, its plural model name, object guid, and empty params hash" do
-            client.base.should_receive(:delete).with("v2", :test_models, guid, :params => {})
+            client.base.should_receive(:delete).with("v2", 'test_models', guid, :params => {})
             model.delete!
           end
         end
@@ -213,7 +233,7 @@ module CFoundry
         context "with options" do
           it "sends delete with the object guid and options" do
             options = {:excellent => "billandted"}
-            client.base.should_receive(:delete).with("v2", :test_models, guid, :params => options)
+            client.base.should_receive(:delete).with("v2", 'test_models', guid, :params => options)
 
             model.delete!(options)
           end
