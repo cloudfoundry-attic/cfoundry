@@ -115,7 +115,6 @@ module CFoundry::V2
               x
             end
           end
-        elsif k.to_s.end_with?("_url")
         else
           payload[k] = v
         end
