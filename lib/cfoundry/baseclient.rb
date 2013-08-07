@@ -7,6 +7,8 @@ require "forwardable"
 
 module CFoundry
   class BaseClient # :nodoc:
+    include CFoundry::ProxyOptions
+
     extend Forwardable
 
     attr_reader :rest_client
@@ -27,7 +29,7 @@ module CFoundry
         endpoint = info[:authorization_endpoint]
 
         if endpoint
-          uaa = CFoundry::UAAClient.new(endpoint)
+          uaa = CFoundry::UAAClient.new(endpoint, "cf", http_proxy: http_proxy, https_proxy: https_proxy)
           uaa.trace = trace
           uaa.token = token
           uaa
@@ -105,7 +107,7 @@ module CFoundry
         opts[:verify_mode] = OpenSSL::SSL::VERIFY_NONE 
       end
 
-      Net::HTTP.start(uri.host, uri.port, opts) do |http|
+      Net::HTTP.start(uri.host, uri.port, *proxy_options_for(uri), opts) do |http|
         http.read_timeout = 5
 
         req = Net::HTTP::Get.new(uri.request_uri)

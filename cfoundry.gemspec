@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.require_paths = %w[lib]
 
   s.add_dependency "activemodel", "~> 3.2.13"
-  s.add_dependency "cf-uaa-lib", "~> 1.3.10"
+  s.add_dependency "cf-uaa-lib", "~> 2.0.0"
   s.add_dependency "multi_json", "~> 1.7"
   s.add_dependency "multipart-post", "~> 1.1"
   s.add_dependency "rubyzip", "~> 0.9"
@@ -30,8 +30,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency "gem-release"
   s.add_development_dependency "json_pure", "~> 1.8"
   s.add_development_dependency "rake", ">= 0.9"
-  s.add_development_dependency "rspec", "~> 2.13"
+  s.add_development_dependency "rspec", "~> 2.14"
   s.add_development_dependency "shoulda-matchers", "~> 1.5.6"
   s.add_development_dependency "timecop", "~> 0.6.1"
   s.add_development_dependency "webmock", "~> 1.9"
+  s.add_development_dependency "putsinator"
 end

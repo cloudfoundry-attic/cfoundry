@@ -25,6 +25,17 @@ EOF
     end
   end
 
+  describe '#initialize' do
+    it "passes proxy info to the UAA info client" do
+      CF::UAA::Info.stub(:new)
+      CFoundry::UAAClient.new(target, 'cf', http_proxy: 'http-proxy.example.com', https_proxy: 'https-proxy.example.com')
+      expect(CF::UAA::Info).to have_received(:new).with(anything, hash_including(
+          http_proxy: 'http-proxy.example.com',
+          https_proxy: 'https-proxy.example.com'
+      ))
+    end
+  end
+
   describe '#prompts' do
     subject { uaa.prompts }
 
@@ -337,6 +348,19 @@ EOF
     it "has logging level 1 if #trace is false" do
       uaa.trace = false
       expect(uaa.send(:token_issuer).logger.level).to eq 1
+    end
+
+    it "passes proxy info to the token issuer" do
+      CF::UAA::TokenIssuer.stub(:new).and_call_original
+      uaa.http_proxy = 'http-proxy.example.com'
+      uaa.https_proxy = 'https-proxy.example.com'
+
+      uaa.send(:token_issuer)
+
+      expect(CF::UAA::TokenIssuer).to have_received(:new).with(anything, anything, anything, hash_including(
+          http_proxy: 'http-proxy.example.com',
+          https_proxy: 'https-proxy.example.com'
+      ))
     end
   end
 

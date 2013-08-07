@@ -1,3 +1,5 @@
+require "cfoundry/concerns/proxy_options"
+
 require "cfoundry/baseclient"
 require "cfoundry/rest_client"
 require "cfoundry/auth_token"

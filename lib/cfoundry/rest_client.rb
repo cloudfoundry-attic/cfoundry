@@ -7,20 +7,10 @@ require "fileutils"
 module CFoundry
   class RestClient
     class HTTPFactory
-      def self.create(uri, http_proxy, https_proxy)
-        scheme = uri.scheme
-        proxy_to_use = (scheme == "http" ? http_proxy : https_proxy)
+      def self.create(uri, proxy_options = [])
+        http = Net::HTTP.new(uri.host, uri.port, *proxy_options)
 
-        if proxy_to_use
-          proxy_uri = URI.parse(proxy_to_use)
-          proxy_user, proxy_pass = proxy_uri.userinfo.split(/:/) if proxy_uri.userinfo
-          http = Net::HTTP::Proxy(proxy_uri.host, proxy_uri.port, proxy_user, proxy_pass).
-            new(uri.host, uri.port)
-        else
-          http = Net::HTTP.new(uri.host, uri.port)
-        end
-
-        if scheme == "https"
+        if uri.is_a?(URI::HTTPS)
           http.use_ssl = true
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
         end
@@ -30,6 +20,7 @@ module CFoundry
     end
 
     include CFoundry::TraceHelpers
+    include CFoundry::ProxyOptions
 
     LOG_LENGTH = 10
 
@@ -148,7 +139,7 @@ module CFoundry
 
       add_headers(request, headers)
 
-      http = HTTPFactory.create(uri, http_proxy, https_proxy)
+      http = HTTPFactory.create(uri, proxy_options_for(uri))
 
       # TODO remove this when staging returns streaming responses
       http.read_timeout = 300

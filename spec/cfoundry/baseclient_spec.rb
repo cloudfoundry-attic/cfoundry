@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe CFoundry::BaseClient do
+  let(:authorization_endpoint) { "http://uaa.example.com" }
   subject(:client) { CFoundry::BaseClient.new("http://api.example.com") }
   describe "#request" do
     before do
@@ -104,7 +105,7 @@ describe CFoundry::BaseClient do
 
   describe "UAAClient" do
     context "with a valid uaa endpoint" do
-      let(:info) { { :authorization_endpoint => "http://uaa.example.com" } }
+      let(:info) { { :authorization_endpoint => authorization_endpoint } }
 
       before do
         subject.stub(:info) { info }
@@ -132,6 +133,22 @@ describe CFoundry::BaseClient do
           it "uses it to create the UAAClient" do
             expect(subject.uaa).to be_a CFoundry::UAAClient
             expect(subject.uaa.target).to eq "foo"
+          end
+        end
+
+        context "when proxy is set" do
+          before do
+            subject.http_proxy = 'http-proxy.example.com'
+            subject.https_proxy = 'https-proxy.example.com'
+          end
+
+          it "passes the proxy to the uaa client" do
+            CFoundry::UAAClient.stub(:new).and_call_original
+            subject.uaa
+            expect(CFoundry::UAAClient).to have_received(:new).with(anything, anything, hash_including(
+                http_proxy: 'http-proxy.example.com',
+                https_proxy: 'https-proxy.example.com'
+            ))
           end
         end
       end
@@ -217,6 +234,16 @@ describe CFoundry::BaseClient do
       end
 
       expect(chunks).to eq(["https result"])
+    end
+
+    it "sets proxy options if available" do
+      stub_request(:get, "https://example.com/something")
+      subject.https_proxy = "user:password@https-proxy.example.com:1234"
+      Net::HTTP.stub(:start).and_call_original
+
+      subject.stream_url("https://example.com/something")
+
+      expect(Net::HTTP).to have_received(:start).with(anything, anything, 'https-proxy.example.com', 1234, 'user', 'password', anything)
     end
 
     it "raises NotFound if response is 404" do
