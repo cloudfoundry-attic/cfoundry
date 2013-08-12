@@ -1,7 +1,6 @@
 language: ruby
 rvm:
   - "1.9.3"
-  - "1.9.2"
   - rbx-19mode
 after_success: "rake release:ci"
 matrix:
