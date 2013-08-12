@@ -75,6 +75,10 @@
           "version":"1.0"
         }
       }
+    },
+    {
+      "guid": "user-provided-id-3",
+      "name": "user-provided-service-name-3"
     }
   ]
 }

@@ -7,6 +7,7 @@
   },
   "entity": {
     "name": "service-instance-name-1",
+    "type": "managed_service_instance",
     "service_plan_guid": "service-plan-id-1",
     "space_guid": "space-id-1",
     "gateway_data": {

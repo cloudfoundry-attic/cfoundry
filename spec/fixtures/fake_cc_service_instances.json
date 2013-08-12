@@ -24,6 +24,7 @@
           "node_id": "rds_mysql_node_cfinternal_0"
         },
         "service_plan_guid": "3757e197-8f8b-4e19-9bc0-111eac4ede21",
+        "type": "managed_service_instance",
         "space_guid": "space-id-1",
         "gateway_data": {
           "plan": "cfinternal",
@@ -56,6 +57,7 @@
         },
         "service_plan_guid": "3757e197-8f8b-4e19-9bc0-111eac4ede21",
         "space_guid": "space-id-1",
+        "type": "managed_service_instance",
         "gateway_data": {
           "plan": "cfinternal",
           "version": "n/a"
