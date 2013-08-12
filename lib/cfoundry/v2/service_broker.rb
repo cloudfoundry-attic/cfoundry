@@ -5,5 +5,7 @@ module CFoundry::V2
     attribute :name, :string
     attribute :broker_url, :string
     attribute :token, :string
+
+    queryable_by :name
   end
 end
