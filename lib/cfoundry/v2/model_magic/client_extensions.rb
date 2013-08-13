@@ -38,6 +38,18 @@ module CFoundry
                 :params => ModelMagic.params_from(args)
               )
             end
+
+            #
+            # def client.MODELs_for_each
+            #
+            define_method(:"#{plural}_for_each") do |*args, &block|
+              for_each(get("v2", plural,
+                  :accept => :json,
+                  :params => ModelMagic.params_from(args)
+                ),
+                &block
+              )
+            end
           end
 
 
@@ -92,6 +104,16 @@ module CFoundry
                   :next_page => !!response[:next_url],
                   :results => results
               }
+            end
+
+            #
+            # def client.MODELs_for_each
+            #
+            define_method(:"#{plural}_for_each") do |*args, &block|
+              @base.send(:"#{plural}_for_each", *args) do |json|
+                result = send(:"make_#{singular}", json)
+                block.call(result)
+              end
             end
 
             #

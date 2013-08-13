@@ -36,6 +36,7 @@ module CFoundry::V2
     def files(guid, instance, *path)
       get("v2", "apps", guid, "instances", instance, "files", *path)
     end
+
     alias :file :files
 
     def stream_file(guid, instance, *path, &blk)
@@ -68,14 +69,20 @@ module CFoundry::V2
           :return_response => true)
     end
 
-    def all_pages(paginated)
-      payload = paginated[:resources]
+    def for_each(paginated, &block)
+      paginated[:resources].each &block
 
       while next_page = paginated[:next_url]
         paginated = get(next_page, :accept => :json)
-        payload += paginated[:resources]
+        paginated[:resources].each &block
       end
+    end
 
+    def all_pages(paginated)
+      payload = []
+      for_each(paginated) do |resource|
+        payload << resource
+      end
       payload
     end
   end
