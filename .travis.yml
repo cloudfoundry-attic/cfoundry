@@ -3,6 +3,9 @@ rvm:
   - "1.9.3"
   - rbx-19mode
 after_success: "rake release:ci"
+before_install:
+  - git submodule foreach --recursive git submodule sync
+  - git submodule update --init --recursive
 matrix:
   allow_failures:
     - rvm: rbx-19mode
