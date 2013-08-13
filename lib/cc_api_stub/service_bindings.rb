@@ -10,8 +10,8 @@ module CcApiStub
 
       private
 
-      def object_endpoint
-        %r{/v2/service_bindings/[^/]+$}
+      def object_endpoint(id = nil)
+        %r{/v2/service_bindings/#{id}[^/]+$}
       end
 
       def collection_endpoint

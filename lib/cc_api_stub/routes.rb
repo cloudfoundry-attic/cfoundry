@@ -18,8 +18,8 @@ module CcApiStub
         %r{/v2/routes/?.*$}
       end
 
-      def object_endpoint
-        %r{/v2/routes/[^/]+$}
+      def object_endpoint(id = nil)
+        %r{/v2/routes/#{id}[^/]+$}
       end
     end
   end

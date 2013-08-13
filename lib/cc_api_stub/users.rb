@@ -39,8 +39,8 @@ module CcApiStub
         stub_get(%r{/v2/users/[^/]+/summary(\?inline-relations-depth=\d)?$}, {}, response(200, response_body))
       end
 
-      def fail_to_find
-        stub_get(object_endpoint, {}, response(404, {:code => 20003, :description => "The user could not be found"}))
+      def fail_to_find(options = {})
+        stub_get(object_endpoint(options[:id]), {}, response(404, {:code => 20003, :description => "The user could not be found"}))
       end
 
       def succeed_to_create
@@ -52,12 +52,12 @@ module CcApiStub
         CcApiStub::Helper.fail_request(:post, 500, {}, /users/)
       end
 
-      def succeed_to_replace_permissions
-        stub_put(object_endpoint, {}, response(200, ""))
+      def succeed_to_replace_permissions(options = {})
+        stub_put(object_endpoint(options[:id]), {}, response(200, ""))
       end
 
-      def fail_to_replace_permissions
-        stub_put(object_endpoint, {}, response(500))
+      def fail_to_replace_permissions(options = {})
+        stub_put(object_endpoint(options[:id]), {}, response(500))
       end
 
       def organizations_fixture
@@ -77,8 +77,8 @@ module CcApiStub
         %r{/v2/users$}
       end
 
-      def object_endpoint
-        %r{/v2/users/[^/]+(/summary)?}
+      def object_endpoint(id = nil)
+        %r{/v2/users/#{id}[^/]+(/summary)?}
       end
     end
   end

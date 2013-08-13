@@ -3,18 +3,18 @@ module CcApiStub
     extend Helper
 
     class << self
-      def succeed_to_delete
-        stub_delete(object_endpoint, {}, response(200, ""))
+      def succeed_to_delete(options = {})
+        stub_delete(object_endpoint(options[:id]), {}, response(200, ""))
       end
 
-      def fail_to_delete
-        stub_delete(object_endpoint, {}, response(500))
+      def fail_to_delete(options = {})
+        stub_delete(object_endpoint(options[:id]), {}, response(500))
       end
 
       private
 
-      def object_endpoint
-        %r{/v2/organizations/[^/]+/users/[^/]+$}
+      def object_endpoint(id = nil)
+        %r{/v2/organizations/[^/]+/users/#{id}[^/]+$}
       end
     end
   end

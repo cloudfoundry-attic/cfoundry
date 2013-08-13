@@ -5,7 +5,7 @@ module CcApiStub
     class << self
       def succeed_to_load(options={})
         response_body = Helper.load_fixtures(options.delete(:fixture) || "fake_cc_#{object_name}", options)
-        stub_get(object_endpoint, {}, response(200, response_body))
+        stub_get(object_endpoint(options[:id]), {}, response(200, response_body))
       end
 
       def succeed_to_create
@@ -41,8 +41,8 @@ module CcApiStub
         %r{/v2/spaces$}
       end
 
-      def object_endpoint
-        %r{/v2/spaces/[^/]+$}
+      def object_endpoint(id = nil)
+        %r{/v2/spaces/#{id}[^/]+$}
       end
     end
   end

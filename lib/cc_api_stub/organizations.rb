@@ -58,8 +58,8 @@ module CcApiStub
 
       private
 
-      def object_endpoint
-        %r{/v2/organizations/[^/]+$}
+      def object_endpoint(id = nil)
+        %r{/v2/organizations/#{id}[^/]+$}
       end
 
       def collection_endpoint

@@ -91,16 +91,16 @@ module CcApiStub
     end
 
     def succeed_to_load(options={})
-      response_body = CcApiStub::Helper.load_fixtures(options.delete(:fixture) || "fake_cc_#{object_name}", options)
-      stub_get(object_endpoint, {}, response(200, response_body))
+      response_body = options[:response] || CcApiStub::Helper.load_fixtures(options.delete(:fixture) || "fake_cc_#{object_name}", options)
+      stub_get(object_endpoint(options[:id]), {}, response(200, response_body))
     end
 
-    def fail_to_load
-      stub_get(object_endpoint, {}, response(500))
+    def fail_to_load(options = {})
+      stub_get(object_endpoint(options[:id]), {}, response(500))
     end
 
     def succeed_to_load_many(options={})
-      response_body = CcApiStub::Helper.load_fixtures(options.delete(:fixture) || "fake_cc_#{object_name.pluralize}", options)
+      response_body = options[:response] || CcApiStub::Helper.load_fixtures(options.delete(:fixture) || "fake_cc_#{object_name.pluralize}", options)
       stub_get(collection_endpoint, {}, response(200, response_body))
     end
 
@@ -118,12 +118,12 @@ module CcApiStub
       stub_post(collection_endpoint, {}, response(201, response_body))
     end
 
-    def succeed_to_update(attributes = {})
-      stub_put(object_endpoint, nil, response(200, {}))
+    def succeed_to_update(options = {})
+      stub_put(object_endpoint(options[:id]), nil, response(200, {}))
     end
 
-    def succeed_to_delete
-      stub_delete(object_endpoint, nil, response(200))
+    def succeed_to_delete(options = {})
+      stub_delete(object_endpoint(options[:id]), nil, response(200))
     end
 
     alias_method :succeed_to_leave, :succeed_to_delete

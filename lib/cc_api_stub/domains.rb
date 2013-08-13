@@ -24,8 +24,8 @@ module CcApiStub
 
       private
 
-      def object_endpoint
-        %r{/v2/domains/[^/]+$}
+      def object_endpoint(id = nil)
+        %r{/v2/domains/#{id}[^/]+$}
       end
     end
   end

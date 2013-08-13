@@ -5,7 +5,7 @@ module CcApiStub
     class << self
       def succeed_to_load(options={})
         response_body = Helper.load_fixtures(options.delete(:fixture) || "fake_cc_#{object_name}", options)
-        stub_get(object_endpoint, {}, response(200, response_body))
+        stub_get(object_endpoint(options[:id]), {}, response(200, response_body))
       end
 
       def succeed_to_create
@@ -15,7 +15,7 @@ module CcApiStub
 
       def succeed_to_update(options={})
         response_body = Helper.load_fixtures(:fake_cc_application, options)
-        stub_put(object_endpoint, nil, response(200, response_body))
+        stub_put(object_endpoint(options[:id]), nil, response(200, response_body))
       end
 
       def succeed_to_map_route
@@ -45,8 +45,8 @@ module CcApiStub
 
       private
 
-      def object_endpoint
-        %r{/v2/apps/[^/]+$}
+      def object_endpoint(id = nil)
+        %r{/v2/apps/#{id}[^/]+$}
       end
     end
   end
