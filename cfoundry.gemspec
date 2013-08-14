@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.name        = "cfoundry"
   s.version     = CFoundry::VERSION.dup
   s.authors     = ["Cloud Foundry Team", "Alex Suraci"]
+  s.license       = "Apache 2.0"
   s.email       = ["vcap-dev@googlegroups.com"]
   s.homepage    = "http://github.com/cloudfoundry/cfoundry"
   s.summary     = %q{
