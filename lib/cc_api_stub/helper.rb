@@ -122,6 +122,10 @@ module CcApiStub
       stub_put(object_endpoint(options[:id]), nil, response(200, {}))
     end
 
+    def fail_to_update(options = {})
+      stub_put(object_endpoint(options[:id]), nil, response(500, {}))
+    end
+
     def succeed_to_delete(options = {})
       stub_delete(object_endpoint(options[:id]), nil, response(200))
     end
