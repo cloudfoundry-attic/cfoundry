@@ -1,0 +1,2 @@
+#- cFoundry
+cfoundry: travis.check cloudfoundry cfoundry
