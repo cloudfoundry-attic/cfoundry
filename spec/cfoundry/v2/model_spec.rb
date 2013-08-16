@@ -1,12 +1,22 @@
 require "spec_helper"
 
-class TestModel < CFoundry::V2::Model
-  attribute :foo, :string
-  to_one :domain
-end
-
 module CFoundry
   module V2
+
+    # be careful, there is a TestModel in global scope because of the TestModelBuilder
+    class TestModel < CFoundry::V2::Model
+      attribute :foo, :string
+      to_one :domain
+
+      def create_endpoint_name
+        :odd_endpoint
+      end
+    end
+
+    class DefaultTestModel < CFoundry::V2::Model
+      attribute :foo, :string
+    end
+
     describe Model do
       let(:client) { build(:client) }
       let(:guid) { "my-object-guid" }
@@ -69,7 +79,7 @@ module CFoundry
         end
 
         it "posts to the model's create url with appropriate arguments" do
-          client.base.should_receive(:post).with("v2", :test_models,
+          client.base.should_receive(:post).with("v2", :odd_endpoint,
             :content => :json,
             :accept => :json,
             :payload => {:foo => "bar"}
@@ -411,6 +421,13 @@ module CFoundry
         end
       end
 
+      describe "#create_endpoint_name" do
+        let(:default_model) { DefaultTestModel.new(guid, client, manifest) }
+
+        it "defaults to the plural object name" do
+          expect(default_model.create_endpoint_name).to eq(:default_test_models)
+        end
+      end
     end
   end
 end

@@ -120,7 +120,7 @@ module CFoundry::V2
         end
       end
 
-      @manifest = @client.base.post("v2", plural_object_name,
+      @manifest = @client.base.post("v2", create_endpoint_name,
         :content => :json,
         :accept => :json,
         :payload => payload
@@ -131,6 +131,10 @@ module CFoundry::V2
       @diff.clear
 
       true
+    end
+
+    def create_endpoint_name
+      plural_object_name
     end
 
     def update!
