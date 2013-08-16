@@ -255,11 +255,12 @@ EOF
     let(:email) { 'test@test.com' }
     let(:password) { 'secret' }
 
-    subject { uaa.add_user(email, password) }
+    context "without given/family name" do
+      subject { uaa.add_user(email, password) }
 
-    context 'with valid data' do
-      it "should add a user" do
-        req =
+      context 'with valid data' do
+        it "should add a user" do
+          req =
           stub_request(:post, "https://uaa.example.com/Users").with(
             :body =>
               { :userName => email,
@@ -267,16 +268,45 @@ EOF
                 :password => password,
                 :name => { :givenName => email, :familyName => email }
               }
-          ).to_return(
-            :status => 200,
-            :body => '{ "id" : "id" }',
-            :headers => { "Content-Type" => 'application/json' }
-          )
+            ).to_return(
+              :status => 200,
+              :body => '{ "id" : "id" }',
+              :headers => { "Content-Type" => 'application/json' }
+            )
 
-        expect(subject).to eq({:id => "id"})
-        expect(req).to have_been_requested
+          expect(subject).to eq({:id => "id"})
+          expect(req).to have_been_requested
+        end
       end
     end
+
+    context "with given/family name" do
+      let(:givenName) { 'givenName' }
+      let(:familyName) { 'familyName' }
+      subject { uaa.add_user(email, password, givenName: givenName, familyName: familyName) }
+
+      context 'with valid data' do
+        it "should add a user" do
+          req =
+            stub_request(:post, "https://uaa.example.com/Users").with(
+              :body =>
+                { :userName => email,
+                  :emails => [{ :value => email }],
+                  :password => password,
+                  :name => { :givenName => givenName, :familyName => familyName }
+                }
+            ).to_return(
+              :status => 200,
+              :body => '{ "id" : "id" }',
+              :headers => { "Content-Type" => 'application/json' }
+            )
+
+          expect(subject).to eq({:id => "id"})
+          expect(req).to have_been_requested
+        end
+      end
+    end
+
   end
 
   describe "#delete_user" do
