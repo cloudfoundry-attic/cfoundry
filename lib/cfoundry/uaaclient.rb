@@ -60,14 +60,15 @@ module CFoundry
       end
     end
 
-    def add_user(email, password)
+    def add_user(email, password, options = {})
       wrap_uaa_errors do
         scim.add(
           :user,
           {:userName => email,
             :emails => [{:value => email}],
             :password => password,
-            :name => {:givenName => email, :familyName => email}
+            :name => {:givenName => options[:givenName] || email,
+                      :familyName => options[:familyName] || email}
           }
         )
       end

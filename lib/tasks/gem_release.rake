@@ -1,3 +1,4 @@
+require 'active_support/time'
 require 'active_support/core_ext'
 
 namespace :gem do
