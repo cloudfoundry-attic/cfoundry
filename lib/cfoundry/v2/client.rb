@@ -50,8 +50,8 @@ module CFoundry::V2
       super
     end
 
-    def register(email, password)
-      uaa_user = @base.uaa.add_user(email, password)
+    def register(email, password, options = {})
+      uaa_user = @base.uaa.add_user(email, password, options)
       cc_user = user
       cc_user.guid = uaa_user[:id]
       cc_user.create!
