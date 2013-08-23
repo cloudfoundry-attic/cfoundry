@@ -8,6 +8,11 @@ namespace :gem do
     old_version = gem_version
 
     sh! "gem bump --version #{version} --no-commit"
+
+    print "About to bump version to #{gem_version}, continue? (Y): "
+    answer = STDIN.gets.strip
+    exit unless answer.length == 0 || answer.upcase.start_with?("Y")
+
     sh! "git add lib/cfoundry/version.rb"
 
     print_with_purpose "Bumping to version #{gem_version}"
