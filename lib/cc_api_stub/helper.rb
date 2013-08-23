@@ -91,7 +91,7 @@ module CcApiStub
     end
 
     def succeed_to_load(options={})
-      response_body = options[:response] || CcApiStub::Helper.load_fixtures(options.delete(:fixture) || "fake_cc_#{object_name}", options)
+      response_body = response_from_options(options.reverse_merge!({:fixture => "fake_cc_#{object_name}"}))
       stub_get(object_endpoint(options[:id]), {}, response(200, response_body))
     end
 
@@ -100,7 +100,7 @@ module CcApiStub
     end
 
     def succeed_to_load_many(options={})
-      response_body = options[:response] || CcApiStub::Helper.load_fixtures(options.delete(:fixture) || "fake_cc_#{object_name.pluralize}", options)
+      response_body = response_from_options(options.reverse_merge!({:fixture => "fake_cc_#{object_name.pluralize}"}))
       stub_get(collection_endpoint, {}, response(200, response_body))
     end
 
@@ -119,7 +119,7 @@ module CcApiStub
     end
 
     def succeed_to_update(options = {})
-      stub_put(object_endpoint(options[:id]), nil, response(200, {}))
+      stub_put(object_endpoint(options[:id]), nil, response(200, response_from_options(options)))
     end
 
     def fail_to_update(options = {})
@@ -134,6 +134,15 @@ module CcApiStub
 
     def fixture_prefix
       "_cc"
+    end
+
+    private
+
+    def response_from_options(options)
+      fixture = options.delete(:fixture)
+      return options[:response] if options[:response]
+      return CcApiStub::Helper.load_fixtures(fixture, options) if fixture
+      {}
     end
   end
 end

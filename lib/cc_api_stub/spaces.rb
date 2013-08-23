@@ -23,6 +23,11 @@ module CcApiStub
         stub_get(%r{/v2/spaces/[^/]+/summary$}, {}, response(200, response_body))
       end
 
+      def succeed_to_load_apps(options={})
+        response = response_from_options(options.reverse_merge!({:fixture => "fake_cc_space_apps"}))
+        stub_get(%r{/v2/spaces/[^/]+/apps\?inline-relations-depth=1}, {}, response(200, response))
+      end
+
       def space_fixture_hash
         {
           :metadata => {
