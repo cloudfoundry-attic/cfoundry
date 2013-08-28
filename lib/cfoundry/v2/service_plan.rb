@@ -4,6 +4,8 @@ module CFoundry::V2
   class ServicePlan < Model
     attribute :name, :string
     attribute :description, :string
+    attribute :unique_id, String
+    attribute :free, :boolean, :default => false
     attribute :extra, :string
     to_one    :service
     to_many   :service_instances
