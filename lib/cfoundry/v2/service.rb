@@ -4,6 +4,7 @@ module CFoundry::V2
   class Service < Model
     attribute :label, String
     attribute :provider, String
+    attribute :unique_id, String
     attribute :url, :url
     attribute :description, String
     attribute :version, String
@@ -13,6 +14,7 @@ module CFoundry::V2
     attribute :timeout, Integer, :default => nil
     attribute :active, :boolean, :default => false
     attribute :extra, String
+    attribute :tags, [String]
     to_many   :service_plans
 
     queryable_by :service_plan_guid
