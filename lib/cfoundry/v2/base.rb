@@ -28,9 +28,26 @@ module CFoundry::V2
             "application/zip")
       end
 
-      put("v2", "apps", guid, "bits", :payload => payload)
+      response = put("v2", "apps", guid, "bits",
+        :payload => payload,
+        :params => {"async" => "true"},
+        :accept => :json)
+
+      poll_upload_until_finished(response[:metadata][:guid])
     rescue EOFError
       retry
+    end
+
+    def poll_upload_until_finished(guid)
+      while true
+        response = get("v2", "jobs", guid, :accept => :json)
+        break if response[:entity][:status] == "finished"
+
+        if response[:entity][:status] == "failed"
+          raise CFoundry::BadResponse
+        end
+        sleep 0.2
+      end
     end
 
     def files(guid, instance, *path)
