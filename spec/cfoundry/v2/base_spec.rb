@@ -245,10 +245,19 @@ describe CFoundry::V2::Base do
   describe "#upload_app" do
     let(:guid) { "some-guid" }
     let(:bits) { "some-bits" }
+    let(:job_guid) { "123abc" }
     let(:fake_zipfile) { File.new("#{SPEC_ROOT}/fixtures/empty_file") }
+    let(:upload_response) { %Q({"metadata":{"guid":"#{job_guid}"}}) }
+
+    before do
+      base.should_receive(:poll_upload_until_finished).with(job_guid)
+    end
 
     it "makes a PUT request to the app bits endpoint with the correct payload" do
-      stub = stub_request(:put, "https://api.example.com/v2/apps/#{guid}/bits").to_return(:body => "{}")
+      stub = stub_request(:put, "https://api.example.com/v2/apps/#{guid}/bits?async=true"
+      ).to_return(
+        :body => upload_response
+      )
       base.upload_app(guid, fake_zipfile)
       expect(stub).to have_been_requested
     end
@@ -258,16 +267,44 @@ describe CFoundry::V2::Base do
         stub =
           stub_request(
             :put,
-            "https://api.example.com/v2/apps/#{guid}/bits"
+            "https://api.example.com/v2/apps/#{guid}/bits?async=true"
           ).with { |request|
             request.body =~ /name="resources"/ &&
               request.body !~ /name="application"/
           }.to_return(
-            :body => "{}"
+            :body => upload_response
           )
         base.upload_app(guid)
         expect(stub).to have_been_requested
       end
+    end
+  end
+
+  describe "#poll_upload_until_finished" do
+    let(:job_guid) { "123abc" }
+
+    it "makes a GET request" do
+      stub = WebMock::API.stub_request(:get, "https://api.example.com/v2/jobs/#{job_guid}"
+      ).to_return(
+        :body => %q({"metadata":{"guid":"123abc"},"entity":{"status":"running"}})
+      ).times(2).then.to_return(
+        :body => %q({"metadata":{"guid":"123abc"},"entity":{"status":"finished"}})
+      )
+      base.poll_upload_until_finished(job_guid)
+      expect(stub).to have_been_requested.times(3)
+    end
+
+    it "raises CFoundry::BadResponse if upload fails" do
+      stub = WebMock::API.stub_request(:get, "https://api.example.com/v2/jobs/#{job_guid}"
+      ).to_return(
+        :body => %q({"metadata":{"guid":"123abc"},"entity":{"status":"running"}})
+      ).times(2).then.to_return(
+        :body => %q({"metadata":{"guid":"123abc"},"entity":{"status":"failed"}})
+      )
+      expect {
+        base.poll_upload_until_finished(job_guid)
+      }.to raise_error(CFoundry::BadResponse)
+      expect(stub).to have_been_requested.times(3)
     end
   end
 
