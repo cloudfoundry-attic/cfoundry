@@ -10,6 +10,7 @@ module CFoundry::V2
     to_many   :apps
     to_many   :domains
     to_many   :service_instances
+    to_many   :services
 
     scoped_to_organization
 
