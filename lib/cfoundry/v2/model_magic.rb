@@ -5,6 +5,7 @@ require "cfoundry/v2/model_magic/attribute"
 require "cfoundry/v2/model_magic/to_one"
 require "cfoundry/v2/model_magic/to_many"
 require "cfoundry/v2/model_magic/queryable_by"
+require "cfoundry/v2/model_magic/query_value_helper"
 
 module CFoundry::V2
   # object name -> module containing query methods
@@ -27,6 +28,7 @@ module CFoundry::V2
     include ModelMagic::ToOne
     include ModelMagic::ToMany
     include ModelMagic::QueryableBy
+    include ModelMagic::QueryValueHelper
 
     attr_reader :scoped_organization, :scoped_space
 
@@ -70,6 +72,22 @@ module CFoundry::V2
       @scoped_space = relation
     end
 
+    # To query a single attribute using equality,
+    # you can use :query => ["attribute", "value"]
+    #
+    # To query multiple attributes, you can specify
+    # a hash of attributes to values, where the values
+    # can be:
+    #   A single value with equality
+    #     :query => {attr1: 'value1', attr2: 'value2'}
+    #   Multiple values for an attribute
+    #     :query => {attr1: ['value1', 'value2']}
+    #   Complex comparisons i.e ('<', '>', '<=', '>=')
+    #     :query => {attr1: QueryValue.new(comparator: '>', value: 'VALUE')}
+    #
+    # QueryValue can be found in CFoundry::V2::ModelMagic::QueryValueHelper
+    # You can include this module in your class to access QueryValue directly
+    # priting is handled by #to_s
     def self.params_from(args)
       options, _ = args
       options ||= {}
@@ -81,13 +99,31 @@ module CFoundry::V2
         when :depth
           params[:"inline-relations-depth"] = v
         when :query
-          params[:q] = v.join(":")
+          if v.is_a? Array
+            params[:q] = v.join(":")
+          else
+            params[:q] = query_from_hash(v)
+          end
         when :user_provided
           params[:"return_user_provided_service_instances"] = v
         end
       end
 
       params
+    end
+
+    def self.query_from_hash(query_params)
+      query_params.collect do |key, value|
+        case value
+          when Array
+            qv = QueryValue.new(:comp => 'IN', :value => value)
+            "#{key}#{qv}"
+          when QueryValue
+            "#{key}#{value}"
+          else
+            "#{key}:#{value}"
+        end
+      end.join(";")
     end
   end
 end
