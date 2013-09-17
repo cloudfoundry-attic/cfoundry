@@ -33,7 +33,7 @@ module CFoundry::V2
         :params => {"async" => "true"},
         :accept => :json)
 
-      poll_upload_until_finished(response[:metadata][:guid])
+      poll_upload_until_finished(response[:metadata][:guid]) if response
     rescue EOFError
       retry
     end
