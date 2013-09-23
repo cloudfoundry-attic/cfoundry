@@ -249,32 +249,49 @@ describe CFoundry::V2::Base do
     let(:fake_zipfile) { File.new("#{SPEC_ROOT}/fixtures/empty_file") }
     let(:upload_response) { %Q({"metadata":{"guid":"#{job_guid}"}}) }
 
-    before do
-      base.should_receive(:poll_upload_until_finished).with(job_guid)
+    context 'when cloud controller supports async requests' do
+      before do
+        base.should_receive(:poll_upload_until_finished).with(job_guid)
+      end
+
+      it "makes a PUT request to the app bits endpoint with the correct payload" do
+        stub = stub_request(:put, "https://api.example.com/v2/apps/#{guid}/bits?async=true"
+        ).to_return(
+          :body => upload_response
+        )
+        base.upload_app(guid, fake_zipfile)
+        expect(stub).to have_been_requested
+      end
+
+      context "when there is no file to upload" do
+        it "does not include 'application' in the request hash" do
+          stub =
+            stub_request(
+              :put,
+              "https://api.example.com/v2/apps/#{guid}/bits?async=true"
+            ).with { |request|
+              request.body =~ /name="resources"/ &&
+                request.body !~ /name="application"/
+            }.to_return(
+              :body => upload_response
+            )
+          base.upload_app(guid)
+          expect(stub).to have_been_requested
+        end
+      end
     end
 
-    it "makes a PUT request to the app bits endpoint with the correct payload" do
-      stub = stub_request(:put, "https://api.example.com/v2/apps/#{guid}/bits?async=true"
-      ).to_return(
-        :body => upload_response
-      )
-      base.upload_app(guid, fake_zipfile)
-      expect(stub).to have_been_requested
-    end
+    context "when cloud controller does not support async request" do
+      before do
+        base.should_not_receive(:poll_upload_until_finished)
+      end
 
-    context "when there is no file to upload" do
-      it "does not include 'application' in the request hash" do
-        stub =
-          stub_request(
-            :put,
-            "https://api.example.com/v2/apps/#{guid}/bits?async=true"
-          ).with { |request|
-            request.body =~ /name="resources"/ &&
-              request.body !~ /name="application"/
-          }.to_return(
-            :body => upload_response
-          )
-        base.upload_app(guid)
+      it "makes a PUT request to the app bits endpoint with the correct payload" do
+        stub = stub_request(:put, "https://api.example.com/v2/apps/#{guid}/bits?async=true"
+        ).to_return(
+          :body => ""
+        )
+        base.upload_app(guid, fake_zipfile)
         expect(stub).to have_been_requested
       end
     end
