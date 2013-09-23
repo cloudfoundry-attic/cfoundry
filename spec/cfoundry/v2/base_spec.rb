@@ -249,21 +249,52 @@ describe CFoundry::V2::Base do
     let(:fake_zipfile) { File.new("#{SPEC_ROOT}/fixtures/empty_file") }
     let(:upload_response) { %Q({"metadata":{"guid":"#{job_guid}"}}) }
 
-    before do
-      base.should_receive(:poll_upload_until_finished).with(job_guid)
+    def stub_upload
+      stub_request(:put, "https://api.example.com/v2/apps/#{guid}/bits?async=true"
+      ).to_return(
+          :body => upload_response
+      )
+    end
+
+    def stub_poll
+      base.stub(:poll_upload_until_finished)
     end
 
     it "makes a PUT request to the app bits endpoint with the correct payload" do
-      stub = stub_request(:put, "https://api.example.com/v2/apps/#{guid}/bits?async=true"
-      ).to_return(
-        :body => upload_response
-      )
+      upload_stub = stub_upload
+      stub_poll
       base.upload_app(guid, fake_zipfile)
-      expect(stub).to have_been_requested
+      expect(upload_stub).to have_been_requested
+    end
+
+    context "when async is supported" do
+      it "polls the job until finished" do
+        stub_upload
+        status_stub = stub_request(:get, "https://api.example.com/v2/jobs/#{job_guid}"
+        ).to_return(
+            {:body => {:entity => {:status => 'queued'}}.to_json},
+            {:body => {:entity => {:status => 'finished'}}.to_json}
+        )
+
+        base.upload_app(guid, fake_zipfile)
+        expect(status_stub).to have_been_requested.twice
+      end
+    end
+
+    context "when async is not supported" do
+      let(:upload_response) { "" }
+
+      it "does not explode" do
+        stub_upload
+        expect {
+          base.upload_app(guid, fake_zipfile)
+        }.not_to raise_exception
+      end
     end
 
     context "when there is no file to upload" do
       it "does not include 'application' in the request hash" do
+        stub_poll
         stub =
           stub_request(
             :put,

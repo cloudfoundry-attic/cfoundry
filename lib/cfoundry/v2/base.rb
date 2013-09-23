@@ -30,10 +30,12 @@ module CFoundry::V2
 
       response = put("v2", "apps", guid, "bits",
         :payload => payload,
-        :params => {"async" => "true"},
-        :accept => :json)
+        :params => {"async" => "true"})
 
-      poll_upload_until_finished(response[:metadata][:guid])
+      if response.present?
+        response_json = JSON.parse(response)
+        poll_upload_until_finished(response_json['metadata']['guid'])
+      end
     rescue EOFError
       retry
     end
