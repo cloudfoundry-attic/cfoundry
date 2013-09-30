@@ -43,6 +43,10 @@ module CcApiStub
         stub_get(%r{/v2/apps/[^/]+/service_bindings/?(?:\?.+)?$}, {}, response(200, response_body))
       end
 
+      def fail_to_find(app_id)
+        stub_get(%r{/v2/apps/#{app_id}}, {}, response(404, {:code => 100004, :description => "The app name could not be found:"}))
+      end
+
       private
 
       def object_endpoint(id = nil)

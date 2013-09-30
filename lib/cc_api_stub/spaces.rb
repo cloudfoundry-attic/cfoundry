@@ -28,6 +28,10 @@ module CcApiStub
         stub_get(%r{/v2/spaces/[^/]+/apps\?inline-relations-depth=1}, {}, response(200, response))
       end
 
+      def fail_to_find(space_id)
+        stub_get(%r{/v2/spaces/#{space_id}}, {}, response(404, {:code => 40004, :description => "The app space could not be found:"}))
+      end
+
       def space_fixture_hash
         {
           :metadata => {
