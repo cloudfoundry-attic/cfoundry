@@ -398,16 +398,17 @@ module CFoundry
       describe "for_each" do
 
         before do
-          WebMock.stub_request(:get, /v2\/test_models/).to_return(:body => {
-              "prev_url" => nil,
-              "next_url" => "/v2/test_models?&page=2&results-per-page=50",
-              "resources" => [{:metadata => {:guid => '1'}}, {:metadata => {:guid => '2'}}]
+
+          WebMock.stub_request(:get, /v2\/test_models\?inline-relations-depth=1/).to_return(:body => {
+            "prev_url" => nil,
+            "next_url" => "/v2/test_models?page=2&q=timestamp>2012-11-01T12:00:00Z&results-per-page=50",
+            "resources" => [{:metadata => {:guid => '1'}}, {:metadata => {:guid => '2'}}]
           }.to_json).times(1)
 
-          WebMock.stub_request(:get, /v2\/test_models\?page=2&results-per-page=50/).to_return(:body => {
-              "prev_url" => nil,
-              "next_url" => nil,
-              "resources" => [{:metadata => {:guid => '3'}}]
+          WebMock.stub_request(:get, /v2\/test_models\?page=2&q=timestamp%3E2012-11-01T12:00:00Z&results-per-page=50/).to_return(:body => {
+            "prev_url" => nil,
+            "next_url" => nil,
+            "resources" => [{:metadata => {:guid => '3'}}]
           }.to_json).times(1)
         end
 
