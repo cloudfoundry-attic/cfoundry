@@ -17,5 +17,18 @@ module CFoundry::V2
 
     queryable_by :name, :space_guid, :user_guid, :manager_guid,
       :billing_manager_guid, :auditor_guid
+
+    def delete_user_from_all_roles(user)
+      remove_user(user)
+      remove_manager(user)
+      remove_billing_manager(user)
+      remove_auditor(user)
+
+      spaces.each do |space|
+        space.remove_developer(user)
+        space.remove_auditor(user)
+        space.remove_manager(user)
+      end
+    end
   end
 end
