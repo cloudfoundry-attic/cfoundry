@@ -12,6 +12,7 @@ require "cc_api_stub/service_bindings"
 require "cc_api_stub/service_instances"
 require "cc_api_stub/services"
 require "cc_api_stub/spaces"
+require "cc_api_stub/space_users"
 require "cc_api_stub/users"
 
 module CcApiStub
