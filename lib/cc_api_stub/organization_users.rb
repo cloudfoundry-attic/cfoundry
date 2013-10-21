@@ -4,6 +4,12 @@ module CcApiStub
 
     class << self
       def succeed_to_delete(options = {})
+        if options.has_key? :roles
+          options[:roles].each do |role|
+            stub_delete(object_endpoint(options[:id], role.to_s.pluralize), {}, response(200, ""))
+          end
+        end
+
         stub_delete(object_endpoint(options[:id]), {}, response(200, ""))
       end
 
@@ -13,8 +19,8 @@ module CcApiStub
 
       private
 
-      def object_endpoint(id = nil)
-        %r{/v2/organizations/[^/]+/users/#{id}[^/]+$}
+      def object_endpoint(id = nil, role="users")
+        %r{/v2/organizations/[^/]+/#{role}/#{id}[^/]+$}
       end
     end
   end
