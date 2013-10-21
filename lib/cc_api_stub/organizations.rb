@@ -56,6 +56,18 @@ module CcApiStub
         stub_get(%r{/v2/organizations/[^\/]+/users\?inline-relations-depth=1}, {}, response(200, users_fixture))
       end
 
+      def spaces_fixture
+        Helper.load_fixtures("fake_cc_organization_spaces")
+      end
+
+      def space_fixture_hash
+        MultiJson.load(spaces_fixture["resources"].first.to_json, :symbolize_keys => true)
+      end
+
+      def succeed_to_load_spaces
+        stub_get(%r{/v2/organizations/[^\/]+/spaces\?inline-relations-depth=1}, {}, response(200, spaces_fixture))
+      end
+
       private
 
       def object_endpoint(id = nil)

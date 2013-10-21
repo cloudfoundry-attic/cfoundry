@@ -94,4 +94,25 @@ describe CcApiStub::Organizations do
 
     it_behaves_like "a stubbed get request"
   end
+
+  describe '.spaces_fixture' do
+    it "returns the fake spaces" do
+      CcApiStub::Organizations.spaces_fixture.should be_a(Hash)
+    end
+  end
+
+  describe '.space_fixture_hash' do
+    it 'returns the fake space' do
+      fixture = CcApiStub::Organizations.space_fixture_hash
+      fixture.should be_a(Hash)
+      fixture.should == fixture.symbolize_keys
+    end
+  end
+
+  describe '.succeed_to_load_spaces' do
+    let(:url) { "http://example.com/v2/organizations/2342/spaces?inline-relations-depth=1" }
+    subject { CcApiStub::Organizations.succeed_to_load_spaces }
+
+    it_behaves_like "a stubbed get request"
+  end
 end

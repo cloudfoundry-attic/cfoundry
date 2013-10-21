@@ -1,0 +1,99 @@
+
+{
+  "total_results": 2,
+  "total_pages": 1,
+  "prev_url": null,
+  "next_url": null,
+  "resources": [
+    {
+      "metadata": {
+        "guid": "space-id-1",
+        "url": "/v2/spaces/space-id-1",
+        "created_at": "2012-10-25 14:10:45 -0700",
+        "updated_at": null
+      },
+      "entity": {
+        "name": "space-name-1",
+        "organization_guid": "organization-id-1",
+        "domains_url": "/v2/spaces/space-id-1/domains",
+        "domains": [
+          {
+            "metadata": {
+              "guid": "domain-id-1",
+              "url": "/v2/domains/domain-id-1",
+              "created_at": "2012-10-25 14:08:38 -0700",
+              "updated_at": null
+            },
+            "entity": {
+              "name": "vcap.me",
+              "owning_organization_guid": null
+            }
+          }
+        ],
+        "organization_url": "/v2/organizations/organization-id-1",
+        "organization": {
+          "metadata": {
+            "guid": "organization-id-1",
+            "url": "/v2/organizations/organization-id-1",
+            "created_at": "2012-10-25 14:10:41 -0700",
+            "updated_at": null
+          },
+          "entity": {
+            "name": "organization-name-1",
+            "spaces_url": "/v2/organizations/organization-id-1/spaces",
+            "domains_url": "/v2/organizations/organization-id-1/domains",
+            "users_url": "/v2/organizations/organization-id-1/users",
+            "managers_url": "/v2/organizations/organization-id-1/managers",
+            "billing_managers_url": "/v2/organizations/organization-id-1/billing_managers",
+            "auditors_url": "/v2/organizations/organization-id-1/auditors"
+          }
+        }
+      }
+    },
+    {
+      "metadata": {
+        "guid": "space-id-2",
+        "url": "/v2/spaces/space-id-2",
+        "created_at": "2012-10-25 14:10:45 -0700",
+        "updated_at": null
+      },
+      "entity": {
+        "name": "space-name-2",
+        "organization_guid": "organization-id-1",
+        "domains_url": "/v2/spaces/space-id-2/domains",
+        "domains": [
+          {
+            "metadata": {
+              "guid": "domain-id-1",
+              "url": "/v2/domains/domain-id-1",
+              "created_at": "2012-10-25 14:08:38 -0700",
+              "updated_at": null
+            },
+            "entity": {
+              "name": "vcap.me",
+              "owning_organization_guid": null
+            }
+          }
+        ],
+        "organization_url": "/v2/organizations/organization-id-1",
+        "organization": {
+          "metadata": {
+            "guid": "organization-id-1",
+            "url": "/v2/organizations/organization-id-1",
+            "created_at": "2012-10-25 14:10:41 -0700",
+            "updated_at": null
+          },
+          "entity": {
+            "name": "organization-name-1",
+            "spaces_url": "/v2/organizations/organization-id-1/spaces",
+            "domains_url": "/v2/organizations/organization-id-1/domains",
+            "users_url": "/v2/organizations/organization-id-1/users",
+            "managers_url": "/v2/organizations/organization-id-1/managers",
+            "billing_managers_url": "/v2/organizations/organization-id-1/billing_managers",
+            "auditors_url": "/v2/organizations/organization-id-1/auditors"
+          }
+        }
+      }
+    }
+  ]
+}
