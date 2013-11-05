@@ -5,6 +5,7 @@ require "cfoundry/rest_client"
 require "cfoundry/auth_token"
 
 require "cfoundry/v2/app"
+require "cfoundry/v2/app_instance"
 require "cfoundry/v2/service"
 require "cfoundry/v2/service_binding"
 require "cfoundry/v2/managed_service_instance"
