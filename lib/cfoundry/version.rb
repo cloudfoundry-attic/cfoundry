@@ -1,4 +1,4 @@
 module CFoundry # :nodoc:
   # CFoundry library version number.
-  VERSION = "4.5.3".freeze
+  VERSION = "4.6.0".freeze
 end
