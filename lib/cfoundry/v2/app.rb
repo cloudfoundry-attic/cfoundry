@@ -52,7 +52,7 @@ module CFoundry::V2
     end
 
     def instances
-      AppInstance.for_app(@client, @guid, name)
+      AppInstance.for_app(name, @guid, @client)
     end
 
     def crashes

@@ -269,7 +269,7 @@ module CFoundry
         before do
           subject.stub(:state) { "STARTED" }
           subject.total_instances = instances.count
-          AppInstance.stub(:for_app).with(client, subject.guid, subject.name) { instances }
+          AppInstance.stub(:for_app).with(subject.name, subject.guid, client) { instances }
         end
 
         let(:instances) do
