@@ -1,16 +1,23 @@
 module CFoundry::V2
   class AppInstance
-    attr_reader :app, :id
+    attr_reader :id
 
-    def initialize(app, id, client, manifest = {})
-      @app = app
+    def self.for_app(name, guid, client)
+      client.base.instances(guid).collect do |i, m|
+        AppInstance.new(name, guid, i.to_s, client, m)
+      end
+    end
+
+    def initialize(app_name, app_guid, id, client, manifest = {})
+      @app_name = app_name
+      @app_guid = app_guid
       @id = id
       @client = client
       @manifest = manifest
     end
 
     def inspect
-      "#<App::Instance '#{@app.name}' \##@id>"
+      "#<App::Instance '#{@app_name}' \##@id>"
     end
 
     def state
@@ -51,17 +58,17 @@ module CFoundry::V2
     end
 
     def files(*path)
-      @client.base.files(@app.guid, @id, *path).split("\n").collect do |entry|
+      @client.base.files(@app_guid, @id, *path).split("\n").collect do |entry|
         path + [entry.split(/\s+/, 2)[0]]
       end
     end
 
     def file(*path)
-      @client.base.files(@app.guid, @id, *path)
+      @client.base.files(@app_guid, @id, *path)
     end
 
     def stream_file(*path, &blk)
-      @client.base.stream_file(@app.guid, @id, *path, &blk)
+      @client.base.stream_file(@app_guid, @id, *path, &blk)
     end
   end
 end

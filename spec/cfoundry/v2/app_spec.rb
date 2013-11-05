@@ -257,7 +257,7 @@ module CFoundry
       describe "#health" do
         describe "when staging failed for an app" do
           it "returns 'STAGING FAILED' as state" do
-            client.base.stub(:instances).with(subject.guid) { raise CFoundry::StagingError }
+            AppInstance.stub(:for_app) { raise CFoundry::StagingError }
             subject.stub(:state) { "STARTED" }
 
             expect(subject.health).to eq("STAGING FAILED")

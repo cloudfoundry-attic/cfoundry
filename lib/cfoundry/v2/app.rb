@@ -52,14 +52,12 @@ module CFoundry::V2
     end
 
     def instances
-      @client.base.instances(@guid).collect do |i, m|
-        AppInstance.new(self, i.to_s, @client, m)
-      end
+      AppInstance.for_app(@client, @guid, name)
     end
 
     def crashes
       @client.base.crashes(@guid).collect do |m|
-        AppInstance.new(self, m[:instance], @client, m)
+        AppInstance.new(self.name, self.guid, m[:instance], @client, m)
       end
     end
 
@@ -266,15 +264,15 @@ module CFoundry::V2
     end
 
     def files(*path)
-      AppInstance.new(self, "0", @client).files(*path)
+      AppInstance.new(self.name, self.guid, "0", @client).files(*path)
     end
 
     def file(*path)
-      AppInstance.new(self, "0", @client).file(*path)
+      AppInstance.new(self.name, self.guid, "0", @client).file(*path)
     end
 
     def stream_file(*path, &blk)
-      AppInstance.new(self, "0", @client).stream_file(*path, &blk)
+      AppInstance.new(self.name, self.guid, "0", @client).stream_file(*path, &blk)
     end
 
     private
