@@ -5,7 +5,7 @@ module CFoundry
     describe App do
       let(:client) { build(:client) }
 
-      subject { build(:app, :client => client) }
+      subject { build(:app, :client => client, :name => 'foo-app') }
 
       describe "#events" do
         let(:events) { [build(:app_event)] }
@@ -261,6 +261,38 @@ module CFoundry
             subject.stub(:state) { "STARTED" }
 
             expect(subject.health).to eq("STAGING FAILED")
+          end
+        end
+      end
+
+      describe "#percent_running" do
+        before do
+          subject.stub(:state) { "STARTED" }
+          subject.total_instances = instances.count
+          AppInstance.stub(:for_app).with(client, subject.guid, subject.name) { instances }
+        end
+
+        let(:instances) do
+          (1..3).map { double(AppInstance, state: "RUNNING") }
+        end
+
+        it "returns the percent of instances running as an integer" do
+          expect(subject.percent_running).to eq(100)
+        end
+
+        context "when half the instances are running" do
+          let(:instances) { [double(AppInstance, state: "RUNNING"), double(AppInstance, state: "STOPPED")] }
+
+          it "returns 50" do
+            expect(subject.percent_running).to eq(50)
+          end
+        end
+
+        context "when staging has failed" do
+          before { AppInstance.stub(:for_app) { raise CFoundry::StagingError } }
+
+          it "returns 0" do
+            expect(subject.percent_running).to eq(0)
           end
         end
       end

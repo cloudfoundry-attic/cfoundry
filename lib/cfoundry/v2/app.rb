@@ -201,6 +201,19 @@ module CFoundry::V2
       "STAGING FAILED"
     end
 
+    def percent_running
+      if state == "STARTED"
+        healthy_count = running_instances
+        expected = total_instances
+
+        expected > 0 ? (healthy_count / expected.to_f) * 100 : 0
+      else
+        0
+      end
+    rescue CFoundry::StagingError, CFoundry::NotStaged
+      0
+    end
+
     def running_instances
       return @cache[:running_instances] if @cache[:running_instances]
 
