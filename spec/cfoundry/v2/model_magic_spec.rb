@@ -24,6 +24,11 @@ module CFoundry
             params = ModelMagic.params_from({query: {key1: ModelMagic::QueryValue.new(comparator: '>=', value:'value1'), key2: 'value2', key3: ['value3a', 'value3b']}})
             expect(params[:q]).to eq("key1>=value1;key2:value2;key3 IN value3a,value3b")
           end
+
+          it "filters by multiple QueryValues" do
+            params = ModelMagic.params_from({query: {key: ModelMagic::QueryMultiValue.new({comparator: '>', value: 'value1'},{comparator: '<', value: 'value2'})}})
+            expect(params[:q]).to eq("key>value1;key<value2")
+          end
         end
       end
     end

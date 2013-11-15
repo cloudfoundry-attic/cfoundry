@@ -6,6 +6,7 @@ require "cfoundry/v2/model_magic/to_one"
 require "cfoundry/v2/model_magic/to_many"
 require "cfoundry/v2/model_magic/queryable_by"
 require "cfoundry/v2/model_magic/query_value_helper"
+require "cfoundry/v2/model_magic/query_multi_value_helper"
 
 module CFoundry::V2
   # object name -> module containing query methods
@@ -120,6 +121,8 @@ module CFoundry::V2
             "#{key}#{qv}"
           when QueryValue
             "#{key}#{value}"
+          when QueryMultiValue
+            value.collect_values(key)
           else
             "#{key}:#{value}"
         end
