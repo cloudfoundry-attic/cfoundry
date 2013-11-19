@@ -17,16 +17,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:00:00+00:00",
         "metadata": {
-          "changes": {
-            "state": [
-              "STOPPED",
-              "STARTED"
-            ]
+          "request": {
+            "state": "STARTED"
           },
-          "footprints": {
-            "memory": 1024,
-            "instances": 2
-          }
+          "desired_memory": 1024,
+          "desired_instances": 2
         },
         "space_guid": "space-id-1"
       }
@@ -44,16 +39,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:01:22+00:00",
         "metadata": {
-          "changes": {
-            "state": [
-              "STOPPED",
-              "STARTED"
-            ]
+          "request": {
+            "state": "STARTED"
           },
-          "footprints": {
-            "memory": 2048,
-            "instances": 1
-          }
+          "desired_memory": 2048,
+          "desired_instances": 1
         },
         "space_guid": "space-id-2"
       }
@@ -71,12 +61,10 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:03:00+00:00",
         "metadata": {
-          "changes": {
+          "request": {
           },
-          "footprints": {
-            "memory": 1024,
-            "instances": 2
-          }
+          "desired_memory": 1024,
+          "desired_instances": 2
         },
         "space_guid": "space-id-1"
       }
@@ -94,16 +82,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:04:00+00:00",
         "metadata": {
-          "changes": {
-            "state": [
-              "STARTED",
-              "STOPPED"
-            ]
+          "request": {
+            "state": "STOPPED"
           },
-          "footprints": {
-            "memory": 1024,
-            "instances": 2
-          }
+          "desired_memory": 1024,
+          "desired_instances": 2
         },
         "space_guid": "space-id-1"
       }
@@ -121,16 +104,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:05:00+00:00",
         "metadata": {
-          "changes": {
-            "state": [
-              "STOPPED",
-              "STARTED"
-            ]
+          "request": {
+            "state": "STARTED"
           },
-          "footprints": {
-            "memory": 1024,
-            "instances": 2
-          }
+          "desired_memory": 1024,
+          "desired_instances": 2
         },
         "space_guid": "space-id-1"
       }
@@ -148,16 +126,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:06:00+00:00",
         "metadata": {
-          "changes": {
-            "state": [
-              "STARTED",
-              "STOPPED"
-            ]
+          "request": {
+            "state": "STOPPED"
           },
-          "footprints": {
-            "memory": 1024,
-            "instances": 2
-          }
+          "desired_memory": 1024,
+          "desired_instances": 2
         },
         "space_guid": "space-id-1"
       }
@@ -175,16 +148,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:07:00+00:00",
         "metadata": {
-          "changes": {
-            "state": [
-              "STOPPED",
-              "STARTED"
-            ]
+          "request": {
+            "state": "STARTED"
           },
-          "footprints": {
-            "memory": 1024,
-            "instances": 2
-          }
+          "desired_memory": 1024,
+          "desired_instances": 2
         },
         "space_guid": "space-id-3"
       }
@@ -202,16 +170,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:07:30+00:00",
         "metadata": {
-          "changes": {
-            "state": [
-              "STARTED",
-              "STOPPED"
-            ]
+          "request": {
+            "state": "STOPPED"
           },
-          "footprints": {
-            "memory": 1024,
-            "instances": 2
-          }
+          "desired_memory": 1024,
+          "desired_instances": 2
         },
         "space_guid": "space-id-3"
       }
@@ -245,16 +208,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:09:00+00:00",
         "metadata": {
-          "changes": {
-            "state": [
-              "STOPPED",
-              "STARTED"
-            ]
+          "request": {
+            "state": "STARTED"
           },
-          "footprints": {
-            "memory": 1024,
-            "instances": 2
-          }
+          "desired_memory": 1024,
+          "desired_instances": 2
         },
         "space_guid": "space-id-4"
       }
@@ -288,16 +246,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:11:00+00:00",
         "metadata": {
-          "changes": {
-            "instances": [
-              1,
-              2
-            ]
-          },
-          "footprints": {
-            "memory": 2048,
+          "request": {
             "instances": 2
-          }
+          },
+          "desired_memory": 2048,
+          "desired_instances": 2
         },
         "space_guid": "space-id-2"
       }
@@ -315,16 +268,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:11:30+00:00",
         "metadata": {
-          "changes": {
-            "memory": [
-              2048,
-              1024
-            ]
+          "request": {
+            "memory": 1024
           },
-          "footprints": {
-            "memory": 1024,
-            "instances": 2
-          }
+          "desired_memory": 1024,
+          "desired_instances": 2
         },
         "space_guid": "space-id-2"
       }
@@ -342,24 +290,13 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:11:35+00:00",
         "metadata": {
-          "changes": {
-            "instances": [
-              2,
-              1
-            ],
-            "memory": [
-              1024,
-              2048
-            ],
-            "state": [
-              "STARTED",
-              "STOPPED"
-            ]
-          },
-          "footprints": {
+          "request": {
+            "instances": 1,
             "memory": 2048,
-            "instances": 1
-          }
+            "state": "STOPPED"
+          },
+          "desired_memory": 2048,
+          "desired_instances": 1
         },
         "space_guid": "space-id-2"
       }
@@ -377,24 +314,13 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:11:40+00:00",
         "metadata": {
-          "changes": {
-            "instances": [
-              1,
-              2
-            ],
-            "memory": [
-              2048,
-              1024
-            ],
-            "state": [
-              "STOPPED",
-              "STARTED"
-            ]
-          },
-          "footprints": {
+          "request": {
+            "instances": 2,
             "memory": 1024,
-            "instances": 2
-          }
+            "state": "STARTED"
+          },
+          "desired_memory": 1024,
+          "desired_instances": 2
         },
         "space_guid": "space-id-2"
       }
@@ -412,20 +338,12 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:11:45+00:00",
         "metadata": {
-          "changes": {
-            "instances": [
-              2,
-              1
-            ],
-            "memory": [
-              1024,
-              2048
-            ]
+          "request": {
+            "instances": 1,
+            "memory": 2048
           },
-          "footprints": {
-            "memory": 2048,
-            "instances": 1
-          }
+          "desired_memory": 2048,
+          "desired_instances": 1
         },
         "space_guid": "space-id-2"
       }
@@ -443,16 +361,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:12:00+00:00",
         "metadata": {
-          "changes": {
-            "instances": [
-              1,
-              2
-            ]
-          },
-          "footprints": {
-            "memory": 2048,
+          "request": {
             "instances": 2
-          }
+          },
+          "desired_memory": 2048,
+          "desired_instances": 2
         },
         "space_guid": "space-id-5"
       }
@@ -470,16 +383,11 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:13:00+00:00",
         "metadata": {
-          "changes": {
-            "memory": [
-              2048,
-              1024
-            ]
+          "request": {
+            "memory": 1024
           },
-          "footprints": {
-            "memory": 1024,
-            "instances": 2
-          }
+          "desired_memory": 1024,
+          "desired_instances": 2
         },
         "space_guid": "space-id-5"
       }
@@ -497,20 +405,12 @@
         "actee_type": "app",
         "timestamp": "2012-11-01T12:14:00+00:00",
         "metadata": {
-          "changes": {
-            "instances": [
-              2,
-              1
-            ],
-            "memory": [
-              1024,
-              2048
-            ]
+          "request": {
+            "instances": 1,
+            "memory": 2048
           },
-          "footprints": {
-            "memory": 2048,
-            "instances": 1
-          }
+          "desired_memory": 2048,
+          "desired_instances": 1
         },
         "space_guid": "space-id-5"
       }

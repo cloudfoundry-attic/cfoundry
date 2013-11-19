@@ -13,17 +13,17 @@ FactoryGirl.define do
 
     initialize_with do
       new(guid, build(:client), {
-          entity: {
-              type: type,
-              actee: actee,
-              actee_type: actee_type,
-              actor: actor,
-              actor_type: actor_type,
-              organization_guid: organization_guid,
-              space_guid: space_guid,
-              timestamp: timestamp,
-              metadata: metadata
-          }
+        entity: {
+          type: type,
+          actee: actee,
+          actee_type: actee_type,
+          actor: actor,
+          actor_type: actor_type,
+          organization_guid: organization_guid,
+          space_guid: space_guid,
+          timestamp: timestamp,
+          metadata: metadata
+        }
       })
     end
 
@@ -31,16 +31,14 @@ FactoryGirl.define do
       type 'audit.app.update'
 
       changes do
-        {state: ['STOPPED', 'STARTED']}
+        {state: 'STARTED'}
       end
 
       metadata do
         {
-            changes: changes,
-            footprints: {
-                memory: 128,
-                instances: 1
-            }
+          request: changes,
+          desired_memory: 128,
+          desired_instances: 1
         }
       end
     end
