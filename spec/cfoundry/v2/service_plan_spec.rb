@@ -25,7 +25,8 @@ stub_request(:get, /\/service_plans\/service-plan-guid-\d{1,2}/).to_return :stat
       "free": true,
       "description": "free as in beer",
       "unique_id": "0aa2f82c-6918-41df-b676-c275b5954ed7",
-      "extra": ""
+      "extra": "",
+      "public": true
     }
   }
 EOF
@@ -42,6 +43,10 @@ EOF
 
       it "has free/paid indicator attribute" do
         subject.free.should be_true
+      end
+
+      it "has a boolean 'public' attribute" do
+        expect(subject.public).to be_true
       end
     end
   end
