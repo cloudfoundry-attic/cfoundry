@@ -79,10 +79,10 @@ module CFoundry
     def find_archives_in_path(path)
       files = Array.new
       list = Array.new
-      if path.include?('.')
+      if File.file?(path)
         files << path
       else
-      files = Dir.glob(File.join(path, '*'))
+        files = Dir.glob(File.join(path, '*'))
       end
       files.each do |file|
         File.open(file, 'r') do |fil|
