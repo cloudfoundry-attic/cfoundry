@@ -395,29 +395,29 @@ module CFoundry
         end
       end
 
-      describe "for_each" do
-
+      describe '#for_each' do
         before do
+          next_url = '/v2/test_models?page=2&q=timestamp%3E2012-11-01T12:00:00Z%3Btimestamp%3C2012-11-01T13:00:00Z&results-per-page=50'
 
           WebMock.stub_request(:get, /v2\/test_models\?inline-relations-depth=1/).to_return(:body => {
-            "prev_url" => nil,
-            "next_url" => "/v2/test_models?page=2&q=timestamp>2012-11-01T12:00:00Z&results-per-page=50",
-            "resources" => [{:metadata => {:guid => '1'}}, {:metadata => {:guid => '2'}}]
+            'prev_url' => nil,
+            'next_url' => next_url,
+            'resources' => [{:metadata => {:guid => '1'}}, {:metadata => {:guid => '2'}}]
           }.to_json).times(1)
 
-          WebMock.stub_request(:get, /v2\/test_models\?page=2&q=timestamp%3E2012-11-01T12:00:00Z&results-per-page=50/).to_return(:body => {
-            "prev_url" => nil,
-            "next_url" => nil,
-            "resources" => [{:metadata => {:guid => '3'}}]
+          WebMock.stub_request(:get, /#{Regexp.escape(next_url)}/).to_return(:body => {
+            'prev_url' => nil,
+            'next_url' => nil,
+            'resources' => [{:metadata => {:guid => '3'}}]
           }.to_json).times(1)
         end
 
-        it "yields each page to the given the block" do
+        it 'yields each page to the given the block' do
           results = []
           client.test_models_for_each do |test_model|
             results << test_model
           end
-          results.collect {|r| r.guid}.should == %w{1 2 3}
+          results.map(&:guid).should == %w{1 2 3}
           results.first.should be_a TestModel
         end
       end

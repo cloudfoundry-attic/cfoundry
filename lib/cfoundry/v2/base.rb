@@ -91,8 +91,7 @@ module CFoundry::V2
     def for_each(paginated, &block)
       paginated[:resources].each &block
 
-      while next_page = paginated[:next_url]
-        next_page = URI.escape(paginated[:next_url])
+      while (next_page = paginated[:next_url])
         paginated = get(next_page, :accept => :json)
         paginated[:resources].each &block
       end
