@@ -54,8 +54,9 @@ module CFoundry
     private
 
     def prepare_package(path, to)
-      if (archive = find_archives_in_path(path).first)
-        CFoundry::Zip.unpack(archive, to)
+      archive = find_archives_in_path(path)
+      if (archive != [] && archive != nil)
+        CFoundry::Zip.unpack(archive.first, to)
       else
         FileUtils.mkdir(to)
 
@@ -84,10 +85,13 @@ module CFoundry
       else
         files = Dir.glob(File.join(path, '*'))
       end
+      # puts "files found #{files}"
       files.each do |file|
-        File.open(file, 'r') do |fil|
-          prefix = fil.read(2)
-          list << file if prefix == 'PK'
+        if File.file?(file)
+          File.open(file, 'r') do |fil|
+            prefix = fil.read(2)
+            list << file if prefix == 'PK'
+          end
         end
       end
       list
