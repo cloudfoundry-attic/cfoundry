@@ -30,6 +30,13 @@ module CFoundry
             expect(params[:q]).to eq("key>value1;key<value2")
           end
         end
+
+        describe "other arguments" do
+          it "appends them to the params as is" do
+            params = ModelMagic.params_from({other_argument: 'something'})
+            expect(params[:other_argument]).to eq('something')
+          end
+        end
       end
     end
   end

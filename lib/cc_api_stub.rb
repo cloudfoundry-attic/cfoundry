@@ -1,6 +1,7 @@
 require "cc_api_stub/helper"
 require "cc_api_stub/organizations"
 require "cc_api_stub/login"
+require "cc_api_stub/app_usage_events"
 require "cc_api_stub/applications"
 require "cc_api_stub/domains"
 require "cc_api_stub/events"

@@ -107,6 +107,8 @@ module CFoundry::V2
           end
         when :user_provided
           params[:"return_user_provided_service_instances"] = v
+        else
+          params[k] = v
         end
       end
 

@@ -20,6 +20,7 @@ require "cfoundry/v2/route"
 require "cfoundry/v2/stack"
 require "cfoundry/v2/quota_definition"
 require "cfoundry/v2/app_event"
+require "cfoundry/v2/app_usage_event"
 require "cfoundry/v2/event"
 require "cfoundry/v2/service_broker"
 
