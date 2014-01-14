@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.require_paths = %w[lib]
 
   s.add_dependency "activemodel", "<5.0.0", ">= 3.2.13"
-  s.add_dependency "cf-uaa-lib", "~> 2.0.0"
+  s.add_dependency "cf-uaa-lib", "~> 2.0.1"
   s.add_dependency "multi_json", "~> 1.7"
   s.add_dependency "multipart-post", "~> 1.1"
   s.add_dependency "rubyzip", "~> 0.9"
