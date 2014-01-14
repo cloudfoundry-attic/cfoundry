@@ -375,6 +375,16 @@ EOF
       expect(uaa.send(:token_issuer).logger.level).to eq -1
     end
 
+    it "sets the log device to STDERR if #trace is true" do
+      uaa.trace = true
+      expect(uaa.send(:token_issuer).logger.send(:instance_variable_get, :@logdev).dev).to eq STDERR
+    end
+
+    it "sets the log device to STDOUT if #trace is false" do
+      uaa.trace = false
+      expect(uaa.send(:token_issuer).logger.send(:instance_variable_get, :@logdev).dev).to eq STDOUT
+    end
+
     it "has logging level 1 if #trace is false" do
       uaa.trace = false
       expect(uaa.send(:token_issuer).logger.level).to eq 1
