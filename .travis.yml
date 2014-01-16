@@ -9,3 +9,4 @@ before_install:
 matrix:
   allow_failures:
     - rvm: rbx-19mode
+
