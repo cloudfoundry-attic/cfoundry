@@ -107,7 +107,14 @@ module CFoundry
         :http_proxy => @http_proxy,
         :https_proxy => @https_proxy
       )
-      @token_issuer.logger.level = @trace ? Logger::Severity::TRACE : 1
+
+      if @trace
+        @token_issuer.logger = CF::UAA::Util.default_logger(:trace, STDERR)
+        CF::UAA::Util.default_logger(nil, STDOUT)
+      else
+        @token_issuer.logger.level = Logger::INFO
+      end
+
       @token_issuer
     end
 
