@@ -55,7 +55,7 @@ module CFoundry
 
     def prepare_package(path, to)
       archive = find_archives_in_path(path)
-      if (archive != [] && archive != nil)
+      if (archive.length == 1)
         CFoundry::Zip.unpack(archive.first, to)
       else
         FileUtils.mkdir(to)
@@ -85,7 +85,7 @@ module CFoundry
       else
         files = Dir.glob(File.join(path, '*'))
       end
-      # puts "files found #{files}"
+
       files.each do |file|
         if File.file?(file)
           File.open(file, 'r') do |fil|
