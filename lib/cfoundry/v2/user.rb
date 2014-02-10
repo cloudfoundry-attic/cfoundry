@@ -83,10 +83,13 @@ module CFoundry
         return if not user[:error].nil?
         
         @emails = user[:emails]
-        return if user[:name].nil?
-        @name ||= {}
-        @name[:familyName] = user[:name][:familyname]
-        @name[:givenName] = user[:name][:givenname]
+
+        if not user[:name].nil?
+          @name ||= {}
+          @name[:familyName] = user[:name][:familyname]
+          @name[:givenName] = user[:name][:givenname]
+        end
+
       end
 
     end
