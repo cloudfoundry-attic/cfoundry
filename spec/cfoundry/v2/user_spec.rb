@@ -200,6 +200,80 @@ EOF
           subject.family_name.should == nil
         end
 
+        it "should not fail to retrieve metadata from the UAA if name field is missing" do
+          stub_request(:get, /#{uaa_target}\/Users\/user-guid-\d{1,2}/).to_return :status => 200,
+          :headers => {'Content-Type' => 'application/json'},
+          :body => <<EOF
+          {
+            "id": "00000000-0000-0000-0000-000000000000",
+            "meta": {
+              "version": 0,
+              "created": "2013-06-24T13:44:38.000Z",
+              "lastModified": "2013-06-24T13:44:38.000Z"
+            },
+            "userName": "#{user_email}",
+            "emails": [
+              {
+                "value": "#{user_email}"
+              }
+            ],
+            "groups": [
+              {
+                "value": "00000000-0000-0000-0000-000000000000",
+                "display": "password.write",
+                "type": "DIRECT"
+              },
+              {
+                "value": "00000000-0000-0000-0000-000000000000",
+                "display": "openid",
+                "type": "DIRECT"
+              },
+              {
+                "value": "00000000-0000-0000-0000-000000000000",
+                "display": "uaa.user",
+                "type": "DIRECT"
+              },
+              {
+                "value": "00000000-0000-0000-0000-000000000000",
+                "display": "scim.userids",
+                "type": "DIRECT"
+              },
+              {
+                "value": "00000000-0000-0000-0000-000000000000",
+                "display": "approvals.me",
+                "type": "DIRECT"
+              },
+              {
+                "value": "00000000-0000-0000-0000-000000000000",
+                "display": "cloud_controller.write",
+                "type": "DIRECT"
+              },
+              {
+                "value": "00000000-0000-0000-0000-000000000000",
+                "display": "scim.me",
+                "type": "DIRECT"
+              },
+              {
+                "value": "00000000-0000-0000-0000-000000000000",
+                "display": "cloud_controller.read",
+                "type": "DIRECT"
+              }
+            ],
+            "approvals": [
+
+            ],
+            "active": true,
+            "schemas": [
+              "urn:scim:schemas:core:1.0"
+            ]
+          }
+EOF
+          subject.email.should == user_email
+          subject.given_name.should == nil
+          subject.family_name.should == nil
+          subject.full_name.should == nil
+        end
+
       end
     end
   end
