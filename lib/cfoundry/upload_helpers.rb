@@ -54,10 +54,9 @@ module CFoundry
     private
 
     def prepare_package(path, to)
-      if path =~ /\.(jar|war|zip)$/
-        CFoundry::Zip.unpack(path, to)
-      elsif (war_file = Dir.glob("#{path}/*.war").first)
-        CFoundry::Zip.unpack(war_file, to)
+      archive = find_archives_in_path(path)
+      if (archive.length == 1)
+        CFoundry::Zip.unpack(archive.first, to)
       else
         FileUtils.mkdir(to)
 
@@ -76,6 +75,26 @@ module CFoundry
           File.delete s
         end
       end
+    end
+
+    def find_archives_in_path(path)
+      files = Array.new
+      list = Array.new
+      if File.file?(path)
+        files << path
+      else
+        files = Dir.glob(File.join(path, '*'))
+      end
+
+      files.each do |file|
+        if File.file?(file)
+          File.open(file, 'r') do |fil|
+            prefix = fil.read(2)
+            list << file if prefix == 'PK'
+          end
+        end
+      end
+      list
     end
 
     def check_unreachable_links(files, path)
