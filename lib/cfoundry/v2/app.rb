@@ -71,6 +71,16 @@ module CFoundry::V2
       stats
     end
 
+    def system_env
+      system_env = {}
+
+      @client.base.env(@guid).each do |idx, info|
+        system_env = info if 'system_env_json'.eql?(idx.to_s)
+      end
+
+      system_env
+    end
+
     def services
       service_bindings.collect(&:service_instance)
     end

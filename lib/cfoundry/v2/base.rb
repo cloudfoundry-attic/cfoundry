@@ -81,6 +81,10 @@ module CFoundry::V2
       get("v2", "apps", guid, "stats", :accept => :json)
     end
 
+    def env(guid)
+      get("v2", "apps", guid, "env", :accept => :json)
+    end
+
     def update_app(guid, diff)
       put("v2", "apps", guid,
           :content => :json,
